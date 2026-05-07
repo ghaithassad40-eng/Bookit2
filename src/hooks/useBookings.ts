@@ -1,0 +1,161 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import type { BookingRow } from "@/lib/database.types";
+import type { PaymentResult } from "@/lib/payments";
+import {
+  generateLocalBookingReference,
+  saveLocalBooking,
+} from "@/lib/localBookings";
+
+const useEdge = (import.meta.env.VITE_USE_EDGE_BOOKING as string | undefined) === "true";
+
+function createDemoBooking(input: CreateBookingInput): BookingRow {
+  const now = new Date().toISOString();
+  const booking: BookingRow = {
+    id: `book-${Date.now()}`,
+    business_id: input.business_id,
+    service_id: input.service_id,
+    staff_id: input.staff_id ?? null,
+    slot_id: input.slot_id,
+    customer_name: input.customer_name,
+    customer_phone: input.customer_phone ?? null,
+    customer_email: input.customer_email ?? null,
+    notes: input.notes ?? null,
+    booking_reference: input.payment?.providerRef
+      ? generateLocalBookingReference()
+      : generateLocalBookingReference(),
+    status: "confirmed",
+    payment_method: input.payment?.method ?? null,
+    payment_status: input.payment ? (input.payment.success ? "paid" : "failed") : null,
+    payment_amount: input.payment_amount ?? null,
+    payment_currency: input.payment_currency ?? null,
+    payment_transaction_id: input.payment?.transactionId ?? null,
+    payment_provider_ref: input.payment?.providerRef ?? null,
+    created_at: now,
+    updated_at: now,
+  };
+  saveLocalBooking(booking);
+  return booking;
+}
+
+export interface CreateBookingInput {
+  business_id: string;
+  service_id: string;
+  staff_id?: string | null;
+  slot_id: string;
+  customer_name: string;
+  customer_phone?: string | null;
+  customer_email?: string | null;
+  notes?: string | null;
+  /** Result from a successful payment charge (mock or real). */
+  payment?: PaymentResult | null;
+  payment_amount?: number | null;
+  payment_currency?: string | null;
+}
+
+async function createBookingViaRpc(input: CreateBookingInput): Promise<BookingRow> {
+  const { data, error } = await supabase.rpc("create_booking_atomic", {
+    p_business_id: input.business_id,
+    p_service_id: input.service_id,
+    p_staff_id: input.staff_id ?? null,
+    p_slot_id: input.slot_id,
+    p_customer_name: input.customer_name,
+    p_customer_phone: input.customer_phone ?? null,
+    p_customer_email: input.customer_email ?? null,
+    p_notes: input.notes ?? null,
+  });
+  if (error) throw new Error(error.message);
+  return data as unknown as BookingRow;
+}
+
+async function createBookingViaEdge(input: CreateBookingInput): Promise<BookingRow> {
+  const { data, error } = await supabase.functions.invoke<{ booking: BookingRow }>("create-booking", {
+    body: input,
+  });
+  if (error) throw error;
+  if (!data?.booking) throw new Error("No booking returned from edge function");
+  return data.booking;
+}
+
+export function useCreateBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CreateBookingInput) => {
+      // Demo mode (no backend, or demo business id) → fake the booking locally.
+      if (!isSupabaseConfigured || input.business_id.startsWith("biz-")) {
+        return createDemoBooking(input);
+      }
+      return useEdge ? createBookingViaEdge(input) : createBookingViaRpc(input);
+    },
+    onSuccess: (booking) => {
+      qc.invalidateQueries({ queryKey: ["slots", booking.business_id] });
+      qc.invalidateQueries({ queryKey: ["bookings", booking.business_id] });
+    },
+  });
+}
+
+interface ListOpts {
+  businessId: string;
+  status?: BookingRow["status"];
+  search?: string;
+  limit?: number;
+}
+
+async function fetchBookings(opts: ListOpts): Promise<BookingRow[]> {
+  let q = supabase
+    .from("bookings")
+    .select("*")
+    .eq("business_id", opts.businessId)
+    .order("created_at", { ascending: false })
+    .limit(opts.limit ?? 200);
+  if (opts.status) q = q.eq("status", opts.status);
+  if (opts.search) {
+    q = q.or(
+      [
+        `customer_name.ilike.%${opts.search}%`,
+        `customer_email.ilike.%${opts.search}%`,
+        `booking_reference.ilike.%${opts.search}%`,
+      ].join(","),
+    );
+  }
+  const { data, error } = await q;
+  if (error) throw error;
+  return data as BookingRow[];
+}
+
+export function useBookings(opts: Partial<ListOpts> & { businessId: string | undefined }) {
+  return useQuery({
+    queryKey: ["bookings", opts.businessId, opts.status, opts.search],
+    queryFn: () =>
+      fetchBookings({
+        businessId: opts.businessId!,
+        status: opts.status,
+        search: opts.search,
+        limit: opts.limit,
+      }),
+    enabled: Boolean(opts.businessId),
+    staleTime: 10_000,
+  });
+}
+
+export function useUpdateBookingStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+      businessId,
+    }: {
+      id: string;
+      status: BookingRow["status"];
+      businessId: string;
+    }) => {
+      const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
+      if (error) throw error;
+      return { id, status, businessId };
+    },
+    onSuccess: ({ businessId }) => {
+      qc.invalidateQueries({ queryKey: ["bookings", businessId] });
+    },
+  });
+}
