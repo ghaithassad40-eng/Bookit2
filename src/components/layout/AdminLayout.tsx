@@ -27,13 +27,15 @@ const NAV = [
 
 export function AdminLayout() {
   const { slug } = useParams();
-  const { user, loading, signOut } = useAuth();
+  const { user, demoUser, isDemoMode, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { data, isLoading } = useBusiness(slug);
 
+  const authedIdentity = user?.email ?? demoUser?.email ?? null;
+
   useEffect(() => {
-    if (!loading && !user) navigate("/admin/login", { replace: true });
-  }, [loading, user, navigate]);
+    if (!loading && !user && !demoUser) navigate("/admin/login", { replace: true });
+  }, [loading, user, demoUser, navigate]);
 
   if (loading || isLoading) {
     return (
@@ -114,9 +116,20 @@ export function AdminLayout() {
                 </Link>
               </div>
               <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
-                <span className="hidden sm:inline">{user?.email}</span>
+                {isDemoMode && (
+                  <span className="hidden items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-600 sm:inline-flex dark:text-amber-300">
+                    Demo mode
+                  </span>
+                )}
+                <span className="hidden sm:inline">{authedIdentity}</span>
               </div>
             </header>
+            {isDemoMode && (
+              <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-xs text-amber-900 dark:text-amber-100">
+                You're exploring in demo mode — changes are saved to this browser only.
+                Connect Supabase to publish them.
+              </div>
+            )}
             <main className="flex-1 p-4 sm:p-6 lg:p-8">
               <Outlet context={{ business, config }} />
             </main>
