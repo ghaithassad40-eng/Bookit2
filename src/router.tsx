@@ -6,6 +6,7 @@ import Landing from "@/pages/customer/Landing";
 import Book from "@/pages/customer/Book";
 import Confirmation from "@/pages/customer/Confirmation";
 import PaymentCallback from "@/pages/customer/PaymentCallback";
+import PaymentFailed from "@/pages/customer/PaymentFailed";
 import MyFatoorahMock from "@/pages/customer/MyFatoorahMock";
 import Login from "@/pages/admin/Login";
 import { AdminLayout } from "@/components/layout/AdminLayout";
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: "book", element: <Book /> },
       { path: "confirmation", element: <Confirmation /> },
       { path: "payment/callback", element: <PaymentCallback /> },
+      { path: "payment/failed", element: <PaymentFailed /> },
     ],
   },
   { path: "/admin", element: <Navigate to="/admin/login" replace /> },

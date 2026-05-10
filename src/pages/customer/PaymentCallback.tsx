@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { BusinessRow, BusinessConfigRow } from "@/lib/database.types";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   callbackToPaymentResult,
   clearPendingBooking,
@@ -18,20 +16,33 @@ interface Ctx {
   config: BusinessConfigRow;
 }
 
-type Stage = "verifying" | "success" | "failed";
-
+/**
+ * Verifies the gateway's redirect payload and routes to one of two pages:
+ *   /business/:slug/confirmation?ref=...                 (success → invoice)
+ *   /business/:slug/payment/failed?ref=...&reason=...    (failure)
+ *
+ * This component itself only ever shows a "verifying…" spinner and is never
+ * the final destination.
+ */
 export default function PaymentCallback() {
   const { business } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const [stage, setStage] = useState<Stage>("verifying");
-  const [message, setMessage] = useState<string>("Confirming your payment with the bank…");
   const ran = useRef(false);
   const createBooking = useCreateBooking();
 
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
+
+    function goFailed(reason: string, code?: string | null) {
+      const reference = params.get("ref") ?? "";
+      const u = new URLSearchParams();
+      if (reference) u.set("ref", reference);
+      u.set("reason", reason);
+      if (code) u.set("code", code);
+      navigate(`/business/${business.slug}/payment/failed?${u.toString()}`, { replace: true });
+    }
 
     void (async () => {
       const reference = params.get("ref");
@@ -40,8 +51,7 @@ export default function PaymentCallback() {
       const errorFlag = params.get("error");
 
       if (errorFlag) {
-        setStage("failed");
-        setMessage("Payment was cancelled or failed. You haven't been charged.");
+        goFailed("Payment was cancelled before it completed.");
         return;
       }
 
@@ -52,17 +62,21 @@ export default function PaymentCallback() {
       });
 
       if (!cb.success) {
-        setStage("failed");
-        setMessage(cb.error ?? `Payment ${cb.status.toLowerCase()}. Please try again.`);
+        goFailed(
+          cb.error ?? `The bank returned status "${cb.status}". The charge did not go through.`,
+          cb.transactionId,
+        );
         return;
       }
 
-      // Pull the pending booking we stored before redirect and finalise it.
       const pending = loadPendingBooking(reference ?? undefined);
       if (!pending) {
-        // No pending — payment succeeded but we don't know which slot.
-        setStage("success");
-        setMessage("Payment confirmed. We couldn't find the original booking — please contact support with the reference below.");
+        // Payment succeeded but we lost the pending booking. Send to a degraded
+        // "failed-but-charged" state so the customer can contact support.
+        goFailed(
+          "Payment captured, but we couldn't link it to a booking. Please contact support with the reference below.",
+          cb.transactionId,
+        );
         return;
       }
 
@@ -87,11 +101,8 @@ export default function PaymentCallback() {
           { replace: true },
         );
       } catch (err) {
-        setStage("failed");
-        setMessage(
-          err instanceof Error
-            ? `Payment captured, but we couldn't finalise the booking: ${err.message}. Contact us with the reference below.`
-            : "Payment captured but booking failed.",
+        goFailed(
+          err instanceof Error ? err.message : "We couldn't finalise the booking after capture.",
         );
       }
     })();
@@ -99,50 +110,18 @@ export default function PaymentCallback() {
   }, []);
 
   return (
-    <div className="container max-w-xl py-16 text-center">
-      {stage === "verifying" && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center gap-4"
-        >
-          <Loader2 className="h-10 w-10 animate-spin text-accent" />
-          <h1 className="text-2xl font-semibold tracking-tight">Verifying payment…</h1>
-          <p className="text-sm text-muted-foreground">{message}</p>
-        </motion.div>
-      )}
-
-      {stage === "failed" && (
-        <Card className="text-left">
-          <CardContent className="space-y-4 pt-6">
-            <div className="grid h-12 w-12 place-items-center rounded-full bg-rose-500/15 text-rose-500">
-              <XCircle className="h-6 w-6" />
-            </div>
-            <h1 className="text-xl font-semibold">Payment didn't go through</h1>
-            <p className="text-sm text-muted-foreground">{message}</p>
-            <div className="flex gap-2">
-              <Button onClick={() => navigate(`/business/${business.slug}/book`, { replace: true })}>
-                Try again
-              </Button>
-              <Button variant="outline" onClick={() => navigate(`/business/${business.slug}`, { replace: true })}>
-                Back to {business.name}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {stage === "success" && (
-        <Card className="text-left">
-          <CardContent className="space-y-3 pt-6">
-            <div className="grid h-12 w-12 place-items-center rounded-full bg-emerald-500/15 text-emerald-500">
-              <CheckCircle2 className="h-6 w-6" />
-            </div>
-            <h1 className="text-xl font-semibold">Payment confirmed</h1>
-            <p className="text-sm text-muted-foreground">{message}</p>
-          </CardContent>
-        </Card>
-      )}
+    <div className="container max-w-xl py-24 text-center">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col items-center gap-4"
+      >
+        <Loader2 className="h-10 w-10 animate-spin text-accent" />
+        <h1 className="text-2xl font-semibold tracking-tight">Verifying payment…</h1>
+        <p className="text-sm text-muted-foreground">
+          We're confirming the transaction with the gateway. This usually takes a few seconds.
+        </p>
+      </motion.div>
     </div>
   );
 }
