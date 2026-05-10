@@ -14,9 +14,27 @@ import { isSupabaseConfigured, supabase } from "./supabase";
 import { saveLocalBooking } from "./localBookings";
 import type { PaymentMethodId, PaymentResult } from "./payments";
 
+/**
+ * In dev mode the Vite middleware (`vite-myfatoorah-plugin.ts`) hosts the
+ * MyFatoorah proxy at `/api/myfatoorah-*`. In production we expect the
+ * deployed Supabase Edge Functions to handle it via `supabase.functions.invoke`.
+ */
+const MYFATOORAH_FLAG =
+  (import.meta.env.VITE_MYFATOORAH_ENABLED as string | undefined) === "true";
+
 export const MYFATOORAH_ENABLED =
-  (import.meta.env.VITE_MYFATOORAH_ENABLED as string | undefined) === "true" &&
-  isSupabaseConfigured;
+  MYFATOORAH_FLAG && (import.meta.env.DEV || isSupabaseConfigured);
+
+const useDevProxy = MYFATOORAH_FLAG && import.meta.env.DEV;
+
+async function devPost<T>(path: string, body: unknown): Promise<T> {
+  const resp = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await resp.json()) as T;
+}
 
 // Map our internal method ids to MyFatoorah's internal codes.
 // MyFatoorah's PaymentMethodCode is what InitiatePayment returns; the edge
@@ -87,6 +105,13 @@ export async function initiateMyFatoorahPayment(body: InitiateBody): Promise<Ini
       customerReference: body.reference,
     };
   }
+  if (useDevProxy) {
+    try {
+      return await devPost<InitiateResponse>("/api/myfatoorah-initiate", body);
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : "dev proxy error" };
+    }
+  }
   const { data, error } = await supabase.functions.invoke<InitiateResponse>("myfatoorah-initiate", {
     body,
   });
@@ -129,15 +154,38 @@ export async function verifyMyFatoorahCallback(query: CallbackQuery): Promise<Ca
       paymentGateway: "MyFatoorah (demo)",
     };
   }
-  const { data, error } = await supabase.functions.invoke<CallbackResult>("myfatoorah-callback", {
-    body: {
-      paymentId: query.paymentId,
-      invoiceId: query.invoiceId,
-      reference: query.reference,
-    },
-  });
-  if (error) return { success: false, status: "error", transactionId: null, invoiceId: null, customerReference: null, amount: null, cardNumber: null, paymentGateway: null, error: error.message };
-  return data ?? { success: false, status: "error", transactionId: null, invoiceId: null, customerReference: null, amount: null, cardNumber: null, paymentGateway: null, error: "no response" };
+
+  const body = {
+    paymentId: query.paymentId,
+    invoiceId: query.invoiceId,
+    reference: query.reference,
+  };
+
+  if (useDevProxy) {
+    try {
+      return await devPost<CallbackResult>("/api/myfatoorah-callback", body);
+    } catch (err) {
+      return errorCallback(err instanceof Error ? err.message : "dev proxy error");
+    }
+  }
+
+  const { data, error } = await supabase.functions.invoke<CallbackResult>("myfatoorah-callback", { body });
+  if (error) return errorCallback(error.message);
+  return data ?? errorCallback("no response");
+}
+
+function errorCallback(message: string): CallbackResult {
+  return {
+    success: false,
+    status: "error",
+    transactionId: null,
+    invoiceId: null,
+    customerReference: null,
+    amount: null,
+    cardNumber: null,
+    paymentGateway: null,
+    error: message,
+  };
 }
 
 /** Convert MyFatoorah callback into our internal PaymentResult shape. */
