@@ -146,6 +146,11 @@ export interface BookingRow {
   payment_currency: string | null;
   payment_transaction_id: string | null;
   payment_provider_ref: string | null;
+  // MyFatoorah / generic provider fields
+  provider: string | null;
+  provider_invoice_id: string | null;
+  provider_payment_url: string | null;
+  provider_initiated_at: string | null;
   created_at: string;
   updated_at: string;
 }

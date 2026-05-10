@@ -5,6 +5,8 @@ import { CustomerLayout } from "@/components/layout/CustomerLayout";
 import Landing from "@/pages/customer/Landing";
 import Book from "@/pages/customer/Book";
 import Confirmation from "@/pages/customer/Confirmation";
+import PaymentCallback from "@/pages/customer/PaymentCallback";
+import MyFatoorahMock from "@/pages/customer/MyFatoorahMock";
 import Login from "@/pages/admin/Login";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
@@ -16,6 +18,9 @@ import Settings from "@/pages/admin/Settings";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Home /> },
+  // MyFatoorah-style hosted page (only used when running without real
+  // MyFatoorah credentials — see src/lib/myfatoorah.ts).
+  { path: "/payment/myfatoorah-mock", element: <MyFatoorahMock /> },
   {
     path: "/business/:slug",
     element: <CustomerLayout />,
@@ -23,6 +28,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Landing /> },
       { path: "book", element: <Book /> },
       { path: "confirmation", element: <Confirmation /> },
+      { path: "payment/callback", element: <PaymentCallback /> },
     ],
   },
   { path: "/admin", element: <Navigate to="/admin/login" replace /> },

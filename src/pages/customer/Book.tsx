@@ -21,6 +21,12 @@ import { useBookingStore } from "@/store/bookingStore";
 import { useCreateBooking } from "@/hooks/useBookings";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 import { charge, enabledPaymentMethods, type PaymentRequest, type PaymentResult } from "@/lib/payments";
+import {
+  MYFATOORAH_ENABLED,
+  initiateMyFatoorahPayment,
+  savePendingBooking,
+  toMyFatoorahMethod,
+} from "@/lib/myfatoorah";
 
 interface Ctx {
   business: BusinessRow;
@@ -93,9 +99,52 @@ export default function Book() {
     }
   }
 
+  // When MyFatoorah is enabled (real or demo mock), redirect to the hosted
+  // MyFatoorah page. Otherwise charge inline via the mock adapter.
   async function handlePay(req: PaymentRequest) {
     setCharging(true);
     try {
+      const useRedirect = MYFATOORAH_ENABLED || (paymentMethod === "knet" || paymentMethod === "paypal");
+      if (useRedirect && service && slot) {
+        const init = await initiateMyFatoorahPayment({
+          method: toMyFatoorahMethod(req.method),
+          amount: req.amount,
+          currency: req.currency,
+          reference: req.reference,
+          business_slug: business.slug,
+          customer: {
+            name: customer.name,
+            phone: customer.phone || null,
+            email: customer.email || null,
+          },
+        });
+        if (!init.success || !init.paymentUrl) {
+          toast.error(init.error ?? "Could not start payment");
+          return;
+        }
+        savePendingBooking({
+          reference: req.reference,
+          invoiceId: init.invoiceId ?? null,
+          business_id: business.id,
+          business_slug: business.slug,
+          service_id: service.id,
+          staff_id: staff?.id ?? null,
+          slot_id: slot.id,
+          customer_name: customer.name,
+          customer_phone: customer.phone || null,
+          customer_email: customer.email || null,
+          notes: customer.notes || null,
+          amount: req.amount,
+          currency: req.currency,
+          method: req.method,
+          createdAt: Date.now(),
+        });
+        toast.message("Redirecting to MyFatoorah…");
+        window.location.assign(init.paymentUrl);
+        return;
+      }
+
+      // Inline (demo) charge for wallets / cards when MyFatoorah is off
       const result = await charge(req);
       setPaymentResult(result);
       if (!result.success) {

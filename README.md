@@ -161,6 +161,72 @@ All six tables have RLS enabled (`0002_rls_policies.sql`):
 - **Owners** (`businesses.owner_id = auth.uid()`) can read/write everything for their business.
 - Cross-tenant access is blocked by policy.
 
+## Payments — MyFatoorah (KNET / Visa / Apple Pay / Google Pay / etc.)
+
+Bookit ships an end-to-end MyFatoorah integration covering the full life-cycle:
+**InitiatePayment → ExecutePayment → redirect → GetPaymentStatus → reconcile**.
+
+| File | Purpose |
+| --- | --- |
+| `supabase/functions/myfatoorah-initiate/index.ts` | Calls `InitiatePayment` to discover available methods + per-method service charge, resolves the customer's selected method to a `PaymentMethodId`, then calls `ExecutePayment` and returns the hosted `PaymentURL`. |
+| `supabase/functions/myfatoorah-callback/index.ts` | Verifies the payment via `GetPaymentStatus` after the customer is redirected back, updates the `bookings` row's `payment_status`, writes a `payment_events` audit row. |
+| `src/lib/myfatoorah.ts` | Frontend client. Posts to the edge function, stores the pending booking in `localStorage` before redirect, and reconciles on return. |
+| `src/pages/customer/PaymentCallback.tsx` | Reached at `/business/:slug/payment/callback?paymentId=…`. Verifies the payment, finalises the booking through `create_booking_atomic`, then forwards to the confirmation page. |
+| `src/pages/customer/MyFatoorahMock.tsx` | Drop-in replica of MyFatoorah's hosted page used in **demo mode** so the redirect flow works without real credentials. Real MyFatoorah replaces this URL once enabled. |
+| `supabase/migrations/0005_myfatoorah.sql` | Adds `provider`, `provider_invoice_id`, `provider_payment_url`, `provider_initiated_at` to `bookings` and opens `payment_events` inserts to the service role. |
+
+### Supported methods (resolved server-side)
+
+Visa / Mastercard, KNET, Apple Pay, Google Pay, Samsung Pay, Mada, AMEX, STC Pay
+— mapped to MyFatoorah's `PaymentMethodCode` in `myfatoorah-initiate/index.ts`.
+
+### Staging quick-start
+
+```bash
+# 1. Deploy the two edge functions
+supabase functions deploy myfatoorah-initiate
+supabase functions deploy myfatoorah-callback
+
+# 2. Set staging credentials. The token below is MyFatoorah's PUBLIC test
+#    token from their docs — works only against apitest.myfatoorah.com.
+supabase secrets set MYFATOORAH_BASE_URL=https://apitest.myfatoorah.com
+supabase secrets set MYFATOORAH_API_KEY="rLtt6JWvbUHDDhsZnfpAhpYk4dxYDQkbcPTyGaKp2TYqQgG7FGZ5Th_WD53Oq8Ebz6A53njUoo1w3pjU1D4vs_ZMqFiz_j0urb_BH9Oq9VZoKFoJEDAbRZepGcQanImyYrry7Kt6MnMdgfG5jn4HngWoRdKduNNyP4kzcgtwsV_uwHFIFbJ4"
+supabase secrets set MYFATOORAH_RETURN_BASE=https://your-deployed-site.com
+
+# 3. Apply the SQL migrations
+supabase db push   # or run 0001 → 0005 in the SQL editor
+
+# 4. Enable on the frontend
+echo 'VITE_MYFATOORAH_ENABLED=true' >> .env.local
+```
+
+### Test cards (MyFatoorah staging)
+
+| Method | Number | Expiry | CVC | OTP |
+|---|---|---|---|---|
+| KNET | `0000000001` | — | — | `1234` |
+| Visa | `4005550000000001` | any future | `123` | `1234` |
+| Mastercard | `5123450000000008` | any future | `123` | `1234` |
+| AMEX | `346391000000019` | any future | `1234` | `1234` |
+
+### Going live
+
+1. Switch `MYFATOORAH_BASE_URL` to your regional production endpoint
+   (`https://api.myfatoorah.com` for Kuwait, `…-sa` for Saudi, etc.).
+2. Replace `MYFATOORAH_API_KEY` with the live token from your MyFatoorah portal.
+3. In your portal, add `https://your-site.com/business/*/payment/callback` to
+   the allowed callback URLs.
+4. Set `MYFATOORAH_RETURN_BASE` to your public origin.
+
+The frontend code does not change — `VITE_MYFATOORAH_ENABLED=true` is enough.
+
+### Demo mode (no setup)
+
+When `VITE_MYFATOORAH_ENABLED=false` (or Supabase isn't connected) the
+booking flow redirects to `/payment/myfatoorah-mock` — a fully-rendered
+look-alike of MyFatoorah's hosted page so you can demonstrate the entire
+redirect → callback → confirmation journey without any credentials.
+
 ## Build
 
 ```bash

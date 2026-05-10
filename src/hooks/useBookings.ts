@@ -21,9 +21,7 @@ function createDemoBooking(input: CreateBookingInput): BookingRow {
     customer_phone: input.customer_phone ?? null,
     customer_email: input.customer_email ?? null,
     notes: input.notes ?? null,
-    booking_reference: input.payment?.providerRef
-      ? generateLocalBookingReference()
-      : generateLocalBookingReference(),
+    booking_reference: generateLocalBookingReference(),
     status: "confirmed",
     payment_method: input.payment?.method ?? null,
     payment_status: input.payment ? (input.payment.success ? "paid" : "failed") : null,
@@ -31,6 +29,10 @@ function createDemoBooking(input: CreateBookingInput): BookingRow {
     payment_currency: input.payment_currency ?? null,
     payment_transaction_id: input.payment?.transactionId ?? null,
     payment_provider_ref: input.payment?.providerRef ?? null,
+    provider: input.payment?.providerRef ? "myfatoorah" : null,
+    provider_invoice_id: input.payment?.providerRef ?? null,
+    provider_payment_url: null,
+    provider_initiated_at: input.payment ? now : null,
     created_at: now,
     updated_at: now,
   };

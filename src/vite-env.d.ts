@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_USE_EDGE_BOOKING?: string;
   readonly VITE_USE_EDGE_PAYMENTS?: string;
   readonly VITE_USE_AI_CONCIERGE?: string;
+  readonly VITE_MYFATOORAH_ENABLED?: string;
 }
 
 interface ImportMeta {
