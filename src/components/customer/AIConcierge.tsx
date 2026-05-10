@@ -2,16 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Activity,
   ArrowRight,
   Bot,
+  CircleDot,
   CornerDownLeft,
   Dumbbell,
+  Goal,
   Heart,
   Leaf,
   Loader2,
   Scissors,
   Sparkles,
   Stethoscope,
+  Trophy,
   User,
 } from "lucide-react";
 import { useConciergeContext } from "@/hooks/useConciergeContext";
@@ -24,13 +28,17 @@ const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   clinic: Stethoscope,
   yoga: Leaf,
   spa: Heart,
+  football: Goal,
+  basketball: CircleDot,
+  padel: Activity,
+  cricket: Trophy,
 };
 
 const STARTERS = [
+  "5v5 football tonight",
+  "Padel court Saturday",
+  "Basketball court for an hour",
   "I need a haircut",
-  "Yoga class tonight",
-  "Personal training",
-  "Doctor visit this week",
 ];
 
 interface Message {

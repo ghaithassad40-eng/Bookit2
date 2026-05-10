@@ -35,6 +35,11 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
   coworking: ["coworking", "desk", "office", "workspace"],
   car: ["car", "auto", "wash", "service", "oil change", "tire"],
   photo: ["photo", "shoot", "portrait", "headshot", "photography"],
+  // Sports
+  football: ["football", "soccer", "5v5", "7v7", "5aside", "7aside", "pitch", "turf", "futsal", "match", "kickabout", "goalkeeper", "striker"],
+  basketball: ["basketball", "basket", "hoops", "fullcourt", "halfcourt", "court", "shoot", "dunk", "dribble"],
+  padel: ["padel", "paddle", "racquet", "racket"],
+  cricket: ["cricket", "nets", "batting", "bowling", "wicket", "bowler", "batsman"],
 };
 
 const STOPWORDS = new Set([

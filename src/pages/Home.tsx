@@ -2,15 +2,19 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
+  Activity,
   ArrowRight,
   CalendarCheck,
+  CircleDot,
   Dumbbell,
+  Goal,
   Heart,
   Leaf,
   MessageSquare,
   Scissors,
   Sparkles,
   Stethoscope,
+  Trophy,
   Clock,
   Palette,
   Smartphone,
@@ -28,6 +32,10 @@ const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   clinic: Stethoscope,
   yoga: Leaf,
   spa: Heart,
+  football: Goal,
+  basketball: CircleDot,
+  padel: Activity,
+  cricket: Trophy,
 };
 
 export default function Home() {
