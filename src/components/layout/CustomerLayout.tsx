@@ -2,6 +2,7 @@ import { Link, Outlet, useParams } from "react-router-dom";
 import { useBusiness } from "@/hooks/useBusiness";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MusicControls } from "@/components/customer/MusicControls";
 import { initials } from "@/lib/utils";
 
 export function CustomerLayout() {
@@ -62,6 +63,7 @@ export function CustomerLayout() {
             <span>Powered by Bookit</span>
           </div>
         </footer>
+        <MusicControls industry={business.industry} />
       </div>
     </ThemeProvider>
   );
