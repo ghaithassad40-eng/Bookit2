@@ -84,6 +84,12 @@ export interface InitiateResponse {
   paymentUrl?: string;
   invoiceId?: number;
   customerReference?: string;
+  /** ISO currency the gateway will settle in (KWD for Apple Pay-via-KNET in
+   * Kuwait). When this differs from the invoice currency the customer is
+   * paying in another currency. */
+  settlementCurrency?: string | null;
+  paymentMethodCode?: string | null;
+  paymentMethodId?: number | null;
   error?: string;
 }
 

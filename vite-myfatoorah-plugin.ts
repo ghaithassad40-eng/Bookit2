@@ -31,6 +31,10 @@ interface MFMethod {
   PaymentMethodId: number;
   PaymentMethodCode: string;
   PaymentMethodEn: string;
+  PaymentCurrencyIso?: string;
+  CurrencyIso?: string;
+  ServiceCharge?: number;
+  TotalAmount?: number;
 }
 
 function readJson<T = unknown>(req: IncomingMessage): Promise<T> {
@@ -83,17 +87,57 @@ async function mfCall<T>(
   return data.Data as T;
 }
 
-function resolveMethodId(methods: MFMethod[], internal: string): number | null {
+/**
+ * Resolve the customer's chosen method to a MyFatoorah PaymentMethodId.
+ *
+ * IMPORTANT: when there are multiple matches (e.g. the same code appears
+ * with different settlement currencies), prefer the one whose
+ * PaymentCurrencyIso matches the invoice currency. This protects the
+ * customer from accidental FX charges — for KWD invoices we always pick
+ * the KWD-settling variant (e.g. Apple Pay routed through KNET, never
+ * Apple Pay routed through SAR/MADA).
+ */
+function resolveMethodId(
+  methods: MFMethod[],
+  internal: string,
+  currency: string,
+): { id: number; settlementCurrency: string | null; codeMatched: string } | null {
   if (internal === "any") return null;
   const codes = METHOD_CODES[internal] ?? [];
+
+  // Prefer exact code matches over substring matches so e.g. AMEX (code
+  // "ae") doesn't get confused with UAE Cards (code "uaecc") just because
+  // the latter contains "ae". Exact > startsWith > contains.
+  const exact: MFMethod[] = [];
+  const startsWith: MFMethod[] = [];
+  const contains: MFMethod[] = [];
   for (const m of methods) {
     const code = (m.PaymentMethodCode ?? "").toLowerCase();
-    if (codes.some((c) => code === c || code.includes(c))) return m.PaymentMethodId;
+    if (codes.includes(code)) exact.push(m);
+    else if (codes.some((c) => code.startsWith(c))) startsWith.push(m);
+    else if (codes.some((c) => code.includes(c))) contains.push(m);
   }
-  const fb = methods.find((m) =>
-    m.PaymentMethodEn?.toLowerCase().includes(internal.replace("_", " ")),
+  const candidates: MFMethod[] = exact.length > 0 ? exact : startsWith.length > 0 ? startsWith : contains;
+
+  if (candidates.length === 0) {
+    const fb = methods.find((m) =>
+      m.PaymentMethodEn?.toLowerCase().includes(internal.replace("_", " ")),
+    );
+    return fb
+      ? { id: fb.PaymentMethodId, settlementCurrency: fb.PaymentCurrencyIso ?? null, codeMatched: fb.PaymentMethodCode }
+      : null;
+  }
+
+  // Prefer same-currency settlement.
+  const sameCurrency = candidates.find(
+    (m) => (m.PaymentCurrencyIso ?? "").toUpperCase() === currency.toUpperCase(),
   );
-  return fb?.PaymentMethodId ?? null;
+  const chosen = sameCurrency ?? candidates[0];
+  return {
+    id: chosen.PaymentMethodId,
+    settlementCurrency: chosen.PaymentCurrencyIso ?? null,
+    codeMatched: chosen.PaymentMethodCode,
+  };
 }
 
 export interface MyFatoorahDevOptions {
@@ -157,7 +201,15 @@ export function myfatoorahDevProxy(opts: MyFatoorahDevOptions = {}): Plugin {
             CurrencyIso: body.currency,
           });
 
-          const methodId = resolveMethodId(init.PaymentMethods ?? [], body.method);
+          const resolved = resolveMethodId(init.PaymentMethods ?? [], body.method, body.currency);
+
+          // eslint-disable-next-line no-console
+          if (resolved) {
+            console.info(
+              `[bookit] MyFatoorah → method=${body.method} matched id=${resolved.id} ` +
+                `code=${resolved.codeMatched} settlement=${resolved.settlementCurrency ?? "?"} (req ${body.currency})`,
+            );
+          }
 
           const callbackUrl = `${env.MYFATOORAH_RETURN_BASE}/business/${body.business_slug}/payment/callback?ref=${encodeURIComponent(body.reference)}`;
           const errorUrl = `${callbackUrl}&error=1`;
@@ -183,10 +235,10 @@ export function myfatoorahDevProxy(opts: MyFatoorahDevOptions = {}): Plugin {
             CustomerReference: string;
           };
 
-          if (methodId) {
+          if (resolved) {
             exec = await mfCall(env, "/v2/ExecutePayment", {
               ...common,
-              PaymentMethodId: methodId,
+              PaymentMethodId: resolved.id,
             });
           } else {
             exec = await mfCall(env, "/v2/SendPayment", {
@@ -200,6 +252,9 @@ export function myfatoorahDevProxy(opts: MyFatoorahDevOptions = {}): Plugin {
             paymentUrl: exec.PaymentURL,
             invoiceId: exec.InvoiceId,
             customerReference: exec.CustomerReference,
+            settlementCurrency: resolved?.settlementCurrency ?? null,
+            paymentMethodCode: resolved?.codeMatched ?? null,
+            paymentMethodId: resolved?.id ?? null,
           });
         } catch (err) {
           return send(res, 502, {

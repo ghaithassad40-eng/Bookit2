@@ -321,6 +321,7 @@ export default function Book() {
                     enabled={enabled}
                     value={paymentMethod}
                     onChange={setPaymentMethod}
+                    currency={service.currency}
                   />
                 </div>
 

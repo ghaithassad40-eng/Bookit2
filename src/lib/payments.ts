@@ -22,6 +22,20 @@ export interface PaymentMethod {
   region?: "global" | "kw";
 }
 
+/**
+ * Per-currency caption suffixes that explain how a method actually routes.
+ * Surfaced in the UI so customers see "Apple Pay · via KNET" in Kuwait,
+ * not just generic "Apple Pay" — and there's no FX surprise.
+ */
+const ROUTING_LABELS: Partial<Record<PaymentMethodId, Record<string, string>>> = {
+  apple_pay: { KWD: "via KNET (Kuwait)" },
+  google_pay: { KWD: "via KNET (Kuwait)" },
+};
+
+export function routingHint(method: PaymentMethodId, currency: string): string | null {
+  return ROUTING_LABELS[method]?.[currency.toUpperCase()] ?? null;
+}
+
 export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
   visa: {
     id: "visa",

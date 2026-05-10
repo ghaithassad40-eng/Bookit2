@@ -102,6 +102,9 @@ interface MFPaymentMethod {
   ServiceCharge: number;
   TotalAmount: number;
   CurrencyIso: string;
+  /** The currency the gateway settles in. Use this to prefer same-currency
+   * variants (e.g. KWD-routed Apple Pay over SAR-routed Apple Pay). */
+  PaymentCurrencyIso?: string;
   IsDirectPayment: boolean;
 }
 
@@ -142,18 +145,61 @@ async function initiatePayment(
   return data.PaymentMethods ?? [];
 }
 
-function resolveMethodId(methods: MFPaymentMethod[], internal: InternalMethod): number | null {
+interface ResolvedMethod {
+  id: number;
+  settlementCurrency: string | null;
+  codeMatched: string;
+}
+
+function resolveMethod(
+  methods: MFPaymentMethod[],
+  internal: InternalMethod,
+  currency: string,
+): ResolvedMethod | null {
   if (internal === "any") return null;
   const codes = METHOD_CODES[internal] ?? [];
+
+  // Prefer exact code matches over substring matches so e.g. AMEX (code
+  // "ae") doesn't get confused with UAE Cards (code "uaecc") just because
+  // the latter contains "ae".
+  const exact: MFPaymentMethod[] = [];
+  const startsWith: MFPaymentMethod[] = [];
+  const contains: MFPaymentMethod[] = [];
   for (const m of methods) {
     const code = (m.PaymentMethodCode ?? "").toLowerCase();
-    if (codes.some((c) => code === c || code.includes(c))) return m.PaymentMethodId;
+    if (codes.includes(code)) exact.push(m);
+    else if (codes.some((c) => code.startsWith(c))) startsWith.push(m);
+    else if (codes.some((c) => code.includes(c))) contains.push(m);
   }
-  // fallback: try to match by EN name (e.g. "knet" or "Visa/Master")
-  const fallback = methods.find((m) =>
-    m.PaymentMethodEn?.toLowerCase().includes(internal.replace("_", " ")),
+  const candidates: MFPaymentMethod[] =
+    exact.length > 0 ? exact : startsWith.length > 0 ? startsWith : contains;
+
+  if (candidates.length === 0) {
+    // Last-resort English-name match.
+    const fallback = methods.find((m) =>
+      m.PaymentMethodEn?.toLowerCase().includes(internal.replace("_", " ")),
+    );
+    return fallback
+      ? {
+          id: fallback.PaymentMethodId,
+          settlementCurrency: fallback.PaymentCurrencyIso ?? null,
+          codeMatched: fallback.PaymentMethodCode,
+        }
+      : null;
+  }
+
+  // Prefer same-currency settlement so customers don't get hit with
+  // unexpected FX conversion (e.g. Apple Pay routed via SAR for a KWD
+  // invoice).
+  const sameCurrency = candidates.find(
+    (m) => (m.PaymentCurrencyIso ?? "").toUpperCase() === currency.toUpperCase(),
   );
-  return fallback?.PaymentMethodId ?? null;
+  const chosen = sameCurrency ?? candidates[0];
+  return {
+    id: chosen.PaymentMethodId,
+    settlementCurrency: chosen.PaymentCurrencyIso ?? null,
+    codeMatched: chosen.PaymentMethodCode,
+  };
 }
 
 interface ExecuteResp {
@@ -210,7 +256,7 @@ serve(async (req) => {
     const errorUrl = `${returnBase}/business/${payload.business_slug}/payment/callback?ref=${encodeURIComponent(payload.reference)}&error=1`;
 
     // 3) Choose ExecutePayment (specific method) or SendPayment (all methods).
-    const methodId = resolveMethodId(methods, payload.method);
+    const resolved = resolveMethod(methods, payload.method, payload.currency);
 
     const commonBody = {
       CustomerName: payload.customer.name,
@@ -227,10 +273,10 @@ serve(async (req) => {
     };
 
     let result: ExecuteResp;
-    if (methodId) {
+    if (resolved) {
       result = await executePayment(baseUrl, apiKey, {
         ...commonBody,
-        PaymentMethodId: methodId,
+        PaymentMethodId: resolved.id,
       });
     } else {
       // No specific method requested → MyFatoorah-hosted picker for all.
@@ -276,7 +322,17 @@ serve(async (req) => {
       invoiceId: result.InvoiceId,
       customerReference: result.CustomerReference,
     };
-    return json(out, 200);
+    // Include diagnostic info so the frontend can show the customer the
+    // exact gateway variant (e.g. "Apple Pay · KWD" vs "Apple Pay · SAR").
+    return json(
+      {
+        ...out,
+        settlementCurrency: resolved?.settlementCurrency ?? null,
+        paymentMethodCode: resolved?.codeMatched ?? null,
+        paymentMethodId: resolved?.id ?? null,
+      },
+      200,
+    );
   } catch (err) {
     return json(
       { success: false, error: err instanceof Error ? err.message : "MyFatoorah error" },
