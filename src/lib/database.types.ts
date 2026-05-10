@@ -42,7 +42,18 @@ export interface BookingRulesJson {
   maxAdvanceBookingDays: number;
   cancellationWindowHours: number;
   /** Optional — when omitted, all built-in payment methods are enabled. */
-  paymentMethods?: ("visa" | "apple_pay" | "google_pay" | "samsung_pay" | "paypal" | "knet")[];
+  paymentMethods?: (
+    | "visa"
+    | "apple_pay"
+    | "google_pay"
+    | "samsung_pay"
+    | "paypal"
+    | "knet"
+    | "mada"
+    | "stcpay"
+    | "uaecc"
+    | "amex"
+  )[];
   /** Optional — collect payment before confirming. Defaults to true. */
   requirePayment?: boolean;
 }
@@ -66,6 +77,16 @@ export interface BusinessRow {
   logo_url: string | null;
   owner_id: string | null;
   is_active: boolean;
+  // Location (optional — older rows can have null)
+  address: string | null;
+  city: string | null;
+  country: string | null;        // ISO 3166-1 alpha-2 (KW, SA, AE, …)
+  postal_code: string | null;
+  lat: number | null;
+  lng: number | null;
+  phone: string | null;
+  website: string | null;
+  timezone: string | null;
   created_at: string;
   updated_at: string;
 }

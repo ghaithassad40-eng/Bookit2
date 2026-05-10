@@ -12,14 +12,21 @@ export type PaymentMethodId =
   | "google_pay"
   | "samsung_pay"
   | "paypal"
-  | "knet";
+  | "knet"
+  | "mada"
+  | "stcpay"
+  | "uaecc"
+  | "amex";
+
+export type PaymentRegion = "global" | "kw" | "sa" | "ae" | "eg";
 
 export interface PaymentMethod {
   id: PaymentMethodId;
   label: string;
   shortLabel: string;
   description: string;
-  region?: "global" | "kw";
+  /** Where this method is most relevant (informational). */
+  regions?: PaymentRegion[];
 }
 
 /**
@@ -42,42 +49,70 @@ export const PAYMENT_METHODS: Record<PaymentMethodId, PaymentMethod> = {
     label: "Card · Visa or Mastercard",
     shortLabel: "Card",
     description: "Pay securely with a credit or debit card.",
-    region: "global",
+    regions: ["global"],
   },
   apple_pay: {
     id: "apple_pay",
     label: "Apple Pay",
     shortLabel: "Apple Pay",
     description: "One tap with Touch ID or Face ID.",
-    region: "global",
+    regions: ["global"],
   },
   google_pay: {
     id: "google_pay",
     label: "Google Pay",
     shortLabel: "G Pay",
     description: "Confirm with your saved Google account.",
-    region: "global",
+    regions: ["global"],
   },
   samsung_pay: {
     id: "samsung_pay",
     label: "Samsung Pay",
     shortLabel: "Samsung Pay",
     description: "Tap to pay from your Samsung wallet.",
-    region: "global",
+    regions: ["global"],
   },
   paypal: {
     id: "paypal",
     label: "PayPal",
     shortLabel: "PayPal",
     description: "Log in with PayPal to complete payment.",
-    region: "global",
+    regions: ["global"],
   },
   knet: {
     id: "knet",
-    label: "Knet",
+    label: "KNET",
     shortLabel: "KNET",
     description: "Pay from any Kuwait bank account.",
-    region: "kw",
+    regions: ["kw"],
+  },
+  mada: {
+    id: "mada",
+    label: "Mada",
+    shortLabel: "Mada",
+    description: "Saudi Arabia's local debit network.",
+    regions: ["sa"],
+  },
+  stcpay: {
+    id: "stcpay",
+    label: "STC Pay",
+    shortLabel: "STC Pay",
+    description: "Pay from your STC Pay wallet.",
+    regions: ["sa"],
+  },
+  uaecc: {
+    id: "uaecc",
+    label: "UAE Cards",
+    shortLabel: "UAE Cards",
+    description: "Local UAE debit card network.",
+    regions: ["ae"],
+  },
+  amex: {
+    id: "amex",
+    label: "American Express",
+    shortLabel: "AMEX",
+    description: "Pay with your American Express card.",
+    regions: ["global"],
   },
 };
 
@@ -258,7 +293,16 @@ export async function charge(req: PaymentRequest): Promise<PaymentResult> {
     case "paypal":
       return mockWalletCharge(req, "PP");
     case "knet":
+    case "mada":
+    case "stcpay":
+    case "uaecc":
+    case "amex":
+      // For local rails (Mada, STC Pay, UAE Cards, AMEX, KNET) we route
+      // through the same KNET-style redirect mock — production replaces
+      // this with the real MyFatoorah Edge Function.
       return mockKnetCharge(req);
+    default:
+      return mockChargeCard(req);
   }
 }
 

@@ -86,5 +86,49 @@ export function PaymentBrandMark({ method, className }: Props) {
           KNET
         </div>
       );
+    case "mada":
+      return (
+        <div
+          className={cn(
+            "flex h-9 w-14 items-center justify-center rounded-md bg-white text-[10px] font-extrabold tracking-tight text-[#84AF40] ring-1 ring-[#84AF40]/30",
+            className,
+          )}
+        >
+          mada
+        </div>
+      );
+    case "stcpay":
+      return (
+        <div
+          className={cn(
+            "grid h-9 w-14 place-items-center rounded-md bg-gradient-to-br from-[#4F008C] to-[#7C3AED] text-[9px] font-extrabold tracking-tight text-white",
+            className,
+          )}
+        >
+          STC Pay
+        </div>
+      );
+    case "uaecc":
+      return (
+        <div
+          className={cn(
+            "grid h-9 w-14 place-items-center rounded-md bg-gradient-to-br from-[#005f3c] via-[#FFFFFF] to-[#a3242f] text-[9px] font-extrabold tracking-tight text-black ring-1 ring-black/10",
+            className,
+          )}
+        >
+          UAE
+        </div>
+      );
+    case "amex":
+      return (
+        <div
+          className={cn(
+            "grid h-9 w-14 place-items-center rounded-md bg-gradient-to-br from-[#0E64C8] to-[#0a4fa3] text-[10px] font-extrabold italic tracking-tight text-white",
+            className,
+          )}
+        >
+          AMEX
+        </div>
+      );
   }
 }

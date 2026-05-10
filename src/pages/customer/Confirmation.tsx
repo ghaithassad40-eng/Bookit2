@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PaymentBrandMark } from "@/components/customer/PaymentBrandMark";
+import { LocationCard } from "@/components/customer/LocationCard";
+import { getLocation } from "@/lib/location";
 import { PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payments";
 import { getLocalBookings } from "@/lib/localBookings";
 import { DEMO_SERVICES, DEMO_STAFF } from "@/lib/demoData";
@@ -262,6 +264,13 @@ export default function Confirmation() {
             </div>
           </Card>
         </motion.div>
+
+        {/* Where to go */}
+        {getLocation(business) && (
+          <div className="mt-6" data-no-print>
+            <LocationCard business={business} compact />
+          </div>
+        )}
 
         {/* Footer CTAs */}
         <div className="mt-8 flex flex-col items-stretch justify-center gap-2 sm:flex-row" data-no-print>

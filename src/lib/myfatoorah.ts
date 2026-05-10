@@ -63,8 +63,20 @@ export function toMyFatoorahMethod(id: PaymentMethodId): MFMethod {
       return "samsung_pay";
     case "knet":
       return "knet";
+    case "mada":
+      return "mada";
+    case "stcpay":
+      return "stcpay";
+    case "amex":
+      return "amex";
+    case "uaecc":
+      // No internal MFMethod for UAE Cards yet — fall through to the
+      // hosted picker so MyFatoorah selects the right local rail.
+      return "any";
     case "paypal":
       // MyFatoorah doesn't process PayPal directly; show all methods.
+      return "any";
+    default:
       return "any";
   }
 }

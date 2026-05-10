@@ -5,6 +5,7 @@ import type { BusinessRow, BusinessConfigRow } from "@/lib/database.types";
 import { Hero } from "@/components/customer/Hero";
 import { ServiceCard } from "@/components/customer/ServiceCard";
 import { StaffCard } from "@/components/customer/StaffCard";
+import { LocationCard } from "@/components/customer/LocationCard";
 import { useServices } from "@/hooks/useServices";
 import { useStaff } from "@/hooks/useStaff";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -107,6 +108,16 @@ export default function Landing() {
           </div>
         </section>
       )}
+
+      <section className="container pb-12">
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold sm:text-3xl">Find us</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Tap the map for turn-by-turn directions in your favourite app.
+          </p>
+        </div>
+        <LocationCard business={business} />
+      </section>
 
       <section className="container pb-20">
         <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-card/60 p-8 text-center sm:flex-row sm:text-left">

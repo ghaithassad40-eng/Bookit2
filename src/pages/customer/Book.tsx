@@ -14,6 +14,7 @@ import { BookingForm } from "@/components/customer/BookingForm";
 import { BookingStepper } from "@/components/customer/BookingStepper";
 import { PaymentSelector } from "@/components/customer/PaymentSelector";
 import { PaymentForm } from "@/components/customer/PaymentForm";
+import { PaymentRegionInfo } from "@/components/customer/PaymentRegionInfo";
 import { useServices } from "@/hooks/useServices";
 import { useStaff } from "@/hooks/useStaff";
 import { useSlots } from "@/hooks/useSlots";
@@ -324,6 +325,8 @@ export default function Book() {
                     currency={service.currency}
                   />
                 </div>
+
+                <PaymentRegionInfo highlightCountry={business.country} />
 
                 {paymentMethod && (
                   <motion.div
