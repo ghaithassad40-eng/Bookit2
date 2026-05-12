@@ -1,6 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ShieldCheck, Wallet } from "lucide-react";
 import type { BusinessRow, BusinessConfigRow } from "@/lib/database.types";
 import { supabase } from "@/lib/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,7 @@ import { JsonConfigEditor } from "@/components/admin/JsonConfigEditor";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 
 interface Ctx {
@@ -27,6 +29,38 @@ export default function Settings() {
   const [name, setName] = useState(business.name);
   const [slug, setSlug] = useState(business.slug);
   const [logoUrl, setLogoUrl] = useState(business.logo_url ?? "");
+
+  // Escrow / commission state
+  const [commissionPct, setCommissionPct] = useState(
+    (business.commission_bps / 100).toString(),
+  );
+  const [iban, setIban] = useState(business.iban_last4 ?? "");
+  const [connectedId, setConnectedId] = useState(business.connected_account_id ?? "");
+  const [payoutsEnabled, setPayoutsEnabled] = useState(business.payouts_enabled);
+
+  const saveEscrow = useMutation({
+    mutationFn: async () => {
+      const bps = Math.round(parseFloat(commissionPct || "0") * 100);
+      if (Number.isNaN(bps) || bps < 0 || bps > 5000) {
+        throw new Error("Commission must be between 0 and 50%");
+      }
+      const { error } = await supabase
+        .from("businesses")
+        .update({
+          commission_bps: bps,
+          iban_last4: iban || null,
+          connected_account_id: connectedId || null,
+          payouts_enabled: payoutsEnabled,
+        })
+        .eq("id", business.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Payout settings saved");
+      qc.invalidateQueries({ queryKey: ["business", business.slug] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Save failed"),
+  });
 
   const updateBusiness = useMutation({
     mutationFn: async () => {
@@ -89,6 +123,87 @@ export default function Settings() {
           <div className="sm:col-span-3">
             <Button disabled={updateBusiness.isPending} onClick={() => updateBusiness.mutate()}>
               Save profile
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-start gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-500/15 text-emerald-500">
+            <Wallet className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <CardTitle>Payouts &amp; commission</CardTitle>
+            <CardDescription>
+              Funds are held in escrow until each booking's service window closes, then split: your share is
+              wired to your bank, the platform fee is netted automatically.
+            </CardDescription>
+          </div>
+          <Badge variant={payoutsEnabled ? "success" : "warning"} className="gap-1">
+            <ShieldCheck className="h-3 w-3" />
+            {payoutsEnabled ? "Active" : "Setup required"}
+          </Badge>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2">
+          <Field label="Commission (%)">
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              max="50"
+              value={commissionPct}
+              onChange={(e) => setCommissionPct(e.target.value)}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Stored as basis points · 1 bps = 0.01% · max 50%
+            </p>
+          </Field>
+          <Field label="IBAN (last 4)">
+            <Input
+              value={iban}
+              onChange={(e) => setIban(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="4321"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Display only — your full IBAN is held by the payment provider.
+            </p>
+          </Field>
+          <Field label="Connected account ID">
+            <Input
+              value={connectedId}
+              onChange={(e) => setConnectedId(e.target.value)}
+              placeholder="acct_…"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Identifier returned by the payment provider after KYC onboarding.
+            </p>
+          </Field>
+          <Field label="Status">
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-card/50 px-3 py-2.5">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={payoutsEnabled}
+                onClick={() => setPayoutsEnabled((v) => !v)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                  payoutsEnabled ? "bg-emerald-500" : "bg-muted"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${
+                    payoutsEnabled ? "left-[18px]" : "left-0.5"
+                  }`}
+                />
+              </button>
+              <span className="text-sm">
+                Payouts {payoutsEnabled ? "enabled" : "disabled"}
+              </span>
+            </div>
+          </Field>
+          <div className="sm:col-span-2">
+            <Button disabled={saveEscrow.isPending} onClick={() => saveEscrow.mutate()}>
+              {saveEscrow.isPending ? "Saving..." : "Save payout settings"}
             </Button>
           </div>
         </CardContent>

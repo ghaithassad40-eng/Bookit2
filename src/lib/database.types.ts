@@ -87,6 +87,12 @@ export interface BusinessRow {
   phone: string | null;
   website: string | null;
   timezone: string | null;
+  // Marketplace + commission config (optional — null until onboarding done)
+  connected_account_id: string | null;
+  commission_bps: number;        // 1000 = 10.00%
+  payouts_enabled: boolean;
+  iban_last4: string | null;
+  payout_provider: string;       // 'myfatoorah', 'stripe', etc.
   created_at: string;
   updated_at: string;
 }
@@ -172,8 +178,62 @@ export interface BookingRow {
   provider_invoice_id: string | null;
   provider_payment_url: string | null;
   provider_initiated_at: string | null;
+  // Escrow / payout lifecycle (held → releasing → completed)
+  payout_status: "held" | "releasing" | "completed" | "transfer_failed" | "refunded" | null;
+  payout_id: string | null;
+  released_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Escrow / payouts
+// ---------------------------------------------------------------------------
+
+export type PayoutStatus =
+  | "pending_transfer"
+  | "transferred"
+  | "transfer_failed"
+  | "reversed";
+
+export type PayoutReason =
+  | "service_completed"
+  | "auto_release"
+  | "manual_override"
+  | "cancellation_window_expired";
+
+export interface PayoutRow {
+  id: string;
+  idempotency_key: string;
+  booking_id: string;
+  business_id: string;
+  gross_amount: number;
+  psp_fee: number;
+  platform_fee: number;
+  merchant_amount: number;
+  currency: string;
+  status: PayoutStatus;
+  reason: PayoutReason;
+  actor: string;
+  provider_transfer_id: string | null;
+  provider: string;
+  last_error: string | null;
+  released_at: string;
+  transferred_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LedgerEntryRow {
+  id: string;
+  account: string;
+  amount: number;                                // signed: + credit, − debit
+  currency: string;
+  kind: "platform_fee" | "merchant_payout" | "reversal";
+  booking_id: string | null;
+  payout_id: string | null;
+  business_id: string | null;
+  created_at: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -239,6 +299,18 @@ export interface Database {
         Row: BookingRow;
         Insert: BookingInsert;
         Update: BookingUpdate;
+        Relationships: [];
+      };
+      payouts: {
+        Row: PayoutRow;
+        Insert: Partial<PayoutRow>;
+        Update: Partial<PayoutRow>;
+        Relationships: [];
+      };
+      ledger_entries: {
+        Row: LedgerEntryRow;
+        Insert: Partial<LedgerEntryRow>;
+        Update: Partial<LedgerEntryRow>;
         Relationships: [];
       };
     };

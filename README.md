@@ -227,6 +227,80 @@ booking flow redirects to `/payment/myfatoorah-mock` — a fully-rendered
 look-alike of MyFatoorah's hosted page so you can demonstrate the entire
 redirect → callback → confirmation journey without any credentials.
 
+## Automated Escrow + Commission Split
+
+Every paid booking is held in escrow until its service window closes, then
+automatically split: a platform fee is netted, the merchant's share is wired
+to their connected account. The merchant never sees a "commission invoice"
+and never waits 30 days for cash. Customers get refund-safe protection
+until their service is actually delivered.
+
+### Schema (migration `0007_escrow.sql`)
+
+| Object | Purpose |
+| --- | --- |
+| `businesses.connected_account_id` | PSP marketplace sub-account |
+| `businesses.commission_bps` | Basis points (1000 = 10.00%, max 5000) |
+| `businesses.payouts_enabled` | Flips to `true` once KYC is complete |
+| `businesses.iban_last4` | Display-only |
+| `bookings.payout_status` | `held` → `releasing` → `completed` (or `transfer_failed`, `refunded`) |
+| `bookings.payout_id` | Back-reference once a release fires |
+| `bookings.released_at` | Audit timestamp |
+| `payouts` | One row per release intent — idempotent on `idempotency_key = 'release:<booking_id>'` |
+| `ledger_entries` | Append-only double-entry book — sum per booking must be 0 |
+| `release_booking_payout(uuid, text, text)` | Atomic RPC: validates state, writes ledger, creates payout, flips booking |
+
+### Flow
+
+```
+Checkout  →  funds settle into platform escrow balance, booking.payout_status=held
+            (the merchant's connected account is the on_behalf_of, never the recipient)
+
+Trigger   →  service_completed | auto_release (cron) | manual_override | cancellation_window_expired
+
+Release   →  release_booking_payout() RPC writes 4 ledger entries summing to zero
+              -platform_fee    on escrow              + platform_fee    on platform_revenue
+              -merchant_amount on escrow              + merchant_amount on merchant_payable:{biz}
+            payout row created with status=pending_transfer
+
+Transfer  →  release-payout Edge Function calls MyFatoorah SupplierDeposit
+            on success → payouts.status=transferred, bookings.payout_status=completed
+            on failure → leave ledger committed, payouts.status=transfer_failed
+                         retry worker will reprocess; reconciliation alerts
+                         if a debit has no matching transfer_id within 7 days
+```
+
+### Run it
+
+The demo carries an in-browser mirror of the entire flow (`src/lib/escrow.ts`)
+so the admin Payouts page works without a backend. To turn on the real thing:
+
+```bash
+# 1. Apply the migration
+supabase db push   # or run supabase/migrations/0007_escrow.sql
+
+# 2. Deploy the release function
+supabase functions deploy release-payout
+
+# 3. (Optional) Set up auto-release on a cron — Supabase Scheduled Functions
+#    or any cron service. Hits the function with:
+#      { "action": "auto_release_due", "grace_minutes": 30 }
+```
+
+### Admin
+
+- `/admin/:slug/payouts` — KPI tiles (Held, Paid out to you, Platform fees,
+  Failed) + a unified table with manual Release-now controls and status
+  badges.
+- `/admin/:slug/settings` — edit commission (in %), IBAN last-4, connected
+  account ID, and the payouts-enabled toggle.
+
+### Customer
+
+The Confirmation invoice now carries an "Your payment is protected by
+escrow" reassurance card so customers understand why the platform holds
+funds before their service is delivered.
+
 ## Build
 
 ```bash

@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 import {
+  Banknote,
   CalendarRange,
   LayoutDashboard,
   LogOut,
@@ -22,6 +23,7 @@ const NAV = [
   { to: "services", icon: Tags, label: "Services" },
   { to: "staff", icon: Users, label: "Staff" },
   { to: "slots", icon: Sparkles, label: "Slots" },
+  { to: "payouts", icon: Banknote, label: "Payouts" },
   { to: "settings", icon: Settings, label: "Settings" },
 ];
 

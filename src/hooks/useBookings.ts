@@ -4,6 +4,7 @@ import type { BookingRow } from "@/lib/database.types";
 import type { PaymentResult } from "@/lib/payments";
 import {
   generateLocalBookingReference,
+  getLocalBookings,
   saveLocalBooking,
 } from "@/lib/localBookings";
 
@@ -33,6 +34,10 @@ function createDemoBooking(input: CreateBookingInput): BookingRow {
     provider_invoice_id: input.payment?.providerRef ?? null,
     provider_payment_url: null,
     provider_initiated_at: input.payment ? now : null,
+    // Funds are held in escrow until the release condition fires.
+    payout_status: input.payment ? "held" : null,
+    payout_id: null,
+    released_at: null,
     created_at: now,
     updated_at: now,
   };
@@ -103,7 +108,29 @@ interface ListOpts {
   limit?: number;
 }
 
+function filterLocalBookings(opts: ListOpts): BookingRow[] {
+  const all = getLocalBookings().filter((b) => b.business_id === opts.businessId);
+  let list = all;
+  if (opts.status) list = list.filter((b) => b.status === opts.status);
+  if (opts.search) {
+    const q = opts.search.toLowerCase();
+    list = list.filter(
+      (b) =>
+        b.customer_name?.toLowerCase().includes(q) ||
+        b.customer_email?.toLowerCase().includes(q) ||
+        b.booking_reference?.toLowerCase().includes(q),
+    );
+  }
+  return list
+    .slice()
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, opts.limit ?? 200);
+}
+
 async function fetchBookings(opts: ListOpts): Promise<BookingRow[]> {
+  if (!isSupabaseConfigured || opts.businessId.startsWith("biz-")) {
+    return filterLocalBookings(opts);
+  }
   let q = supabase
     .from("bookings")
     .select("*")
@@ -122,7 +149,8 @@ async function fetchBookings(opts: ListOpts): Promise<BookingRow[]> {
   }
   const { data, error } = await q;
   if (error) throw error;
-  return data as BookingRow[];
+  const arr = (data ?? []) as BookingRow[];
+  return arr.length === 0 ? filterLocalBookings(opts) : arr;
 }
 
 export function useBookings(opts: Partial<ListOpts> & { businessId: string | undefined }) {

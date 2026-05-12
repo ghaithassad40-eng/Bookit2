@@ -32,6 +32,17 @@ const NULL_LOCATION = {
   timezone: null as string | null,
 };
 
+// Marketplace defaults applied to every demo business. 10% commission with
+// payouts enabled — replace per-row to demonstrate different commission
+// tiers across the demo dataset.
+const DEFAULT_ESCROW = {
+  connected_account_id: "demo_acct_marketplace" as string | null,
+  commission_bps: 1000,                          // 10.00%
+  payouts_enabled: true,
+  iban_last4: "4321" as string | null,
+  payout_provider: "myfatoorah" as string,
+};
+
 export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-pulse",
@@ -41,6 +52,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "Block 4, Salem Al-Mubarak Street",
     city: "Salmiya",
@@ -60,6 +72,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "Olympia Mall, Ground Floor",
     city: "Salmiya",
@@ -78,6 +91,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "Beirut Street, Al-Bahr Tower, 3rd Floor",
     city: "Hawalli",
@@ -96,6 +110,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "Block 6, Mishref Co-op Roundabout",
     city: "Mishref",
@@ -115,6 +130,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "Block 11, Sport Club Street",
     city: "Salmiya",
@@ -134,6 +150,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "Tunis Street, Hawalli Sports Complex",
     city: "Hawalli",
@@ -152,6 +169,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "King Fahd Road, Olaya District",
     city: "Riyadh",
@@ -171,6 +189,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     logo_url: null,
     owner_id: null,
     is_active: true,
+    ...DEFAULT_ESCROW,
     ...NULL_LOCATION,
     address: "Sheikh Zayed Road, Al Quoz 2",
     city: "Dubai",

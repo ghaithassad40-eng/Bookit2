@@ -249,6 +249,23 @@ export default function Confirmation() {
                   </div>
                 </div>
               </div>
+
+              {/* Escrow protection note */}
+              {paid && (
+                <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
+                  <div className="text-sm">
+                    <div className="font-medium text-emerald-700 dark:text-emerald-200">
+                      Your payment is protected by escrow
+                    </div>
+                    <div className="mt-0.5 text-xs text-emerald-700/70 dark:text-emerald-200/70">
+                      Funds are held with the platform until your service is delivered.
+                      If something goes wrong before then, the refund returns to you cleanly —
+                      we haven't released the money to {business.name} yet.
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
 
             <div className="flex flex-col gap-2 border-t border-border/60 bg-muted/30 p-5 sm:flex-row sm:items-center sm:justify-between">

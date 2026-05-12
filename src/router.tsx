@@ -15,6 +15,7 @@ import Bookings from "@/pages/admin/Bookings";
 import Services from "@/pages/admin/Services";
 import Staff from "@/pages/admin/Staff";
 import Slots from "@/pages/admin/Slots";
+import Payouts from "@/pages/admin/Payouts";
 import Settings from "@/pages/admin/Settings";
 
 export const router = createBrowserRouter([
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
       { path: "services", element: <Services /> },
       { path: "staff", element: <Staff /> },
       { path: "slots", element: <Slots /> },
+      { path: "payouts", element: <Payouts /> },
       { path: "settings", element: <Settings /> },
     ],
   },
