@@ -5,9 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency = "USD") {
+export function formatCurrency(amount: number, currency = "USD", locale?: string) {
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
       maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
@@ -17,16 +17,16 @@ export function formatCurrency(amount: number, currency = "USD") {
   }
 }
 
-export function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
+export function formatDate(iso: string, locale?: string) {
+  return new Date(iso).toLocaleDateString(locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
   });
 }
 
-export function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString(undefined, {
+export function formatTime(iso: string, locale?: string) {
+  return new Date(iso).toLocaleTimeString(locale, {
     hour: "numeric",
     minute: "2-digit",
   });

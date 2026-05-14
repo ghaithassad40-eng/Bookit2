@@ -22,6 +22,7 @@ import { useBookingStore } from "@/store/bookingStore";
 import { useCreateBooking } from "@/hooks/useBookings";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 import { charge, enabledPaymentMethods, type PaymentRequest, type PaymentResult } from "@/lib/payments";
+import { useI18n } from "@/hooks/useI18n";
 import {
   MYFATOORAH_ENABLED,
   initiateMyFatoorahPayment,
@@ -38,6 +39,9 @@ export default function Book() {
   const { business, config } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const rules = config.booking_rules_json;
+
+  const { t, intl, locale } = useI18n();
+  const intlLocale = intl(business.country);
 
   const {
     step, service, staff, slot, customer,
@@ -118,6 +122,7 @@ export default function Book() {
             phone: customer.phone || null,
             email: customer.email || null,
           },
+          language: locale === "ar" ? "AR" : "EN",
         });
         if (!init.success || !init.paymentUrl) {
           toast.error(init.error ?? "Could not start payment");
@@ -182,7 +187,7 @@ export default function Book() {
         >
           {step === "service" && (
             <section>
-              <h1 className="mb-4 text-2xl font-semibold">Choose a service</h1>
+              <h1 className="mb-4 text-2xl font-semibold">{t("book.chooseService")}</h1>
               {loadingSvc ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: 6 }).map((_, i) => (
@@ -209,10 +214,10 @@ export default function Book() {
 
           {step === "staff" && (
             <section>
-              <h1 className="mb-4 text-2xl font-semibold">Choose your specialist</h1>
+              <h1 className="mb-4 text-2xl font-semibold">{t("book.chooseStaff")}</h1>
               <div className="mb-3">
                 <Button variant="ghost" onClick={() => { setStaff(null); setStep("slot"); }}>
-                  No preference
+                  {t("book.noPreference")}
                 </Button>
               </div>
               {loadingStaff ? (
@@ -238,7 +243,7 @@ export default function Book() {
 
           {step === "slot" && (
             <section>
-              <h1 className="mb-4 text-2xl font-semibold">Pick a time</h1>
+              <h1 className="mb-4 text-2xl font-semibold">{t("book.pickTime")}</h1>
               {loadingSlots ? (
                 <Skeleton className="h-72 w-full" />
               ) : (
@@ -254,7 +259,7 @@ export default function Book() {
           {step === "details" && (
             <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
               <div>
-                <h1 className="mb-4 text-2xl font-semibold">Your details</h1>
+                <h1 className="mb-4 text-2xl font-semibold">{t("book.yourDetails")}</h1>
                 <BookingForm
                   rules={rules}
                   initial={customer}
@@ -272,7 +277,7 @@ export default function Book() {
             <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
               <Card>
                 <CardHeader>
-                  <CardTitle>Review your booking</CardTitle>
+                  <CardTitle>{t("book.reviewYourBooking")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <Row label="Name" value={customer.name} />
@@ -289,12 +294,12 @@ export default function Book() {
                       {requirePayment ? (
                         <>
                           <Lock className="h-4 w-4" />
-                          Continue to payment · {service ? formatCurrency(service.price, service.currency) : ""}
+                          {t("book.continueToPayment")} · {service ? formatCurrency(service.price, service.currency, intlLocale) : ""}
                         </>
                       ) : createBooking.isPending ? (
-                        "Confirming..."
+                        t("common.loading")
                       ) : (
-                        "Confirm booking"
+                        t("book.confirmBooking")
                       )}
                     </Button>
                   </div>
@@ -308,15 +313,15 @@ export default function Book() {
             <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
               <div className="space-y-6">
                 <div>
-                  <h1 className="text-2xl font-semibold">Payment</h1>
+                  <h1 className="text-2xl font-semibold">{t("payment.title")}</h1>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Choose how you'd like to pay. All transactions are encrypted.
+                    {t("payment.subtitle")}
                   </p>
                 </div>
 
                 <div>
                   <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Payment method
+                    {t("payment.method")}
                   </h2>
                   <PaymentSelector
                     enabled={enabled}
@@ -379,20 +384,27 @@ function BookingSummary({
   slot: ReturnType<typeof useBookingStore.getState>["slot"];
   paymentLabel?: string;
 }) {
+  const { t, intl } = useI18n();
+  const intlLoc = intl();
   if (!service) return null;
   return (
     <Card className="h-fit">
       <CardHeader>
-        <CardTitle>Summary</CardTitle>
+        <CardTitle>{t("book.summary")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        <Row label="Service" value={service.name} />
-        {staff && <Row label="Specialist" value={staff.name} />}
-        {slot && <Row label="When" value={`${formatDate(slot.start_time)} · ${formatTime(slot.start_time)}`} />}
-        {paymentLabel && <Row label="Payment" value={paymentLabel} />}
+        <Row label={t("book.service")} value={service.name} />
+        {staff && <Row label={t("book.specialist")} value={staff.name} />}
+        {slot && (
+          <Row
+            label={t("book.when")}
+            value={`${formatDate(slot.start_time, intlLoc)} · ${formatTime(slot.start_time, intlLoc)}`}
+          />
+        )}
+        {paymentLabel && <Row label={t("invoice.payment")} value={paymentLabel} />}
         <div className="flex items-center justify-between pt-3 text-base">
-          <span className="text-muted-foreground">Total</span>
-          <span className="font-semibold">{formatCurrency(service.price, service.currency)}</span>
+          <span className="text-muted-foreground">{t("book.total")}</span>
+          <span className="font-semibold">{formatCurrency(service.price, service.currency, intlLoc)}</span>
         </div>
       </CardContent>
     </Card>

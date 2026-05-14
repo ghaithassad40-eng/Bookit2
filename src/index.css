@@ -62,6 +62,14 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Arabic: switch primary font to IBM Plex Sans Arabic which has full
+     diacritic and ligature coverage. Inter handles any Latin characters
+     intermixed in the text automatically. */
+  html[dir="rtl"] body,
+  html.rtl body {
+    font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", var(--font-sans), system-ui, sans-serif;
+  }
+
   /* prevent horizontal scroll on mobile */
   html, body { overflow-x: hidden; }
 }

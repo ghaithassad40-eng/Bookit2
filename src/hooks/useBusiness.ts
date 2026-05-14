@@ -28,6 +28,7 @@ function buildSafeConfig(
       business_id: businessId,
       theme_json: DEFAULT_THEME,
       copy_json: DEFAULT_COPY,
+      copy_json_ar: null,
       booking_rules_json: DEFAULT_RULES,
       layout_json: DEFAULT_LAYOUT,
       created_at: new Date().toISOString(),
@@ -38,6 +39,7 @@ function buildSafeConfig(
     ...(rawConfig as BusinessConfigRow),
     theme_json: withDefaults(rawConfig.theme_json, DEFAULT_THEME),
     copy_json: withDefaults(rawConfig.copy_json, DEFAULT_COPY),
+    copy_json_ar: rawConfig.copy_json_ar ?? null,
     booking_rules_json: withDefaults(rawConfig.booking_rules_json, DEFAULT_RULES),
     layout_json: withDefaults(rawConfig.layout_json, DEFAULT_LAYOUT),
   };

@@ -15,20 +15,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { initials } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Ctx {
   business: BusinessRow;
   config: BusinessConfigRow;
 }
 
-const COMMON_REASONS = [
-  { icon: CreditCard, title: "Card declined", body: "Your bank rejected the charge — usually insufficient funds or a security block." },
-  { icon: ShieldAlert, title: "Authentication failed", body: "OTP or 3-D Secure didn't go through in time. Try again with the code." },
-  { icon: RefreshCw, title: "Connection lost", body: "The session expired or the network dropped. Restart the booking." },
-];
-
 export default function PaymentFailed() {
   const { business } = useOutletContext<Ctx>();
+  const { t } = useI18n();
+
+  const COMMON_REASONS = [
+    { icon: CreditCard, title: t("fail.cardDeclined"),    body: t("fail.cardDeclinedBody") },
+    { icon: ShieldAlert, title: t("fail.authFailed"),     body: t("fail.authFailedBody") },
+    { icon: RefreshCw,   title: t("fail.connectionLost"), body: t("fail.connectionLostBody") },
+  ];
   const [params] = useSearchParams();
   const reference = params.get("ref");
   const reason = params.get("reason");
@@ -50,14 +52,13 @@ export default function PaymentFailed() {
           <XCircle className="h-10 w-10" />
         </motion.div>
         <Badge variant="destructive" className="mb-3 px-3 py-1 text-xs">
-          Payment failed
+          {t("fail.title")}
         </Badge>
         <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-          We couldn't process your payment.
+          {t("fail.headline")}
         </h1>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          Don't worry — you haven't been charged. Your booking slot is still
-          available, so try again with a different method or come back to it later.
+          {t("fail.reassurance")}
         </p>
       </motion.div>
 
@@ -77,7 +78,7 @@ export default function PaymentFailed() {
             )}
             <div>
               <div className="text-sm font-semibold">{business.name}</div>
-              <div className="text-xs text-muted-foreground">Booking unconfirmed</div>
+              <div className="text-xs text-muted-foreground">{t("fail.bookingUnconfirmed")}</div>
             </div>
           </div>
 
@@ -98,7 +99,7 @@ export default function PaymentFailed() {
             {reference && (
               <div className="flex items-center justify-between gap-3 rounded-2xl bg-muted/30 p-4 text-sm">
                 <div className="inline-flex items-center gap-2 text-muted-foreground">
-                  <Hash className="h-4 w-4" /> Attempt reference
+                  <Hash className="h-4 w-4" /> {t("fail.attemptReference")}
                 </div>
                 <span className="font-mono font-semibold">{reference}</span>
               </div>
@@ -106,7 +107,7 @@ export default function PaymentFailed() {
 
             <div>
               <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Common causes
+                {t("fail.commonCauses")}
               </div>
               <ul className="space-y-2">
                 {COMMON_REASONS.map((r) => (
@@ -126,8 +127,7 @@ export default function PaymentFailed() {
             <div className="flex items-start gap-3 rounded-2xl border border-dashed border-border/60 p-4 text-sm">
               <HelpCircle className="mt-0.5 h-4 w-4 text-accent" />
               <div className="text-muted-foreground">
-                Need help? Reach out to {business.name} with your reference and we'll
-                get the booking sorted manually.
+                {t("fail.helpHint")}
               </div>
             </div>
           </CardContent>
@@ -138,19 +138,19 @@ export default function PaymentFailed() {
         <Button asChild size="lg">
           <Link to={`/business/${business.slug}/book`}>
             <RefreshCw className="h-4 w-4" />
-            Try again
+            {t("common.tryAgain")}
           </Link>
         </Button>
         <Button variant="outline" asChild size="lg">
           <Link to={`/business/${business.slug}`}>
             <ArrowLeft className="h-4 w-4" />
-            Back to {business.name}
+            {t("nav.backTo")} {business.name}
           </Link>
         </Button>
         <Button variant="ghost" asChild size="lg">
           <a href={`mailto:support@${business.slug}.bookit.app`}>
             <Mail className="h-4 w-4" />
-            Contact support
+            {t("common.contactSupport")}
           </a>
         </Button>
       </div>

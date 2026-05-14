@@ -226,6 +226,12 @@ export const DEMO_CONFIGS: BusinessConfigRow[] = [
       ctaText: "Book a Session",
       confirmationMessage: "Your session is locked in. See you on the floor.",
     },
+    copy_json_ar: {
+      heroTitle: "تمرين أذكى. تقدّم أبعد.",
+      heroSubtitle: "احجز حصّتك مع مدرّبينا المعتمدين خلال ثوانٍ.",
+      ctaText: "احجز حصّة",
+      confirmationMessage: "تم تأكيد الحصّة. نلتقي على الأرضية.",
+    },
     booking_rules_json: {
       allowStaffSelection: true,
       requirePhone: true,
@@ -360,6 +366,12 @@ export const DEMO_CONFIGS: BusinessConfigRow[] = [
       heroSubtitle: "Floodlit 5v5 and 7v7 turf in the heart of the city. Reserve in seconds.",
       ctaText: "Book Pitch",
       confirmationMessage: "Pitch reserved. Bring the boots — see you on the turf.",
+    },
+    copy_json_ar: {
+      heroTitle: "الملعب جاهز. الحجز محسوم.",
+      heroSubtitle: "ملاعب 5v5 و 7v7 معشّبة وبإضاءة كاملة في قلب المدينة. احجز خلال ثوانٍ.",
+      ctaText: "احجز الملعب",
+      confirmationMessage: "تم حجز الملعب. جهّز الجزمة — نلتقي على العشب.",
     },
     booking_rules_json: {
       allowStaffSelection: false,

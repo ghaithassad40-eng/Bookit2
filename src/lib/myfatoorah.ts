@@ -89,6 +89,8 @@ export interface InitiateBody {
   business_slug: string;
   customer: { name: string; phone?: string | null; email?: string | null };
   booking_id?: string | null;
+  /** Locale to render MyFatoorah's hosted page in. */
+  language?: "EN" | "AR";
 }
 
 export interface InitiateResponse {

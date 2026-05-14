@@ -6,6 +6,7 @@ import { Hero } from "@/components/customer/Hero";
 import { ServiceCard } from "@/components/customer/ServiceCard";
 import { StaffCard } from "@/components/customer/StaffCard";
 import { LocationCard } from "@/components/customer/LocationCard";
+import { useI18n } from "@/hooks/useI18n";
 import { useServices } from "@/hooks/useServices";
 import { useStaff } from "@/hooks/useStaff";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +19,7 @@ interface Ctx {
 
 export default function Landing() {
   const { business, config } = useOutletContext<Ctx>();
+  const { t } = useI18n();
   const { data: services, isLoading: servicesLoading } = useServices(business.id);
   const { data: staff, isLoading: staffLoading } = useStaff(business.id);
   const layout = config.layout_json;
@@ -111,9 +113,9 @@ export default function Landing() {
 
       <section className="container pb-12">
         <div className="mb-6">
-          <h2 className="text-2xl font-semibold sm:text-3xl">Find us</h2>
+          <h2 className="text-2xl font-semibold sm:text-3xl">{t("common.findUs")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Tap the map for turn-by-turn directions in your favourite app.
+            {t("common.findUsDescription")}
           </p>
         </div>
         <LocationCard business={business} />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { BookingRulesJson } from "@/lib/database.types";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Props {
   rules: BookingRulesJson;
@@ -11,14 +12,15 @@ interface Props {
 }
 
 export function BookingForm({ rules, initial, submitting, onSubmit }: Props) {
+  const { t } = useI18n();
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function validate() {
     const e: Record<string, string> = {};
-    if (!values.name.trim()) e.name = "Name is required";
-    if (rules.requireEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) e.email = "Valid email required";
-    if (rules.requirePhone && values.phone.replace(/\D/g, "").length < 7) e.phone = "Valid phone required";
+    if (!values.name.trim()) e.name = t("form.nameRequired");
+    if (rules.requireEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) e.email = t("form.emailRequired");
+    if (rules.requirePhone && values.phone.replace(/\D/g, "").length < 7) e.phone = t("form.phoneRequired");
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -32,7 +34,7 @@ export function BookingForm({ rules, initial, submitting, onSubmit }: Props) {
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="name">Full name</Label>
+        <Label htmlFor="name">{t("form.fullName")}</Label>
         <Input
           id="name"
           autoComplete="name"
@@ -44,7 +46,7 @@ export function BookingForm({ rules, initial, submitting, onSubmit }: Props) {
 
       {rules.requireEmail && (
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("form.email")}</Label>
           <Input
             id="email"
             type="email"
@@ -58,7 +60,7 @@ export function BookingForm({ rules, initial, submitting, onSubmit }: Props) {
 
       {rules.requirePhone && (
         <div className="space-y-1.5">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{t("form.phone")}</Label>
           <Input
             id="phone"
             type="tel"
@@ -72,7 +74,7 @@ export function BookingForm({ rules, initial, submitting, onSubmit }: Props) {
 
       {rules.allowNotes && (
         <div className="space-y-1.5">
-          <Label htmlFor="notes">Notes (optional)</Label>
+          <Label htmlFor="notes">{t("form.notes")}</Label>
           <Textarea
             id="notes"
             value={values.notes}
@@ -82,7 +84,7 @@ export function BookingForm({ rules, initial, submitting, onSubmit }: Props) {
       )}
 
       <Button type="submit" size="lg" className="w-full" disabled={submitting}>
-        {submitting ? "Reviewing..." : "Continue"}
+        {submitting ? t("form.reviewing") : t("form.continue")}
       </Button>
     </form>
   );

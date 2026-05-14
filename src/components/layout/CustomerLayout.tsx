@@ -3,11 +3,15 @@ import { useBusiness } from "@/hooks/useBusiness";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MusicControls } from "@/components/customer/MusicControls";
+import { LanguagePicker } from "@/components/customer/LanguagePicker";
 import { initials } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
+import { localizedCopy } from "@/lib/i18n";
 
 export function CustomerLayout() {
   const { slug } = useParams();
   const { data, isLoading, error } = useBusiness(slug);
+  const { locale } = useI18n();
 
   if (isLoading) {
     return (
@@ -29,7 +33,12 @@ export function CustomerLayout() {
     );
   }
 
-  const { business, config } = data;
+  const { business, config: rawConfig } = data;
+  // Apply locale-aware copy override (Arabic businesses see Arabic hero/CTA/etc.)
+  const config = {
+    ...rawConfig,
+    copy_json: localizedCopy(locale, rawConfig.copy_json, rawConfig.copy_json_ar),
+  };
 
   return (
     <ThemeProvider theme={config.theme_json}>
@@ -46,12 +55,15 @@ export function CustomerLayout() {
               )}
               <span className="font-semibold tracking-tight">{business.name}</span>
             </Link>
-            <Link
-              to={`/business/${business.slug}/book`}
-              className="rounded-full bg-accent px-4 py-1.5 text-xs font-medium text-accent-foreground shadow"
-            >
-              {config.copy_json.ctaText}
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguagePicker />
+              <Link
+                to={`/business/${business.slug}/book`}
+                className="rounded-full bg-accent px-4 py-1.5 text-xs font-medium text-accent-foreground shadow"
+              >
+                {config.copy_json.ctaText}
+              </Link>
+            </div>
           </div>
         </header>
         <main>

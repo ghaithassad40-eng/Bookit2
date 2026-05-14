@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { BusinessRow, CopyJson } from "@/lib/database.types";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Props {
   business: BusinessRow;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function Hero({ business, copy }: Props) {
+  const { dir } = useI18n();
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -38,11 +40,8 @@ export function Hero({ business, copy }: Props) {
             <Button size="lg" asChild>
               <Link to={`/business/${business.slug}/book`}>
                 {copy.ctaText}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className={dir === "rtl" ? "h-4 w-4 rotate-180" : "h-4 w-4"} />
               </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <a href="#services">Explore services</a>
             </Button>
           </div>
         </motion.div>

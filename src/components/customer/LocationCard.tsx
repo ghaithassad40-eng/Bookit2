@@ -17,6 +17,7 @@ import {
   type MapType,
 } from "@/lib/location";
 import type { BusinessRow } from "@/lib/database.types";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Props {
   business: BusinessRow;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function LocationCard({ business, compact = false }: Props) {
+  const { t } = useI18n();
   const loc = getLocation(business);
   const [mapType, setMapType] = useState<MapType>("m");
   if (!loc) return null;
@@ -85,7 +87,7 @@ export function LocationCard({ business, compact = false }: Props) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Find us
+              {t("common.findUs")}
             </div>
             <div className="mt-1.5 inline-flex items-start gap-2 text-sm">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />

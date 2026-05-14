@@ -102,6 +102,8 @@ export interface BusinessConfigRow {
   business_id: string;
   theme_json: ThemeJson;
   copy_json: CopyJson;
+  /** Optional Arabic translation of copy_json. Falls back to copy_json. */
+  copy_json_ar?: Partial<CopyJson> | null;
   booking_rules_json: BookingRulesJson;
   layout_json: LayoutJson;
   created_at: string;
