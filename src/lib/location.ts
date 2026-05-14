@@ -67,6 +67,51 @@ export function osmEmbedUrl(loc: BusinessLocation, deltaLat = 0.004, deltaLng = 
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${loc.lat},${loc.lng}`;
 }
 
+export type MapType = "m" | "k" | "h" | "p"; // map, satellite, hybrid, terrain
+
+/**
+ * Google Maps embed URL.
+ *
+ * Two modes:
+ *   - If VITE_GOOGLE_MAPS_KEY is set, uses the official Embed API which gives
+ *     us place details, satellite toggle, traffic layer, etc.
+ *   - Otherwise uses the public `output=embed` URL which works without a key
+ *     (covers ~95% of what customers need: pan, zoom, "View larger map"
+ *     button that opens Google Maps proper, native marker).
+ *
+ * Both options surface the standard Google Maps UI customers recognise.
+ */
+export function googleMapsEmbedUrl(
+  loc: BusinessLocation,
+  options: { zoom?: number; type?: MapType; label?: string } = {},
+): string {
+  const zoom = options.zoom ?? 16;
+  const type = options.type ?? "m";
+  const key = (typeof import.meta !== "undefined" &&
+    (import.meta as ImportMeta & { env?: ImportMetaEnv })?.env?.VITE_GOOGLE_MAPS_KEY) as
+    | string
+    | undefined;
+
+  if (key) {
+    // Official Embed API → richer UI, optional satellite toggle.
+    const q = encodeURIComponent(options.label ? `${options.label}` : `${loc.lat},${loc.lng}`);
+    const mapMode = type === "k" || type === "h" ? "&maptype=satellite" : "";
+    return `https://www.google.com/maps/embed/v1/place?key=${key}&q=${q}&center=${loc.lat},${loc.lng}&zoom=${zoom}${mapMode}`;
+  }
+
+  // No-key public embed. The pin and "View larger map" link are built-in.
+  const q = encodeURIComponent(`${loc.lat},${loc.lng}`);
+  return `https://www.google.com/maps?q=${q}&z=${zoom}&t=${type}&hl=en&output=embed`;
+}
+
+/** True when a Google Maps API key is configured (enables satellite toggle, etc.). */
+export function hasGoogleMapsKey(): boolean {
+  return Boolean(
+    typeof import.meta !== "undefined" &&
+      (import.meta as ImportMeta & { env?: ImportMetaEnv })?.env?.VITE_GOOGLE_MAPS_KEY,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Country / region helpers
 // ---------------------------------------------------------------------------

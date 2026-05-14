@@ -1,6 +1,8 @@
-import { ExternalLink, MapPin, Navigation, Phone } from "lucide-react";
+import { useState } from "react";
+import { ExternalLink, Layers, Map as MapIcon, MapPin, Navigation, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   appleMapsUrl,
   countryFlag,
@@ -8,9 +10,11 @@ import {
   fullAddress,
   getLocation,
   googleDirectionsUrl,
+  googleMapsEmbedUrl,
   googleMapsUrl,
-  osmEmbedUrl,
+  hasGoogleMapsKey,
   wazeUrl,
+  type MapType,
 } from "@/lib/location";
 import type { BusinessRow } from "@/lib/database.types";
 
@@ -22,23 +26,59 @@ interface Props {
 
 export function LocationCard({ business, compact = false }: Props) {
   const loc = getLocation(business);
+  const [mapType, setMapType] = useState<MapType>("m");
   if (!loc) return null;
 
   const directions = googleDirectionsUrl(loc);
   const search = googleMapsUrl(loc, business.name);
   const apple = appleMapsUrl(loc, business.name);
   const waze = wazeUrl(loc);
+  const embedUrl = googleMapsEmbedUrl(loc, { type: mapType, label: business.name });
+  const showSatToggle = hasGoogleMapsKey() || true; // public embed also supports t=k
 
   return (
-    <Card className={compact ? "" : "overflow-hidden"}>
-      {/* Map preview — OpenStreetMap iframe, no API key, no tracking */}
-      <div className={compact ? "aspect-[16/7]" : "aspect-[16/9]"}>
+    <Card className={compact ? "overflow-hidden" : "overflow-hidden"}>
+      {/* Map preview — Google Maps iframe (familiar UI, built-in pin + zoom + View Larger Map link) */}
+      <div className={cn("relative", compact ? "aspect-[16/7]" : "aspect-[16/9]")}>
         <iframe
-          title={`${business.name} location`}
-          src={osmEmbedUrl(loc)}
+          key={mapType}
+          title={`${business.name} on Google Maps`}
+          src={embedUrl}
           className="h-full w-full border-0"
           loading="lazy"
+          allow="geolocation; fullscreen"
+          referrerPolicy="no-referrer-when-downgrade"
         />
+        {showSatToggle && (
+          <div className="pointer-events-none absolute right-3 top-3 flex items-center gap-1">
+            <div className="pointer-events-auto inline-flex overflow-hidden rounded-lg border border-black/10 bg-white shadow-md">
+              <button
+                onClick={() => setMapType("m")}
+                className={cn(
+                  "inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium transition-colors",
+                  mapType === "m" ? "bg-black text-white" : "text-black/70 hover:bg-black/5",
+                )}
+                aria-pressed={mapType === "m"}
+                aria-label="Standard map"
+              >
+                <MapIcon className="h-3 w-3" />
+                Map
+              </button>
+              <button
+                onClick={() => setMapType("k")}
+                className={cn(
+                  "inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium transition-colors",
+                  mapType === "k" ? "bg-black text-white" : "text-black/70 hover:bg-black/5",
+                )}
+                aria-pressed={mapType === "k"}
+                aria-label="Satellite map"
+              >
+                <Layers className="h-3 w-3" />
+                Satellite
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <CardContent className={`space-y-4 ${compact ? "p-4" : "p-5"}`}>
