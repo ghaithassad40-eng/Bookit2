@@ -6,6 +6,7 @@ import type { BusinessRow, BusinessConfigRow } from "@/lib/database.types";
 import { supabase } from "@/lib/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonConfigEditor } from "@/components/admin/JsonConfigEditor";
+import { BrandGeneratorPanel } from "@/components/admin/BrandGeneratorPanel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,12 @@ export default function Settings() {
           Tune branding, copy, and booking rules. Changes apply instantly across the customer experience.
         </p>
       </header>
+
+      <BrandGeneratorPanel
+        business={business}
+        config={config}
+        onApplied={() => qc.invalidateQueries({ queryKey: ["business", business.slug] })}
+      />
 
       <Card>
         <CardHeader>

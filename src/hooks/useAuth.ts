@@ -19,6 +19,7 @@ export interface AuthState {
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   enterDemoMode: (email?: string) => DemoUser;
+  requestPasswordReset: (email: string) => Promise<{ error: Error | null }>;
 }
 
 export function useAuth(): AuthState {
@@ -79,8 +80,34 @@ export function useAuth(): AuthState {
         ),
       };
     }
+    if (password.length < 8) {
+      return { error: new Error("Password must be at least 8 characters.") };
+    }
     try {
       const { error } = await supabase.auth.signUp({ email, password });
+      return { error: error ?? null };
+    } catch (err) {
+      return { error: normalizeError(err) };
+    }
+  }
+
+  /**
+   * Sends a password reset email. The link points back to
+   * `${origin}/admin/reset-password` where the user sets a new one.
+   */
+  async function requestPasswordReset(email: string) {
+    if (!isSupabaseConfigured) {
+      return {
+        error: new Error(
+          "Supabase isn't connected. Password reset isn't available in demo mode.",
+        ),
+      };
+    }
+    try {
+      const redirectTo = typeof window !== "undefined"
+        ? `${window.location.origin}/admin/reset-password`
+        : undefined;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
       return { error: error ?? null };
     } catch (err) {
       return { error: normalizeError(err) };
@@ -112,6 +139,7 @@ export function useAuth(): AuthState {
     signUp,
     signOut,
     enterDemoMode,
+    requestPasswordReset,
   };
 }
 

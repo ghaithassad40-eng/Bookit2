@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import type { BookingRow, BusinessRow, BusinessConfigRow } from "@/lib/database.types";
 import { useBookings, useUpdateBookingStatus } from "@/hooks/useBookings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatDate, formatTime } from "@/lib/utils";
 import { toast } from "sonner";
+import { downloadCsv, toCsv } from "@/lib/csv";
 
 interface Ctx {
   business: BusinessRow;
@@ -86,8 +87,40 @@ export default function Bookings() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle>{data?.length ?? 0} results</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!data || data.length === 0}
+            onClick={() => {
+              if (!data || data.length === 0) return;
+              const rows = data.map((b) => ({
+                reference: b.booking_reference,
+                created_at: b.created_at,
+                customer_name: b.customer_name,
+                customer_email: b.customer_email ?? "",
+                customer_phone: b.customer_phone ?? "",
+                service_id: b.service_id,
+                staff_id: b.staff_id ?? "",
+                status: b.status,
+                payment_status: b.payment_status ?? "",
+                payment_method: b.payment_method ?? "",
+                payment_amount: b.payment_amount ?? "",
+                payment_currency: b.payment_currency ?? "",
+                payment_transaction_id: b.payment_transaction_id ?? "",
+                payout_status: b.payout_status ?? "",
+                notes: b.notes ?? "",
+              }));
+              const csv = toCsv(rows);
+              const stamp = new Date().toISOString().slice(0, 10);
+              downloadCsv(`${business.slug}-bookings-${stamp}.csv`, csv);
+              toast.success(`Exported ${rows.length} bookings`);
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
+          </Button>
         </CardHeader>
         <CardContent>
           {isLoading ? (

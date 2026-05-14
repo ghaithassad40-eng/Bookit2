@@ -13,13 +13,31 @@ import { isSupabaseConfigured } from "@/lib/supabase";
 import { DEMO_BUSINESSES } from "@/lib/demoData";
 
 export default function Login() {
-  const { signIn, signUp, user, demoUser, enterDemoMode } = useAuth();
+  const { signIn, signUp, user, demoUser, enterDemoMode, requestPasswordReset } = useAuth();
   const navigate = useNavigate();
   const { data: businesses } = useAdminBusinesses(user?.id ?? null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
+
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      toast.error("Enter your email above, then click 'Forgot password' again");
+      return;
+    }
+    setResetBusy(true);
+    try {
+      const { error } = await requestPasswordReset(email.trim());
+      if (error) throw error;
+      toast.success(`Reset link sent to ${email}. Check your inbox.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Reset failed");
+    } finally {
+      setResetBusy(false);
+    }
+  }
 
   // After auth, route to a workspace.
   useEffect(() => {
@@ -116,9 +134,15 @@ export default function Login() {
                       id={`${action}-pw`}
                       type="password"
                       autoComplete={action === "in" ? "current-password" : "new-password"}
+                      minLength={8}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
+                    {action === "up" && (
+                      <p className="text-[11px] text-muted-foreground">
+                        At least 8 characters.
+                      </p>
+                    )}
                   </div>
                   <Button
                     className="w-full"
@@ -127,6 +151,16 @@ export default function Login() {
                   >
                     {busy ? "Working…" : action === "in" ? "Sign in" : "Create account"}
                   </Button>
+                  {action === "in" && isSupabaseConfigured && (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={resetBusy}
+                      className="block w-full text-center text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"
+                    >
+                      {resetBusy ? "Sending reset link…" : "Forgot password?"}
+                    </button>
+                  )}
                   {!isSupabaseConfigured && (
                     <p className="text-center text-[11px] text-muted-foreground">
                       Sign-in is disabled without Supabase. Use the demo below.

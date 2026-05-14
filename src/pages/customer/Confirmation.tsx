@@ -20,9 +20,10 @@ import { Badge } from "@/components/ui/badge";
 import { PaymentBrandMark } from "@/components/customer/PaymentBrandMark";
 import { LocationCard } from "@/components/customer/LocationCard";
 import { getLocation } from "@/lib/location";
+import { downloadIcs } from "@/lib/calendar";
 import { PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payments";
 import { getLocalBookings } from "@/lib/localBookings";
-import { DEMO_SERVICES, DEMO_STAFF } from "@/lib/demoData";
+import { DEMO_SERVICES, DEMO_STAFF, generateDemoSlots } from "@/lib/demoData";
 import { formatCurrency, formatDate, formatTime, initials } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -63,6 +64,30 @@ export default function Confirmation() {
     if (!reference) return "—";
     return `INV-${reference.replace(/^BK-/, "")}`;
   }, [reference]);
+
+  // Resolve the slot's start/end times for the .ics download. In demo mode we
+  // regenerate the deterministic slot grid and match by id; in production this
+  // would be a JOIN against time_slots.
+  const slotTimes = useMemo(() => {
+    if (!booking?.business_id || !booking.slot_id) return null;
+    const slot = generateDemoSlots(booking.business_id).find((s) => s.id === booking.slot_id);
+    return slot ? { start: slot.start_time, end: slot.end_time } : null;
+  }, [booking?.business_id, booking?.slot_id]);
+
+  function handleAddToCalendar() {
+    if (!booking || !slotTimes) {
+      toast.error("Couldn't find the slot times to build the calendar event");
+      return;
+    }
+    downloadIcs({
+      booking,
+      business,
+      service,
+      staff,
+      start: slotTimes.start,
+      end: slotTimes.end,
+    });
+  }
 
   function handleCopy() {
     if (!reference) return;
@@ -240,14 +265,22 @@ export default function Confirmation() {
               )}
 
               {/* Calendar nudge */}
-              <div className="flex items-start gap-3 rounded-2xl border border-dashed border-border/60 p-4">
-                <Calendar className="mt-0.5 h-5 w-5 text-accent" />
-                <div className="text-sm">
-                  <div className="font-medium">Save the date</div>
-                  <div className="text-muted-foreground">
-                    Add this to your calendar so you don't miss it.
+              <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <Calendar className="mt-0.5 h-5 w-5 text-accent" />
+                  <div className="text-sm">
+                    <div className="font-medium">Save the date</div>
+                    <div className="text-muted-foreground">
+                      Add this to your calendar so you don't miss it.
+                    </div>
                   </div>
                 </div>
+                {slotTimes && (
+                  <Button variant="outline" size="sm" onClick={handleAddToCalendar} data-no-print>
+                    <Calendar className="h-3.5 w-3.5" />
+                    Add to calendar
+                  </Button>
+                )}
               </div>
 
               {/* Escrow protection note */}
