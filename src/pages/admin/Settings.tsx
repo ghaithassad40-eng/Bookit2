@@ -2,13 +2,13 @@ import { useOutletContext } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ShieldCheck, Wallet } from "lucide-react";
-import type { BusinessRow, BusinessConfigRow } from "@/lib/database.types";
+import type { BusinessRow, BusinessConfigRow, CopyJson } from "@/lib/database.types";
 import { supabase } from "@/lib/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonConfigEditor } from "@/components/admin/JsonConfigEditor";
 import { BrandGeneratorPanel } from "@/components/admin/BrandGeneratorPanel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input, Label } from "@/components/ui/input";
+import { Input, Label, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -22,6 +22,7 @@ interface Ctx {
 type ConfigKey =
   | "theme_json"
   | "copy_json"
+  | "copy_json_ar"
   | "booking_rules_json"
   | "layout_json";
 
@@ -250,12 +251,12 @@ export default function Settings() {
           />
         </TabsContent>
         <TabsContent value="copy">
-          <JsonConfigEditor
-            title="copy_json"
-            description="Hero, CTAs, confirmation messaging."
-            value={config.copy_json}
+          <CopyEditor
+            copy={config.copy_json}
+            copyAr={config.copy_json_ar ?? null}
             saving={saveJson.isPending}
-            onSave={(v) => saveJson.mutate({ key: "copy_json", value: v as object })}
+            onSaveEn={(v) => saveJson.mutate({ key: "copy_json", value: v })}
+            onSaveAr={(v) => saveJson.mutate({ key: "copy_json_ar", value: v })}
           />
         </TabsContent>
         <TabsContent value="rules">
@@ -287,5 +288,106 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <Label>{label}</Label>
       {children}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Copy editor — structured form for the 4 keys customer pages read from
+// copy_json (heroTitle / heroSubtitle / ctaText / confirmationMessage) with
+// paired Arabic inputs that write to copy_json_ar. Replaces the previous raw
+// JSON textarea so vendors can localise their hero copy without writing
+// JSON, and so the Arabic side actually has a UI.
+// ---------------------------------------------------------------------------
+
+interface CopyEditorProps {
+  copy: CopyJson;
+  copyAr: Partial<CopyJson> | null;
+  saving: boolean;
+  onSaveEn: (value: CopyJson) => void;
+  onSaveAr: (value: Partial<CopyJson>) => void;
+}
+
+const COPY_FIELDS: { key: keyof CopyJson; label: string; textarea?: boolean }[] = [
+  { key: "heroTitle", label: "Hero title" },
+  { key: "heroSubtitle", label: "Hero subtitle", textarea: true },
+  { key: "ctaText", label: "Primary CTA" },
+  { key: "confirmationMessage", label: "Confirmation message", textarea: true },
+];
+
+function CopyEditor({ copy, copyAr, saving, onSaveEn, onSaveAr }: CopyEditorProps) {
+  const [en, setEn] = useState<CopyJson>(copy);
+  const [ar, setAr] = useState<Partial<CopyJson>>(copyAr ?? {});
+
+  function set<K extends keyof CopyJson>(side: "en" | "ar", key: K, value: string) {
+    if (side === "en") setEn((prev) => ({ ...prev, [key]: value }));
+    else setAr((prev) => ({ ...prev, [key]: value }));
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Copy</CardTitle>
+        <CardDescription>
+          Hero, CTAs, and confirmation messaging. Arabic translations are
+          optional — the Arabic site falls back to the English value per field
+          when a translation is missing.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {COPY_FIELDS.map((f) => (
+          <div key={f.key} className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>{f.label} (English)</Label>
+              {f.textarea ? (
+                <Textarea
+                  value={en[f.key] ?? ""}
+                  onChange={(e) => set("en", f.key, e.target.value)}
+                />
+              ) : (
+                <Input
+                  value={en[f.key] ?? ""}
+                  onChange={(e) => set("en", f.key, e.target.value)}
+                />
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label>{f.label} (العربية)</Label>
+              {f.textarea ? (
+                <Textarea
+                  dir="rtl"
+                  value={ar[f.key] ?? ""}
+                  onChange={(e) => set("ar", f.key, e.target.value)}
+                  placeholder="ترجمة عربية اختيارية"
+                />
+              ) : (
+                <Input
+                  dir="rtl"
+                  value={ar[f.key] ?? ""}
+                  onChange={(e) => set("ar", f.key, e.target.value)}
+                  placeholder="ترجمة عربية اختيارية"
+                />
+              )}
+            </div>
+          </div>
+        ))}
+        <div className="flex justify-end">
+          <Button
+            disabled={saving}
+            onClick={() => {
+              onSaveEn(en);
+              // Strip empty AR fields so we don't ship blanks that override
+              // the English fallback unnecessarily.
+              const arPayload: Partial<CopyJson> = {};
+              for (const [k, v] of Object.entries(ar)) {
+                if (typeof v === "string" && v.trim()) arPayload[k as keyof CopyJson] = v;
+              }
+              onSaveAr(arPayload);
+            }}
+          >
+            {saving ? "Saving…" : "Save copy"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
