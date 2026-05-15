@@ -14,6 +14,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import Bookings from "@/pages/admin/Bookings";
 import Services from "@/pages/admin/Services";
+import Equipment from "@/pages/admin/Equipment";
 import Staff from "@/pages/admin/Staff";
 import Slots from "@/pages/admin/Slots";
 import Payouts from "@/pages/admin/Payouts";
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Dashboard /> },
       { path: "bookings", element: <Bookings /> },
       { path: "services", element: <Services /> },
+      { path: "equipment", element: <Equipment /> },
       { path: "staff", element: <Staff /> },
       { path: "slots", element: <Slots /> },
       { path: "payouts", element: <Payouts /> },
