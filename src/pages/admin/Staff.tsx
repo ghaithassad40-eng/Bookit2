@@ -50,11 +50,11 @@ export default function Staff() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Saved");
+      toast.success(t("admin.staff.toastSaved"));
       qc.invalidateQueries({ queryKey: ["staff", business.id] });
       setEditing(null);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Save failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.staff.toastSaveFailed")),
   });
 
   const remove = useMutation({
@@ -63,10 +63,10 @@ export default function Staff() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Deleted");
+      toast.success(t("admin.staff.toastDeleted"));
       qc.invalidateQueries({ queryKey: ["staff", business.id] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Delete failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.staff.toastDeleteFailed")),
   });
 
   return (
@@ -83,7 +83,9 @@ export default function Staff() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{staff?.length ?? 0} members</CardTitle>
+          <CardTitle>
+            {t("admin.staff.count").replace("{{count}}", String(staff?.length ?? 0))}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -116,15 +118,18 @@ export default function Staff() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Badge variant={p.is_active ? "success" : "secondary"}>
-                      {p.is_active ? "Active" : "Inactive"}
+                      {p.is_active ? t("admin.action.active") : t("admin.action.inactive")}
                     </Badge>
                     <Button variant="ghost" size="sm" onClick={() => setEditing(p)}>
-                      Edit
+                      {t("admin.action.edit")}
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => confirm(`Delete "${p.name}"?`) && remove.mutate(p.id)}
+                      onClick={() =>
+                        confirm(t("admin.staff.deleteConfirm").replace("{{name}}", p.name)) &&
+                        remove.mutate(p.id)
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -134,9 +139,9 @@ export default function Staff() {
             </div>
           ) : (
             <EmptyState
-              title="No staff yet"
-              description="Add team members so customers can book with their favorite specialist."
-              action={<Button onClick={() => setEditing(empty)}>Add staff</Button>}
+              title={t("admin.staff.empty")}
+              description={t("admin.staff.emptyBody")}
+              action={<Button onClick={() => setEditing(empty)}>{t("admin.staff.newBtn")}</Button>}
             />
           )}
         </CardContent>
@@ -145,48 +150,50 @@ export default function Staff() {
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing?.id ? "Edit staff" : "New staff"}</DialogTitle>
+            <DialogTitle>
+              {editing?.id ? t("admin.staff.dialogEdit") : t("admin.staff.dialogNew")}
+            </DialogTitle>
           </DialogHeader>
           {editing && (
             <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Name (English)">
+                <Field label={t("admin.staff.field.nameEn")}>
                   <Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
                 </Field>
-                <Field label="Name (العربية)">
+                <Field label={t("admin.staff.field.nameAr")}>
                   <Input
                     dir="rtl"
                     value={editing.name_ar ?? ""}
                     onChange={(e) => setEditing({ ...editing, name_ar: e.target.value })}
-                    placeholder="اختياري"
+                    placeholder={t("admin.staff.optional")}
                   />
                 </Field>
-                <Field label="Role (English)">
+                <Field label={t("admin.staff.field.roleEn")}>
                   <Input value={editing.role ?? ""} onChange={(e) => setEditing({ ...editing, role: e.target.value })} />
                 </Field>
-                <Field label="Role (العربية)">
+                <Field label={t("admin.staff.field.roleAr")}>
                   <Input
                     dir="rtl"
                     value={editing.role_ar ?? ""}
                     onChange={(e) => setEditing({ ...editing, role_ar: e.target.value })}
-                    placeholder="اختياري"
+                    placeholder={t("admin.staff.optional")}
                   />
                 </Field>
-                <Field label="Specialty (English)">
+                <Field label={t("admin.staff.field.specialtyEn")}>
                   <Input
                     value={editing.specialty ?? ""}
                     onChange={(e) => setEditing({ ...editing, specialty: e.target.value })}
                   />
                 </Field>
-                <Field label="Specialty (العربية)">
+                <Field label={t("admin.staff.field.specialtyAr")}>
                   <Input
                     dir="rtl"
                     value={editing.specialty_ar ?? ""}
                     onChange={(e) => setEditing({ ...editing, specialty_ar: e.target.value })}
-                    placeholder="اختياري"
+                    placeholder={t("admin.staff.optional")}
                   />
                 </Field>
-                <Field label="Rating">
+                <Field label={t("admin.staff.field.rating")}>
                   <Input
                     type="number"
                     step="0.01"
@@ -196,33 +203,33 @@ export default function Staff() {
                     onChange={(e) => setEditing({ ...editing, rating: Number(e.target.value) })}
                   />
                 </Field>
-                <Field label="Photo URL">
+                <Field label={t("admin.staff.field.photo")}>
                   <Input
                     value={editing.profile_photo_url ?? ""}
                     onChange={(e) => setEditing({ ...editing, profile_photo_url: e.target.value })}
                   />
                 </Field>
               </div>
-              <Field label="Bio (English)">
+              <Field label={t("admin.staff.field.bioEn")}>
                 <Textarea
                   value={editing.bio ?? ""}
                   onChange={(e) => setEditing({ ...editing, bio: e.target.value })}
                 />
               </Field>
-              <Field label="Bio (العربية)">
+              <Field label={t("admin.staff.field.bioAr")}>
                 <Textarea
                   dir="rtl"
                   value={editing.bio_ar ?? ""}
                   onChange={(e) => setEditing({ ...editing, bio_ar: e.target.value })}
-                  placeholder="اختياري"
+                  placeholder={t("admin.staff.optional")}
                 />
               </Field>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setEditing(null)}>{t("admin.action.cancel")}</Button>
             <Button disabled={upsert.isPending} onClick={() => editing && upsert.mutate(editing)}>
-              Save
+              {t("admin.action.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

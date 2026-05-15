@@ -56,11 +56,11 @@ export default function Services() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Saved");
+      toast.success(t("admin.services.toastSaved"));
       qc.invalidateQueries({ queryKey: ["services", business.id] });
       setEditing(null);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Save failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.services.toastSaveFailed")),
   });
 
   const remove = useMutation({
@@ -69,10 +69,10 @@ export default function Services() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Deleted");
+      toast.success(t("admin.services.toastDeleted"));
       qc.invalidateQueries({ queryKey: ["services", business.id] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Delete failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.services.toastDeleteFailed")),
   });
 
   const toggle = useMutation({
@@ -100,7 +100,9 @@ export default function Services() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{services?.length ?? 0} services</CardTitle>
+          <CardTitle>
+            {t("admin.services.count").replace("{{count}}", String(services?.length ?? 0))}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -118,24 +120,27 @@ export default function Services() {
                     <div>
                       <div className="font-medium">{s.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        {s.duration_minutes} min · {formatCurrency(s.price, s.currency)} · cap {s.capacity}
+                        {s.duration_minutes} {t("service.minutes")} · {formatCurrency(s.price, s.currency)} · {t("admin.services.cap")} {s.capacity}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={s.is_active ? "success" : "secondary"}>
-                      {s.is_active ? "Active" : "Inactive"}
+                      {s.is_active ? t("admin.action.active") : t("admin.action.inactive")}
                     </Badge>
                     <Button variant="ghost" size="sm" onClick={() => toggle.mutate(s)}>
-                      {s.is_active ? "Disable" : "Enable"}
+                      {s.is_active ? t("admin.action.disable") : t("admin.action.enable")}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setEditing(s)}>
-                      Edit
+                      {t("admin.action.edit")}
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => confirm(`Delete "${s.name}"?`) && remove.mutate(s.id)}
+                      onClick={() =>
+                        confirm(t("admin.services.deleteConfirm").replace("{{name}}", s.name)) &&
+                        remove.mutate(s.id)
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -145,9 +150,9 @@ export default function Services() {
             </ul>
           ) : (
             <EmptyState
-              title="No services yet"
-              description="Create your first bookable service to get started."
-              action={<Button onClick={() => setEditing(empty)}>Create service</Button>}
+              title={t("admin.services.empty")}
+              description={t("admin.services.emptyBody")}
+              action={<Button onClick={() => setEditing(empty)}>{t("admin.services.create")}</Button>}
             />
           )}
         </CardContent>
@@ -156,54 +161,56 @@ export default function Services() {
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing?.id ? "Edit service" : "New service"}</DialogTitle>
+            <DialogTitle>
+              {editing?.id ? t("admin.services.dialogEdit") : t("admin.services.dialogNew")}
+            </DialogTitle>
           </DialogHeader>
           {editing && (
             <div className="space-y-3">
-              <Field label="Name (English)">
+              <Field label={t("admin.services.field.nameEn")}>
                 <Input
                   value={editing.name ?? ""}
                   onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                 />
               </Field>
-              <Field label="Name (العربية)">
+              <Field label={t("admin.services.field.nameAr")}>
                 <Input
                   dir="rtl"
                   value={editing.name_ar ?? ""}
                   onChange={(e) => setEditing({ ...editing, name_ar: e.target.value })}
-                  placeholder="ترجمة عربية اختيارية"
+                  placeholder={t("admin.services.optionalAr")}
                 />
               </Field>
-              <Field label="Description (English)">
+              <Field label={t("admin.services.field.descEn")}>
                 <Textarea
                   value={editing.description ?? ""}
                   onChange={(e) => setEditing({ ...editing, description: e.target.value })}
                 />
               </Field>
-              <Field label="Description (العربية)">
+              <Field label={t("admin.services.field.descAr")}>
                 <Textarea
                   dir="rtl"
                   value={editing.description_ar ?? ""}
                   onChange={(e) => setEditing({ ...editing, description_ar: e.target.value })}
-                  placeholder="ترجمة عربية اختيارية"
+                  placeholder={t("admin.services.optionalAr")}
                 />
               </Field>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Duration (min)">
+                <Field label={t("admin.services.field.duration")}>
                   <Input
                     type="number"
                     value={editing.duration_minutes ?? 0}
                     onChange={(e) => setEditing({ ...editing, duration_minutes: Number(e.target.value) })}
                   />
                 </Field>
-                <Field label="Capacity">
+                <Field label={t("admin.services.field.capacity")}>
                   <Input
                     type="number"
                     value={editing.capacity ?? 1}
                     onChange={(e) => setEditing({ ...editing, capacity: Number(e.target.value) })}
                   />
                 </Field>
-                <Field label="Price">
+                <Field label={t("admin.services.field.price")}>
                   <Input
                     type="number"
                     step="0.01"
@@ -211,20 +218,20 @@ export default function Services() {
                     onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })}
                   />
                 </Field>
-                <Field label="Currency">
+                <Field label={t("admin.services.field.currency")}>
                   <Input
                     value={editing.currency ?? defaultCurrencyForCountry(business.country)}
                     onChange={(e) => setEditing({ ...editing, currency: e.target.value })}
                   />
                 </Field>
-                <Field label="Color">
+                <Field label={t("admin.services.field.color")}>
                   <Input
                     type="color"
                     value={editing.color ?? "#3B82F6"}
                     onChange={(e) => setEditing({ ...editing, color: e.target.value })}
                   />
                 </Field>
-                <Field label="Image URL">
+                <Field label={t("admin.services.field.image")}>
                   <Input
                     value={editing.image_url ?? ""}
                     onChange={(e) => setEditing({ ...editing, image_url: e.target.value })}
@@ -234,9 +241,9 @@ export default function Services() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setEditing(null)}>{t("admin.action.cancel")}</Button>
             <Button disabled={upsert.isPending} onClick={() => editing && upsert.mutate(editing)}>
-              Save
+              {t("admin.action.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
