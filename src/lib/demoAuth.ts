@@ -5,9 +5,17 @@
 
 const DEMO_USER_KEY = "bookit.demo.user";
 
+/** Bookit's RBAC has two operator-side roles:
+ *   vendor          — runs ONE business via /admin/:slug
+ *   platform_admin  — runs the marketplace via /admin/platform
+ * Customers don't have a role here — they use the separate customerAuth
+ * layer (no /admin access at all). */
+export type UserRole = "vendor" | "platform_admin";
+
 export interface DemoUser {
   id: string;
   email: string;
+  role: UserRole;
   createdAt: string;
   isDemo: true;
 }
@@ -28,11 +36,12 @@ export function getDemoUser(): DemoUser | null {
   }
 }
 
-export function setDemoUser(email: string): DemoUser {
+export function setDemoUser(email: string, role: UserRole = "vendor"): DemoUser {
   const w = safeWindow();
   const user: DemoUser = {
     id: `demo-${cryptoRandom()}`,
     email: email.trim().toLowerCase(),
+    role,
     createdAt: new Date().toISOString(),
     isDemo: true,
   };

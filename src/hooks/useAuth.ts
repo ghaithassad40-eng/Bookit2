@@ -7,18 +7,33 @@ import {
   onDemoAuthChange,
   setDemoUser,
   type DemoUser,
+  type UserRole,
 } from "@/lib/demoAuth";
+
+/** Resolved RBAC role for the active operator-side session.
+ *  - 'vendor' when the user manages a single business
+ *  - 'platform_admin' when the user runs the marketplace itself
+ *  - null when no operator-side session is active (customer-only mode)
+ *
+ *  In Supabase mode this is read from the user's `app_metadata.role` field
+ *  (set server-side); in demo mode it's stored on the DemoUser record. */
+export type ResolvedRole = UserRole | null;
 
 export interface AuthState {
   session: Session | null;
   user: User | null;
   demoUser: DemoUser | null;
   isDemoMode: boolean;
+  /** Resolved RBAC role, regardless of demo / real-Supabase mode. */
+  role: ResolvedRole;
+  isPlatformAdmin: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  enterDemoMode: (email?: string) => DemoUser;
+  /** Sign in as a demo operator. Defaults to 'vendor'; pass 'platform_admin'
+   *  to bootstrap a marketplace operator session in demo mode. */
+  enterDemoMode: (email?: string, role?: UserRole) => DemoUser;
   requestPasswordReset: (email: string) => Promise<{ error: Error | null }>;
 }
 
@@ -125,15 +140,24 @@ export function useAuth(): AuthState {
     clearDemoUser();
   }
 
-  function enterDemoMode(email = "demo@bookit.app"): DemoUser {
-    return setDemoUser(email);
+  function enterDemoMode(email = "demo@bookit.app", role: UserRole = "vendor"): DemoUser {
+    return setDemoUser(email, role);
   }
+
+  // Resolve role across both auth modes. Real Supabase puts role on
+  // app_metadata (server-controlled, can't be tampered with client-side);
+  // demo mode keeps it on the DemoUser record.
+  const supabaseRole =
+    (session?.user?.app_metadata?.role as UserRole | undefined) ?? null;
+  const role: ResolvedRole = demoUser?.role ?? supabaseRole;
 
   return {
     session,
     user: session?.user ?? null,
     demoUser,
     isDemoMode: !!demoUser,
+    role,
+    isPlatformAdmin: role === "platform_admin",
     loading,
     signIn,
     signUp,

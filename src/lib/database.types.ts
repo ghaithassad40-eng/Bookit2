@@ -69,6 +69,16 @@ export interface LayoutJson {
 // Row shapes
 // ---------------------------------------------------------------------------
 
+/**
+ * Marketplace approval state. New vendor signups start as `pending` and are
+ * invisible to customers until a platform admin approves the business.
+ *   pending    — admin hasn't reviewed yet; hidden from public surfaces
+ *   approved   — live and bookable
+ *   suspended  — taken down by platform (fraud, policy, etc.); hidden
+ *   rejected   — admin rejected at signup; hidden + reason shown to vendor
+ */
+export type BusinessStatus = "pending" | "approved" | "suspended" | "rejected";
+
 export interface BusinessRow {
   id: string;
   name: string;
@@ -79,6 +89,12 @@ export interface BusinessRow {
   logo_url: string | null;
   owner_id: string | null;
   is_active: boolean;
+  /** Marketplace approval state. Optional for back-compat — rows without
+   *  this column are treated as `approved` so existing prod data isn't
+   *  silently hidden. New rows must set it. */
+  status?: BusinessStatus;
+  /** Free-form admin note shown to the vendor when status is `rejected`. */
+  rejection_reason?: string | null;
   // Location (optional — older rows can have null)
   address: string | null;
   city: string | null;

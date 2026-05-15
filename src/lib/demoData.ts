@@ -43,6 +43,14 @@ const DEFAULT_ESCROW = {
   payout_provider: "myfatoorah" as string,
 };
 
+// All 8 seed businesses ship pre-approved so the existing demo flow is
+// unaffected. Production vendor signups will start as `pending` instead and
+// only flip to `approved` after a platform admin reviews them.
+const DEFAULT_APPROVAL = {
+  status: "approved" as const,
+  rejection_reason: null as string | null,
+};
+
 export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-pulse",
@@ -54,6 +62,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     address: "Block 4, Salem Al-Mubarak Street",
     city: "Salmiya",
@@ -75,6 +84,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     address: "Olympia Mall, Ground Floor",
     city: "Salmiya",
@@ -95,6 +105,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     address: "Beirut Street, Al-Bahr Tower, 3rd Floor",
     city: "Hawalli",
@@ -115,6 +126,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     address: "Block 6, Mishref Co-op Roundabout",
     city: "Mishref",
@@ -136,6 +148,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     address: "Block 11, Sport Club Street",
     city: "Salmiya",
@@ -157,6 +170,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     address: "Tunis Street, Hawalli Sports Complex",
     city: "Hawalli",
@@ -177,6 +191,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     // Padel Point operates in Salmiya, Kuwait — KWD denominated, +965 line.
     address: "Salem Al-Mubarak Street, Salmiya",
@@ -199,6 +214,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     owner_id: null,
     is_active: true,
     ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
     ...NULL_LOCATION,
     address: "Sheikh Zayed Road, Al Quoz 2",
     city: "Dubai",
