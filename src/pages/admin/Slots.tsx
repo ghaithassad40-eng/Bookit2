@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatTime, groupBy } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
+import type { TranslationKey } from "@/lib/i18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -61,11 +62,11 @@ export default function Slots() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Slot created");
+      toast.success(t("admin.slots.toastCreated"));
       qc.invalidateQueries({ queryKey: ["slots", business.id] });
       setOpen(false);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Create failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.slots.toastCreateFailed")),
   });
 
   const updateStatus = useMutation({
@@ -96,7 +97,7 @@ export default function Slots() {
           {isLoading ? (
             <Skeleton className="h-40 w-full" />
           ) : Object.keys(grouped).length === 0 ? (
-            <EmptyState title="No slots scheduled" />
+            <EmptyState title={t("admin.slots.empty")} />
           ) : (
             Object.entries(grouped).map(([day, daySlots]) => (
               <div key={day}>
@@ -120,7 +121,9 @@ export default function Slots() {
                           {svc ? svc.name : t("admin.slots.anyService")}
                           {stf ? ` · ${stf.name}` : ""}
                           {" · "}
-                          {s.booked_count}/{s.capacity} booked
+                          {t("admin.slots.bookedFraction")
+                            .replace("{{booked}}", String(s.booked_count))
+                            .replace("{{capacity}}", String(s.capacity))}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -135,7 +138,7 @@ export default function Slots() {
                               : "secondary"
                           }
                         >
-                          {s.status}
+                          {t(`admin.slots.status.${s.status}` as TranslationKey)}
                         </Badge>
                         <Button
                           size="sm"
@@ -147,7 +150,9 @@ export default function Slots() {
                             })
                           }
                         >
-                          {s.status === "open" ? "Close" : "Open"}
+                          {s.status === "open"
+                            ? t("admin.slots.action.close")
+                            : t("admin.slots.action.open")}
                         </Button>
                       </div>
                     </div>
@@ -163,49 +168,49 @@ export default function Slots() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New slot</DialogTitle>
+            <DialogTitle>{t("admin.slots.dialogNew")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <Field label="Service">
+            <Field label={t("admin.slots.field.service")}>
               <select
                 className="flex h-11 w-full rounded-xl border border-border bg-background/50 px-3 text-sm"
                 value={draft.service_id}
                 onChange={(e) => setDraft({ ...draft, service_id: e.target.value })}
               >
-                <option value="">— Any —</option>
+                <option value="">{t("admin.slots.field.any")}</option>
                 {services?.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
             </Field>
-            <Field label="Staff">
+            <Field label={t("admin.slots.field.staff")}>
               <select
                 className="flex h-11 w-full rounded-xl border border-border bg-background/50 px-3 text-sm"
                 value={draft.staff_id}
                 onChange={(e) => setDraft({ ...draft, staff_id: e.target.value })}
               >
-                <option value="">— Any —</option>
+                <option value="">{t("admin.slots.field.any")}</option>
                 {staff?.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </Field>
             <div className="grid grid-cols-3 gap-3">
-              <Field label="Date">
+              <Field label={t("admin.slots.field.date")}>
                 <Input
                   type="date"
                   value={draft.date}
                   onChange={(e) => setDraft({ ...draft, date: e.target.value })}
                 />
               </Field>
-              <Field label="Start">
+              <Field label={t("admin.slots.field.start")}>
                 <Input
                   type="time"
                   value={draft.start}
                   onChange={(e) => setDraft({ ...draft, start: e.target.value })}
                 />
               </Field>
-              <Field label="End">
+              <Field label={t("admin.slots.field.end")}>
                 <Input
                   type="time"
                   value={draft.end}
@@ -213,7 +218,7 @@ export default function Slots() {
                 />
               </Field>
             </div>
-            <Field label="Capacity">
+            <Field label={t("admin.slots.field.capacity")}>
               <Input
                 type="number"
                 min={1}
@@ -223,9 +228,9 @@ export default function Slots() {
             </Field>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>{t("admin.action.cancel")}</Button>
             <Button disabled={create.isPending} onClick={() => create.mutate()}>
-              Create
+              {t("admin.slots.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
