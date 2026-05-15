@@ -4,8 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { ServiceRow } from "@/lib/database.types";
+import { useMemo } from "react";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { useI18n } from "@/hooks/useI18n";
+import { useRegion } from "@/hooks/useRegion";
 import { pickLocale } from "@/lib/i18n";
 
 interface Props {
@@ -16,10 +18,15 @@ interface Props {
 
 export function ServiceCard({ service, selected, onSelect }: Props) {
   const { format } = useDisplayCurrency();
-  const { locale, t } = useI18n();
+  const { locale, t, intl } = useI18n();
+  const { country } = useRegion();
   const price = format(service.price, service.currency);
   const name = pickLocale(locale, service.name, service.name_ar);
   const description = pickLocale(locale, service.description, service.description_ar);
+  const numberFmt = useMemo(
+    () => new Intl.NumberFormat(intl(country && country !== "ALL" ? country : null)),
+    [intl, country],
+  );
   return (
     <motion.button
       type="button"
@@ -60,12 +67,12 @@ export function ServiceCard({ service, selected, onSelect }: Props) {
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Badge variant="outline" className="gap-1">
               <Clock className="h-3 w-3" />
-              {service.duration_minutes} {t("service.minutes")}
+              {numberFmt.format(service.duration_minutes)} {t("service.minutes")}
             </Badge>
             {service.capacity > 1 && (
               <Badge variant="outline" className="gap-1">
                 <Users className="h-3 w-3" />
-                {t("service.upTo")} {service.capacity}
+                {t("service.upTo")} {numberFmt.format(service.capacity)}
               </Badge>
             )}
           </div>
