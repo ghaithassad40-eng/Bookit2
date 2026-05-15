@@ -136,6 +136,22 @@ const STRINGS_EN = {
   "lang.language": "Language",
   "lang.switchTo": "Switch to",
 
+  // booking cancel + refund
+  "booking.cancel": "Cancel booking",
+  "booking.cancelConfirmTitle": "Cancel this booking?",
+  "booking.cancelConfirmBody":
+    "Your slot will be released. If you've paid, we'll refund the full amount to your original payment method — it can take 3–7 business days to land back in your account.",
+  "booking.cancelKeep": "Keep booking",
+  "booking.cancelConfirm": "Yes, cancel & refund",
+  "booking.cancelling": "Cancelling…",
+  "booking.cancelled": "Booking cancelled",
+  "booking.cancelledBody":
+    "Your slot has been released. Your reference is still valid for your records.",
+  "booking.refundIssued": "Refund issued",
+  "booking.refundIssuedBody":
+    "We've sent the refund to your original payment method. Expect it in 3–7 business days.",
+  "booking.cancelFailed": "Could not cancel the booking",
+
   // landing page sections
   "landing.services": "Services",
   "landing.servicesSubtitle": "Pick one and book in under a minute.",
@@ -266,6 +282,21 @@ const STRINGS_AR: Record<TranslationKey, string> = {
 
   "lang.language": "اللغة",
   "lang.switchTo": "التبديل إلى",
+
+  "booking.cancel": "إلغاء الحجز",
+  "booking.cancelConfirmTitle": "هل تريد إلغاء هذا الحجز؟",
+  "booking.cancelConfirmBody":
+    "سيتم تحرير موعدك. إذا كنت قد دفعت، سنُعيد المبلغ كاملاً إلى طريقة الدفع الأصلية — قد يستغرق ذلك من ٣ إلى ٧ أيام عمل ليصل إلى حسابك.",
+  "booking.cancelKeep": "الإبقاء على الحجز",
+  "booking.cancelConfirm": "نعم، ألغِ واسترد المبلغ",
+  "booking.cancelling": "جارٍ الإلغاء…",
+  "booking.cancelled": "تم إلغاء الحجز",
+  "booking.cancelledBody":
+    "تم تحرير موعدك. الرقم المرجعي ما زال صالحاً لسجلاتك.",
+  "booking.refundIssued": "تم استرداد المبلغ",
+  "booking.refundIssuedBody":
+    "أرسلنا المبلغ إلى طريقة الدفع الأصلية. توقّع وصوله خلال ٣ إلى ٧ أيام عمل.",
+  "booking.cancelFailed": "تعذّر إلغاء الحجز",
 
   "landing.services": "الخدمات",
   "landing.servicesSubtitle": "اختر واحدة واحجز خلال أقل من دقيقة.",

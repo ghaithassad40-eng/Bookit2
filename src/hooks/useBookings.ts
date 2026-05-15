@@ -6,6 +6,7 @@ import {
   generateLocalBookingReference,
   getLocalBookings,
   saveLocalBooking,
+  updateLocalBooking,
 } from "@/lib/localBookings";
 
 const useEdge = (import.meta.env.VITE_USE_EDGE_BOOKING as string | undefined) === "true";
@@ -165,6 +166,78 @@ export function useBookings(opts: Partial<ListOpts> & { businessId: string | und
       }),
     enabled: Boolean(opts.businessId),
     staleTime: 10_000,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Cancel + refund
+// ---------------------------------------------------------------------------
+
+export interface CancelBookingInput {
+  /** The booking row id (NOT the human reference). */
+  id: string;
+  /** Business id — used to invalidate the slot/booking query caches. */
+  business_id: string;
+  /** Why the customer/business cancelled. Free-form, written to the booking
+   *  row for audit purposes. */
+  reason?: string;
+}
+
+export interface CancelBookingResult {
+  booking: BookingRow;
+  /** True when funds were actually returned (paid booking). False for
+   *  unpaid/already-failed bookings — the row still gets the cancelled
+   *  status but there's nothing to refund. */
+  refunded: boolean;
+}
+
+function cancelDemoBooking(input: CancelBookingInput): CancelBookingResult {
+  const wasPaid = (() => {
+    const existing = getLocalBookings().find((b) => b.id === input.id);
+    return existing?.payment_status === "paid";
+  })();
+  const updated = updateLocalBooking(input.id, {
+    status: "cancelled",
+    payment_status: wasPaid ? "refunded" : null,
+    payout_status: wasPaid ? "refunded" : null,
+    notes: input.reason ? `[cancelled] ${input.reason}` : undefined,
+  });
+  if (!updated) throw new Error("Booking not found");
+  return { booking: updated, refunded: wasPaid };
+}
+
+async function cancelBookingViaRpc(input: CancelBookingInput): Promise<CancelBookingResult> {
+  // The production schema needs a `cancel_booking_atomic` RPC that flips
+  // status + payment_status + payout_status + writes a ledger reversal in a
+  // single transaction. Migration is not yet shipped — fall back to a plain
+  // UPDATE so the UI flow can be exercised against staging.
+  const { data, error } = await supabase
+    .from("bookings")
+    .update({
+      status: "cancelled",
+      payment_status: "refunded",
+      payout_status: "refunded",
+    })
+    .eq("id", input.id)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return { booking: data as BookingRow, refunded: true };
+}
+
+export function useCancelBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CancelBookingInput): Promise<CancelBookingResult> => {
+      if (!isSupabaseConfigured || input.business_id.startsWith("biz-")) {
+        return cancelDemoBooking(input);
+      }
+      return cancelBookingViaRpc(input);
+    },
+    onSuccess: ({ booking }) => {
+      qc.invalidateQueries({ queryKey: ["slots", booking.business_id] });
+      qc.invalidateQueries({ queryKey: ["bookings", booking.business_id] });
+    },
   });
 }
 

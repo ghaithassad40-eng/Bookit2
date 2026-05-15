@@ -8,15 +8,26 @@ import {
   Clock,
   Copy,
   Hash,
+  Loader2,
   Printer,
   Receipt,
   ShieldCheck,
   Sparkles,
+  XCircle,
 } from "lucide-react";
-import type { BusinessRow, BusinessConfigRow } from "@/lib/database.types";
+import type { BookingRow, BusinessRow, BusinessConfigRow } from "@/lib/database.types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { PaymentBrandMark } from "@/components/customer/PaymentBrandMark";
 import { LocationCard } from "@/components/customer/LocationCard";
 import { getLocation } from "@/lib/location";
@@ -25,6 +36,8 @@ import { PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payments";
 import { getLocalBookings } from "@/lib/localBookings";
 import { DEMO_SERVICES, DEMO_STAFF, generateDemoSlots } from "@/lib/demoData";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
+import { useCancelBooking } from "@/hooks/useBookings";
+import { useI18n } from "@/hooks/useI18n";
 import { formatCurrency, formatDate, formatTime, initials } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -38,12 +51,22 @@ export default function Confirmation() {
   const [params] = useSearchParams();
   const reference = params.get("ref");
   const [copied, setCopied] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  // Locally overlay the booking status so the UI updates instantly after a
+  // successful cancel, without having to refetch from localStorage.
+  const [overlay, setOverlay] = useState<Partial<BookingRow> | null>(null);
   const { format: formatDisplay } = useDisplayCurrency();
+  const { t } = useI18n();
+  const cancelMutation = useCancelBooking();
 
-  const booking = useMemo(
+  const baseBooking = useMemo(
     () => (reference ? getLocalBookings().find((b) => b.booking_reference === reference) ?? null : null),
     [reference],
   );
+  const booking = baseBooking ? ({ ...baseBooking, ...overlay } as BookingRow) : null;
+
+  const isCancelled = booking?.status === "cancelled";
+  const canCancel = booking && !isCancelled;
 
   // Resolve service + staff for receipt context (works in demo + when row is local).
   const service = useMemo(
@@ -103,6 +126,25 @@ export default function Confirmation() {
     window.print();
   }
 
+  async function handleCancel() {
+    if (!booking) return;
+    try {
+      const result = await cancelMutation.mutateAsync({
+        id: booking.id,
+        business_id: booking.business_id,
+      });
+      setOverlay({
+        status: result.booking.status,
+        payment_status: result.booking.payment_status,
+        payout_status: result.booking.payout_status,
+      });
+      setCancelOpen(false);
+      toast.success(result.refunded ? t("booking.refundIssued") : t("booking.cancelled"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("booking.cancelFailed"));
+    }
+  }
+
   return (
     <>
       <style>{`
@@ -124,19 +166,43 @@ export default function Confirmation() {
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", damping: 16, stiffness: 220, delay: 0.1 }}
-            className="mx-auto mb-5 grid h-20 w-20 place-items-center rounded-full bg-emerald-500/15 text-emerald-500 ring-8 ring-emerald-500/5"
+            className={
+              isCancelled
+                ? "mx-auto mb-5 grid h-20 w-20 place-items-center rounded-full bg-rose-500/15 text-rose-500 ring-8 ring-rose-500/5"
+                : "mx-auto mb-5 grid h-20 w-20 place-items-center rounded-full bg-emerald-500/15 text-emerald-500 ring-8 ring-emerald-500/5"
+            }
           >
-            <CheckCircle2 className="h-10 w-10" />
+            {isCancelled ? <XCircle className="h-10 w-10" /> : <CheckCircle2 className="h-10 w-10" />}
           </motion.div>
-          <Badge variant="success" className="mb-3 px-3 py-1 text-xs">
-            Booking confirmed
-          </Badge>
-          <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-            {config.copy_json.confirmationMessage}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            We've emailed a copy of this invoice to you{booking?.customer_email ? ` at ${booking.customer_email}` : ""}.
-          </p>
+          {isCancelled ? (
+            <>
+              <Badge variant="destructive" className="mb-3 px-3 py-1 text-xs">
+                {t("booking.cancelled")}
+              </Badge>
+              <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+                {booking?.payment_status === "refunded"
+                  ? t("booking.refundIssued")
+                  : t("booking.cancelled")}
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {booking?.payment_status === "refunded"
+                  ? t("booking.refundIssuedBody")
+                  : t("booking.cancelledBody")}
+              </p>
+            </>
+          ) : (
+            <>
+              <Badge variant="success" className="mb-3 px-3 py-1 text-xs">
+                Booking confirmed
+              </Badge>
+              <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+                {config.copy_json.confirmationMessage}
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                We've emailed a copy of this invoice to you{booking?.customer_email ? ` at ${booking.customer_email}` : ""}.
+              </p>
+            </>
+          )}
         </motion.div>
 
         {/* Invoice card */}
@@ -320,7 +386,18 @@ export default function Confirmation() {
                 <Sparkles className="h-3.5 w-3.5" />
                 Powered by Bookit
               </div>
-              <div className="flex items-center gap-2" data-no-print>
+              <div className="flex flex-wrap items-center gap-2" data-no-print>
+                {canCancel && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCancelOpen(true)}
+                    className="border-rose-500/30 text-rose-600 hover:bg-rose-500/5 dark:text-rose-300"
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                    {t("booking.cancel")}
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={handlePrint}>
                   <Printer className="h-3.5 w-3.5" /> Print invoice
                 </Button>
@@ -352,6 +429,43 @@ export default function Confirmation() {
           </Button>
         </div>
       </div>
+
+      {/* Cancel confirmation dialog */}
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-rose-500/15 text-rose-500">
+              <XCircle className="h-5 w-5" />
+            </div>
+            <DialogTitle>{t("booking.cancelConfirmTitle")}</DialogTitle>
+            <DialogDescription>{t("booking.cancelConfirmBody")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={cancelMutation.isPending}>
+                {t("booking.cancelKeep")}
+              </Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={cancelMutation.isPending}
+            >
+              {cancelMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t("booking.cancelling")}
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4" />
+                  {t("booking.cancelConfirm")}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

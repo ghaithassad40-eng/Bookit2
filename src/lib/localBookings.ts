@@ -20,6 +20,28 @@ export function saveLocalBooking(booking: BookingRow): void {
   window.localStorage.setItem(KEY, JSON.stringify(list));
 }
 
+/**
+ * Patch an existing local booking by id. Returns the updated row, or null if
+ * no booking with that id exists.
+ */
+export function updateLocalBooking(
+  id: string,
+  patch: Partial<BookingRow>,
+): BookingRow | null {
+  if (typeof window === "undefined") return null;
+  const list = getLocalBookings();
+  const idx = list.findIndex((b) => b.id === id);
+  if (idx === -1) return null;
+  const updated: BookingRow = {
+    ...list[idx],
+    ...patch,
+    updated_at: new Date().toISOString(),
+  };
+  list[idx] = updated;
+  window.localStorage.setItem(KEY, JSON.stringify(list));
+  return updated;
+}
+
 export function generateLocalBookingReference(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let out = "";
