@@ -14,25 +14,33 @@ import { EmptyState } from "@/components/ui/empty";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { defaultCurrencyForCountry } from "@/lib/location";
 
 interface Ctx {
   business: BusinessRow;
   config: BusinessConfigRow;
 }
 
-const empty: Partial<ServiceRow> = {
-  name: "",
-  description: "",
-  duration_minutes: 60,
-  price: 50,
-  currency: "USD",
-  capacity: 1,
-  color: "#3B82F6",
-  is_active: true,
-};
+function buildEmptyService(country: string | null | undefined): Partial<ServiceRow> {
+  return {
+    name: "",
+    name_ar: "",
+    description: "",
+    description_ar: "",
+    duration_minutes: 60,
+    price: 50,
+    // Default the currency to the business's country so a KW vendor doesn't
+    // have to manually edit every new service away from USD.
+    currency: defaultCurrencyForCountry(country),
+    capacity: 1,
+    color: "#3B82F6",
+    is_active: true,
+  };
+}
 
 export default function Services() {
   const { business } = useOutletContext<Ctx>();
+  const empty = buildEmptyService(business.country);
   const { data: services, isLoading } = useServices(business.id, { onlyActive: false });
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Partial<ServiceRow> | null>(null);
@@ -150,16 +158,32 @@ export default function Services() {
           </DialogHeader>
           {editing && (
             <div className="space-y-3">
-              <Field label="Name">
+              <Field label="Name (English)">
                 <Input
                   value={editing.name ?? ""}
                   onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                 />
               </Field>
-              <Field label="Description">
+              <Field label="Name (العربية)">
+                <Input
+                  dir="rtl"
+                  value={editing.name_ar ?? ""}
+                  onChange={(e) => setEditing({ ...editing, name_ar: e.target.value })}
+                  placeholder="ترجمة عربية اختيارية"
+                />
+              </Field>
+              <Field label="Description (English)">
                 <Textarea
                   value={editing.description ?? ""}
                   onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                />
+              </Field>
+              <Field label="Description (العربية)">
+                <Textarea
+                  dir="rtl"
+                  value={editing.description_ar ?? ""}
+                  onChange={(e) => setEditing({ ...editing, description_ar: e.target.value })}
+                  placeholder="ترجمة عربية اختيارية"
                 />
               </Field>
               <div className="grid grid-cols-2 gap-3">
@@ -187,7 +211,7 @@ export default function Services() {
                 </Field>
                 <Field label="Currency">
                   <Input
-                    value={editing.currency ?? "USD"}
+                    value={editing.currency ?? defaultCurrencyForCountry(business.country)}
                     onChange={(e) => setEditing({ ...editing, currency: e.target.value })}
                   />
                 </Field>
