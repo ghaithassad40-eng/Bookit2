@@ -11,6 +11,7 @@ import {
   Heart,
   Leaf,
   MessageSquare,
+  Package,
   Scissors,
   Sparkles,
   Stethoscope,
@@ -20,6 +21,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { AIConcierge } from "@/components/customer/AIConcierge";
+import { EquipmentSearchDialog } from "@/components/customer/EquipmentSearchDialog";
 import { WelcomePicker } from "@/components/customer/WelcomePicker";
 import { RegionPill } from "@/components/customer/RegionPill";
 import { SocialProof } from "@/components/customer/SocialProof";
@@ -47,6 +49,7 @@ const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>
 };
 
 export default function Home() {
+  const [equipmentSearchOpen, setEquipmentSearchOpen] = useState(false);
   const [allBusinesses, setAllBusinesses] = useState<BusinessRow[] | null>(null);
   const { country, setCountry } = useRegion();
   const { locale, t } = useI18n();
@@ -92,6 +95,12 @@ export default function Home() {
     <div className="relative min-h-screen overflow-hidden bg-[#0a0a0f] text-white">
       {/* First-visit country + language prompt */}
       <WelcomePicker />
+
+      {/* AI-powered equipment search ("find me a vendor with a 4K monitor") */}
+      <EquipmentSearchDialog
+        open={equipmentSearchOpen}
+        onOpenChange={setEquipmentSearchOpen}
+      />
 
       {/* ambient background */}
       <div className="pointer-events-none absolute inset-0">
@@ -214,6 +223,19 @@ export default function Home() {
               </p>
             </div>
             <AIConcierge />
+
+            {/* AI equipment search — "find me a vendor with this gear" */}
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setEquipmentSearchOpen(true)}
+                className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white/80 backdrop-blur transition-all hover:bg-white/[0.08] hover:text-white"
+              >
+                <Package className="h-3.5 w-3.5 text-emerald-300 transition-transform group-hover:scale-110" />
+                {t("home.equipmentSearchCta")}
+                <ArrowRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
