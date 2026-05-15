@@ -25,6 +25,8 @@ import { charge, resolvePaymentMethodsForCustomer, type PaymentRequest, type Pay
 import { useI18n } from "@/hooks/useI18n";
 import { useRegion } from "@/hooks/useRegion";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { CustomerAuthDialog } from "@/components/customer/CustomerAuthDialog";
 import {
   MYFATOORAH_ENABLED,
   initiateMyFatoorahPayment,
@@ -55,6 +57,26 @@ export default function Book() {
   const requirePayment = rules.requirePayment !== false;
   const { country: customerCountry } = useRegion();
   const enabled = resolvePaymentMethodsForCustomer(rules, customerCountry);
+
+  // Customer auth gate — payment is only reachable after sign-in/sign-up.
+  // The Details step stays anonymous so the customer can fill out their
+  // info first and then authenticate when they see the cost on Review.
+  const { customer: authedCustomer } = useCustomerAuth();
+  const [authOpen, setAuthOpen] = useState(false);
+
+  // If the customer is already signed in (returning user) and the Details
+  // form is empty, pre-fill it from their profile so they're not asked to
+  // type the same info again.
+  useEffect(() => {
+    if (!authedCustomer) return;
+    if (customer.name || customer.email || customer.phone) return;
+    setCustomer({
+      name: authedCustomer.name,
+      email: authedCustomer.email,
+      phone: authedCustomer.phone ?? "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authedCustomer]);
   const reference = `BK-${slot?.id?.slice(-6).toUpperCase() ?? "PENDING"}`;
 
   const { data: services, isLoading: loadingSvc } = useServices(business.id);
@@ -101,11 +123,31 @@ export default function Book() {
   }
 
   function handleReviewContinue() {
+    // Gate: paid bookings require the customer to be signed in. Free
+    // bookings (requirePayment === false) skip the gate since there's no
+    // financial transaction.
+    if (requirePayment && !authedCustomer) {
+      setAuthOpen(true);
+      return;
+    }
     if (requirePayment) {
       setStep("payment");
     } else {
       void finalizeBooking(null);
     }
+  }
+
+  // After successful auth, write the authenticated profile into the booking
+  // state (so the Payment step + final booking row carry the verified
+  // identity), close the dialog, and advance the wizard to Payment.
+  function handleAuthSuccess(profile: { name: string; email: string; phone: string | null }) {
+    setCustomer({
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone ?? "",
+    });
+    setAuthOpen(false);
+    setStep("payment");
   }
 
   // When MyFatoorah is enabled (real or demo mock), redirect to the hosted
@@ -368,6 +410,23 @@ export default function Book() {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Customer auth gate — opens when the customer hits 'Continue to
+          payment' on the Review step while not signed in. */}
+      <CustomerAuthDialog
+        open={authOpen}
+        onOpenChange={setAuthOpen}
+        prefillName={customer.name}
+        prefillEmail={customer.email}
+        prefillPhone={customer.phone}
+        onAuthSuccess={(profile) =>
+          handleAuthSuccess({
+            name: profile.name,
+            email: profile.email,
+            phone: profile.phone,
+          })
+        }
+      />
     </div>
   );
 }

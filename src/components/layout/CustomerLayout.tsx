@@ -6,12 +6,15 @@ import { MusicControls } from "@/components/customer/MusicControls";
 import { LanguagePicker } from "@/components/customer/LanguagePicker";
 import { initials } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { localizedCopy, pickLocale } from "@/lib/i18n";
+import { LogOut, UserCircle2 } from "lucide-react";
 
 export function CustomerLayout() {
   const { slug } = useParams();
   const { data, isLoading, error } = useBusiness(slug);
   const { locale, t } = useI18n();
+  const { customer, signOut } = useCustomerAuth();
 
   if (isLoading) {
     return (
@@ -57,6 +60,22 @@ export function CustomerLayout() {
               <span className="font-semibold tracking-tight">{businessName}</span>
             </Link>
             <div className="flex items-center gap-2">
+              {customer && (
+                <div
+                  className="hidden items-center gap-1.5 rounded-full border border-border bg-card/60 px-2.5 py-1 text-xs sm:inline-flex"
+                  title={`${t("customerAuth.signedInAs")} ${customer.email}`}
+                >
+                  <UserCircle2 className="h-3.5 w-3.5 text-accent" />
+                  <span className="max-w-[120px] truncate">{customer.name}</span>
+                  <button
+                    onClick={signOut}
+                    aria-label={t("customerAuth.signOut")}
+                    className="ms-1 text-muted-foreground hover:text-foreground"
+                  >
+                    <LogOut className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
               <LanguagePicker />
               <Link
                 to={`/business/${business.slug}/book`}

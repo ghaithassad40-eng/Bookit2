@@ -519,6 +519,29 @@ const STRINGS_EN = {
   "lang.language": "Language",
   "lang.switchTo": "Switch to",
 
+  // customer auth (gates the payment step)
+  "customerAuth.title": "Sign in to pay",
+  "customerAuth.subtitle":
+    "Your account lets you track bookings, leave reviews, and pay with one tap next time.",
+  "customerAuth.tabSignIn": "Sign in",
+  "customerAuth.tabSignUp": "Create account",
+  "customerAuth.name": "Full name",
+  "customerAuth.email": "Email",
+  "customerAuth.phone": "Phone (optional)",
+  "customerAuth.password": "Password",
+  "customerAuth.passwordHint": "At least 6 characters.",
+  "customerAuth.signInBtn": "Sign in & continue",
+  "customerAuth.signUpBtn": "Create account & continue",
+  "customerAuth.working": "Working…",
+  "customerAuth.signOut": "Sign out",
+  "customerAuth.signedInAs": "Signed in as",
+  "customerAuth.error.invalidEmail": "Enter a valid email",
+  "customerAuth.error.shortPassword": "Password must be at least 6 characters",
+  "customerAuth.error.noAccount": "No account with that email. Try signing up instead.",
+  "customerAuth.error.wrongPassword": "That password doesn't match. Try again.",
+  "customerAuth.error.emailTaken": "An account with that email already exists. Sign in instead.",
+  "customerAuth.error.nameRequired": "Tell us your name",
+
   // booking cancel + refund
   "booking.cancel": "Cancel booking",
   "booking.cancelConfirmTitle": "Cancel this booking?",
@@ -1058,6 +1081,28 @@ const STRINGS_AR: Record<TranslationKey, string> = {
 
   "lang.language": "اللغة",
   "lang.switchTo": "التبديل إلى",
+
+  "customerAuth.title": "سجّل دخولك لإكمال الدفع",
+  "customerAuth.subtitle":
+    "حسابك يحفظ حجوزاتك ويسمح لك بترك تقييمات والدفع بضغطة واحدة في المرّة القادمة.",
+  "customerAuth.tabSignIn": "تسجيل الدخول",
+  "customerAuth.tabSignUp": "إنشاء حساب",
+  "customerAuth.name": "الاسم الكامل",
+  "customerAuth.email": "البريد الإلكتروني",
+  "customerAuth.phone": "رقم الهاتف (اختياري)",
+  "customerAuth.password": "كلمة المرور",
+  "customerAuth.passwordHint": "ستّة أحرف على الأقل.",
+  "customerAuth.signInBtn": "سجّل الدخول وتابع",
+  "customerAuth.signUpBtn": "أنشئ الحساب وتابع",
+  "customerAuth.working": "جارٍ العمل…",
+  "customerAuth.signOut": "تسجيل الخروج",
+  "customerAuth.signedInAs": "مسجّل باسم",
+  "customerAuth.error.invalidEmail": "أدخل بريداً إلكترونياً صالحاً",
+  "customerAuth.error.shortPassword": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+  "customerAuth.error.noAccount": "لا يوجد حساب بهذا البريد. جرّب إنشاء حساب جديد.",
+  "customerAuth.error.wrongPassword": "كلمة المرور غير صحيحة. حاول مرة أخرى.",
+  "customerAuth.error.emailTaken": "يوجد حساب بهذا البريد. سجّل الدخول بدلاً من ذلك.",
+  "customerAuth.error.nameRequired": "أخبرنا باسمك",
 
   "booking.cancel": "إلغاء الحجز",
   "booking.cancelConfirmTitle": "هل تريد إلغاء هذا الحجز؟",
