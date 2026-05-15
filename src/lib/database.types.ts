@@ -186,6 +186,54 @@ export interface TimeSlotRow {
   updated_at: string;
 }
 
+/**
+ * Equipment / add-on items vendors can offer alongside their services.
+ * Pattern: vendor maintains a per-business shelf (e.g. a co-working space
+ * lists "Printer", "External Monitor", "Whiteboard markers"); customers
+ * tick the items they want during booking, with a quantity. Items can be
+ * free (`price === null`) or paid (`price > 0`); paid items add to the
+ * booking total.
+ *
+ * The `features` array carries machine-friendly tags ("4k", "wireless",
+ * "27-inch", "color-printing") so the AI equipment search can match user
+ * queries like "find me a vendor with a 4K monitor".
+ */
+export interface EquipmentRow {
+  id: string;
+  business_id: string;
+  name: string;
+  /** Optional Arabic translation of name. Falls back to name when absent. */
+  name_ar?: string | null;
+  description: string | null;
+  description_ar?: string | null;
+  /** Vendor-defined grouping (e.g. "office", "av", "stationery"). Free-form. */
+  category: string;
+  /** Item price per unit. `null` means included free; render as "Included". */
+  price: number | null;
+  currency: string;
+  image_url: string | null;
+  /** Lowercase keyword tags used by the AI equipment search. */
+  features: string[];
+  /** Max quantity a single booking can request. Defaults to 1 client-side. */
+  max_per_booking: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Per-booking line item — which equipment was selected, how many, at
+ *  which unit price (snapshotted so vendor price changes don't retroactively
+ *  affect issued receipts). */
+export interface BookingEquipmentRow {
+  id: string;
+  booking_id: string;
+  equipment_id: string;
+  quantity: number;
+  unit_price: number; // 0 when the source row's price is null
+  currency: string;
+  created_at: string;
+}
+
 export interface BookingRow {
   id: string;
   business_id: string;
@@ -289,6 +337,10 @@ export type TimeSlotInsert = AllOptional<TimeSlotRow>;
 export type TimeSlotUpdate = AllOptional<TimeSlotRow>;
 export type BookingInsert = AllOptional<BookingRow>;
 export type BookingUpdate = AllOptional<BookingRow>;
+export type EquipmentInsert = AllOptional<EquipmentRow>;
+export type EquipmentUpdate = AllOptional<EquipmentRow>;
+export type BookingEquipmentInsert = AllOptional<BookingEquipmentRow>;
+export type BookingEquipmentUpdate = AllOptional<BookingEquipmentRow>;
 
 // ---------------------------------------------------------------------------
 // Database interface (matches `supabase gen types typescript` output shape)
@@ -331,6 +383,18 @@ export interface Database {
         Row: BookingRow;
         Insert: BookingInsert;
         Update: BookingUpdate;
+        Relationships: [];
+      };
+      equipment: {
+        Row: EquipmentRow;
+        Insert: EquipmentInsert;
+        Update: EquipmentUpdate;
+        Relationships: [];
+      };
+      booking_equipment: {
+        Row: BookingEquipmentRow;
+        Insert: BookingEquipmentInsert;
+        Update: BookingEquipmentUpdate;
         Relationships: [];
       };
       payouts: {

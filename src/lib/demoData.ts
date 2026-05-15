@@ -5,6 +5,7 @@
 import type {
   BusinessConfigRow,
   BusinessRow,
+  EquipmentRow,
   ServiceRow,
   StaffRow,
   TimeSlotRow,
@@ -224,6 +225,32 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
     lng: 55.225600,
     phone: "+971 4 388 9900",
     timezone: "Asia/Dubai",
+  }),
+  // Business Centre — added to showcase the equipment add-on feature.
+  // Office spaces are the textbook case for "pick a desk, add a printer,
+  // request a 4K monitor" so this vendor carries the deepest equipment
+  // catalog in the demo dataset.
+  row({
+    id: "biz-meridian",
+    name: "Meridian Business Centre",
+    name_ar: "مركز ميريديان للأعمال",
+    slug: "meridian-business",
+    industry: "coworking",
+    logo_url: null,
+    owner_id: null,
+    is_active: true,
+    ...DEFAULT_ESCROW,
+    ...DEFAULT_APPROVAL,
+    ...NULL_LOCATION,
+    address: "Al Hamra Tower, Sharq",
+    city: "Kuwait City",
+    country: "KW",
+    postal_code: "13013",
+    lat: 29.378500,
+    lng: 47.991700,
+    phone: "+965 2244 8800",
+    website: "https://meridianbusiness.example",
+    timezone: "Asia/Kuwait",
   }),
 ];
 
@@ -555,6 +582,48 @@ export const DEMO_CONFIGS: BusinessConfigRow[] = [
     },
     layout_json: { showTestimonials: false, showStaff: true, showServicesPreview: true },
   }),
+  // Meridian Business Centre — co-working / private offices in Kuwait City.
+  row({
+    id: "cfg-meridian",
+    business_id: "biz-meridian",
+    theme_json: {
+      mode: "light",
+      primaryColor: "#0f172a",
+      accentColor: "#0ea5e9",
+      secondaryColor: "#f1f5f9",
+      fontFamily: "Inter",
+      borderRadius: "xl",
+      cardStyle: "soft",
+      animationStyle: "subtle",
+    },
+    copy_json: {
+      heroTitle: "Your office, by the hour.",
+      heroSubtitle:
+        "Private desks, meeting rooms, and full conference suites — pick the gear you need à la carte.",
+      ctaText: "Reserve a workspace",
+      confirmationMessage: "Welcome aboard. Your workspace is ready.",
+    },
+    copy_json_ar: {
+      heroTitle: "مكتبك، بالساعة.",
+      heroSubtitle:
+        "مكاتب خاصّة، غرف اجتماعات، وقاعات مؤتمرات — اختر التجهيزات التي تحتاجها بشكل منفصل.",
+      ctaText: "احجز مساحة عمل",
+      confirmationMessage: "أهلاً بك. مساحة عملك جاهزة.",
+    },
+    booking_rules_json: {
+      allowStaffSelection: false,
+      requirePhone: true,
+      requireEmail: true,
+      allowNotes: true,
+      preventDoubleBooking: true,
+      slotDurationMinutes: 60,
+      maxAdvanceBookingDays: 30,
+      cancellationWindowHours: 4,
+      requirePayment: true,
+      paymentMethods: ["visa", "knet", "apple_pay", "google_pay"],
+    },
+    layout_json: { showTestimonials: true, showStaff: false, showServicesPreview: true },
+  }),
 ];
 
 // ---------------------------------------------------------------------------
@@ -775,6 +844,296 @@ export const DEMO_SERVICES: ServiceRow[] = [
     capacity: 1,
     color: "#DC2626",
   }),
+
+  // ─── Meridian Business Centre (Kuwait City) ─────────────────────────────
+  svc({
+    id: "svc-meridian-hotdesk",
+    business_id: "biz-meridian",
+    name: "Hot Desk",
+    name_ar: "مكتب مرن",
+    description: "Drop-in desk in the open-plan area. High-speed Wi-Fi included.",
+    description_ar: "مكتب مرن في المنطقة المفتوحة. واي-فاي عالي السرعة مشمول.",
+    duration_minutes: 60,
+    price: 4,
+    currency: "KWD",
+    capacity: 1,
+    color: "#0EA5E9",
+  }),
+  svc({
+    id: "svc-meridian-private",
+    business_id: "biz-meridian",
+    name: "Private Office",
+    name_ar: "مكتب خاص",
+    description: "Lockable private office for 1–2 people. Door + window.",
+    description_ar: "مكتب خاص قابل للإقفال يتسع لشخصين. باب ونافذة.",
+    duration_minutes: 60,
+    price: 9,
+    currency: "KWD",
+    capacity: 2,
+    color: "#0F172A",
+  }),
+  svc({
+    id: "svc-meridian-meeting",
+    business_id: "biz-meridian",
+    name: "Meeting Room",
+    name_ar: "غرفة اجتماعات",
+    description: "8-seat boardroom with built-in display and conferencing.",
+    description_ar: "قاعة اجتماعات لـ٨ أشخاص مع شاشة عرض ونظام اجتماعات.",
+    duration_minutes: 60,
+    price: 18,
+    currency: "KWD",
+    capacity: 8,
+    color: "#7C3AED",
+  }),
+];
+
+// ---------------------------------------------------------------------------
+// Equipment (per-business add-on shelf — paid + free)
+// ---------------------------------------------------------------------------
+
+const eqp = (extra: Partial<EquipmentRow>): EquipmentRow =>
+  row({
+    image_url: null,
+    description: null,
+    description_ar: null,
+    features: [] as string[],
+    max_per_booking: 1,
+    is_active: true,
+    ...extra,
+  } as EquipmentRow);
+
+/** Catalog of add-on items by business. Heavy on Meridian (the dedicated
+ *  business-centre vendor) so the AI search has rich data to query against.
+ *  Sport venues carry lighter, mostly-free gear catalogs. */
+export const DEMO_EQUIPMENT: EquipmentRow[] = [
+  // ─── Meridian Business Centre ──────────────────────────────────────────
+  eqp({
+    id: "eqp-meridian-4k-monitor",
+    business_id: "biz-meridian",
+    name: "4K External Monitor",
+    name_ar: "شاشة خارجية 4K",
+    description: "27-inch 4K UHD IPS display with USB-C passthrough.",
+    description_ar: "شاشة 27 بوصة 4K UHD بتقنية IPS مع منفذ USB-C.",
+    category: "av",
+    price: 3,
+    currency: "KWD",
+    features: ["4k", "uhd", "27-inch", "ips", "usb-c", "monitor", "display"],
+    max_per_booking: 2,
+  }),
+  eqp({
+    id: "eqp-meridian-dual-monitor",
+    business_id: "biz-meridian",
+    name: "Dual Monitor Stand",
+    name_ar: "حامل شاشة مزدوج",
+    description: "Adjustable arm for two monitors with cable management.",
+    description_ar: "ذراع قابل للتعديل لشاشتين مع تنظيم للأسلاك.",
+    category: "av",
+    price: 1.5,
+    currency: "KWD",
+    features: ["dual", "stand", "ergonomic", "adjustable", "monitor"],
+    max_per_booking: 1,
+  }),
+  eqp({
+    id: "eqp-meridian-printer-bw",
+    business_id: "biz-meridian",
+    name: "Black-and-White Printing",
+    name_ar: "طباعة بالأبيض والأسود",
+    description: "Up to 50 A4 pages, B&W laser.",
+    description_ar: "حتى ٥٠ ورقة A4، طباعة ليزر بالأبيض والأسود.",
+    category: "office",
+    price: 0.5,
+    currency: "KWD",
+    features: ["printer", "printing", "bw", "black-and-white", "laser", "a4"],
+    max_per_booking: 4,
+  }),
+  eqp({
+    id: "eqp-meridian-printer-color",
+    business_id: "biz-meridian",
+    name: "Color Printing",
+    name_ar: "طباعة ملوّنة",
+    description: "Up to 20 A4 pages, color laser.",
+    description_ar: "حتى ٢٠ ورقة A4، طباعة ليزر ملوّنة.",
+    category: "office",
+    price: 1.5,
+    currency: "KWD",
+    features: ["printer", "printing", "color", "laser", "a4"],
+    max_per_booking: 4,
+  }),
+  eqp({
+    id: "eqp-meridian-pens",
+    business_id: "biz-meridian",
+    name: "Stationery Pack",
+    name_ar: "مجموعة قرطاسية",
+    description: "Pens, notepad, sticky notes — included free.",
+    description_ar: "أقلام، دفتر ملاحظات، ملاحظات لاصقة — مجاناً.",
+    category: "stationery",
+    price: null,
+    currency: "KWD",
+    features: ["pens", "stationery", "notepad", "sticky-notes", "free"],
+    max_per_booking: 1,
+  }),
+  eqp({
+    id: "eqp-meridian-whiteboard",
+    business_id: "biz-meridian",
+    name: "Whiteboard + Markers",
+    name_ar: "لوح أبيض مع أقلام",
+    description: "Rolling whiteboard with fresh markers and eraser.",
+    description_ar: "لوح أبيض متنقّل مع أقلام جديدة وممحاة.",
+    category: "office",
+    price: null,
+    currency: "KWD",
+    features: ["whiteboard", "markers", "brainstorm", "meeting", "free"],
+    max_per_booking: 1,
+  }),
+  eqp({
+    id: "eqp-meridian-chair",
+    business_id: "biz-meridian",
+    name: "Ergonomic Chair Upgrade",
+    name_ar: "ترقية كرسي مريح",
+    description: "Herman-Miller-style ergonomic chair with lumbar support.",
+    description_ar: "كرسي مريح بدعم قطني على طراز Herman Miller.",
+    category: "furniture",
+    price: 2,
+    currency: "KWD",
+    features: ["chair", "ergonomic", "lumbar", "comfort", "furniture"],
+    max_per_booking: 2,
+  }),
+  eqp({
+    id: "eqp-meridian-hdmi",
+    business_id: "biz-meridian",
+    name: "HDMI / USB-C Cable Kit",
+    name_ar: "مجموعة كابلات HDMI / USB-C",
+    description: "Loaner cable kit for laptop-to-display.",
+    description_ar: "مجموعة كابلات للإعارة من اللابتوب إلى الشاشة.",
+    category: "av",
+    price: null,
+    currency: "KWD",
+    features: ["hdmi", "usb-c", "cable", "adapter", "free"],
+    max_per_booking: 1,
+  }),
+  eqp({
+    id: "eqp-meridian-coffee",
+    business_id: "biz-meridian",
+    name: "Specialty Coffee Service",
+    name_ar: "خدمة قهوة مختصّة",
+    description: "Barista-pulled espresso drinks throughout your booking.",
+    description_ar: "مشروبات إسبريسو يحضّرها باريستا خلال فترة حجزك.",
+    category: "catering",
+    price: 2.5,
+    currency: "KWD",
+    features: ["coffee", "espresso", "catering", "drinks", "barista"],
+    max_per_booking: 6,
+  }),
+  eqp({
+    id: "eqp-meridian-conf-cam",
+    business_id: "biz-meridian",
+    name: "4K Conference Camera",
+    name_ar: "كاميرا مؤتمرات 4K",
+    description: "Wide-angle 4K camera with auto-tracking — Zoom/Teams ready.",
+    description_ar: "كاميرا 4K بزاوية واسعة مع تتبّع تلقائي — جاهزة لـZoom/Teams.",
+    category: "av",
+    price: 4,
+    currency: "KWD",
+    features: ["camera", "4k", "conference", "zoom", "teams", "wide-angle", "video"],
+    max_per_booking: 1,
+  }),
+
+  // ─── Padel Point (Kuwait) — sport gear, mostly free ─────────────────────
+  eqp({
+    id: "eqp-padel-racket",
+    business_id: "biz-padel",
+    name: "Padel Racket Rental",
+    name_ar: "استئجار مضرب بادل",
+    description: "Tournament-grade padel racket. Forgot yours? No problem.",
+    description_ar: "مضرب بادل بمستوى البطولات. نسيت مضربك؟ لا مشكلة.",
+    category: "sport",
+    price: 1,
+    currency: "KWD",
+    features: ["padel", "racket", "rental", "sport"],
+    max_per_booking: 4,
+  }),
+  eqp({
+    id: "eqp-padel-balls",
+    business_id: "biz-padel",
+    name: "Fresh Ball Pack",
+    name_ar: "علبة كرات جديدة",
+    description: "Sleeve of 3 pressurized padel balls.",
+    description_ar: "علبة من ٣ كرات بادل مضغوطة.",
+    category: "sport",
+    price: 1.5,
+    currency: "KWD",
+    features: ["padel", "balls", "tournament"],
+    max_per_booking: 4,
+  }),
+  eqp({
+    id: "eqp-padel-water",
+    business_id: "biz-padel",
+    name: "Chilled Water",
+    name_ar: "ماء بارد",
+    description: "Two 500ml bottles on the bench.",
+    description_ar: "زجاجتان بسعة ٥٠٠ مل على المقعد.",
+    category: "catering",
+    price: null,
+    currency: "KWD",
+    features: ["water", "drinks", "free"],
+    max_per_booking: 1,
+  }),
+
+  // ─── Galaxy Football Arena ───────────────────────────────────────────────
+  eqp({
+    id: "eqp-galaxy-bibs",
+    business_id: "biz-galaxy",
+    name: "Match Bibs (set of 10)",
+    name_ar: "صدريات مباراة (طقم ١٠)",
+    description: "Two sets of 5 — pick your team colors.",
+    description_ar: "طقمان من ٥ صدريات — اختر ألوان فريقك.",
+    category: "sport",
+    price: null,
+    currency: "KWD",
+    features: ["bibs", "football", "team", "free"],
+    max_per_booking: 1,
+  }),
+  eqp({
+    id: "eqp-galaxy-balls",
+    business_id: "biz-galaxy",
+    name: "Match Ball",
+    name_ar: "كرة مباراة",
+    description: "FIFA-quality match ball, pumped and ready.",
+    description_ar: "كرة مباراة بمواصفات فيفا، منفوخة وجاهزة.",
+    category: "sport",
+    price: null,
+    currency: "KWD",
+    features: ["football", "ball", "fifa", "free"],
+    max_per_booking: 2,
+  }),
+
+  // ─── Stillpoint Yoga ─────────────────────────────────────────────────────
+  eqp({
+    id: "eqp-yoga-mat",
+    business_id: "biz-stillpoint",
+    name: "Premium Yoga Mat",
+    name_ar: "سجّادة يوغا متميّزة",
+    description: "Eco cork mat with carry strap.",
+    description_ar: "سجّادة من الفلّين الصديقة للبيئة مع حزام حمل.",
+    category: "wellness",
+    price: 1,
+    currency: "KWD",
+    features: ["yoga", "mat", "cork", "eco", "wellness"],
+    max_per_booking: 2,
+  }),
+  eqp({
+    id: "eqp-yoga-blocks",
+    business_id: "biz-stillpoint",
+    name: "Yoga Blocks (pair)",
+    name_ar: "كتلتا يوغا",
+    description: "High-density foam blocks for alignment.",
+    description_ar: "كتلتان من الإسفنج عالي الكثافة للمحاذاة.",
+    category: "wellness",
+    price: null,
+    currency: "KWD",
+    features: ["yoga", "blocks", "alignment", "free"],
+    max_per_booking: 1,
+  }),
 ];
 
 // ---------------------------------------------------------------------------
@@ -900,6 +1259,10 @@ export function findDemoBusinessBySlug(slug: string) {
 
 export function getDemoServices(businessId: string, onlyActive = true) {
   return DEMO_SERVICES.filter((s) => s.business_id === businessId && (!onlyActive || s.is_active));
+}
+
+export function getDemoEquipment(businessId: string, onlyActive = true) {
+  return DEMO_EQUIPMENT.filter((e) => e.business_id === businessId && (!onlyActive || e.is_active));
 }
 
 export function getDemoStaff(businessId: string, onlyActive = true) {
