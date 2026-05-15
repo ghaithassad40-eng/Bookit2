@@ -270,12 +270,14 @@ export default function Settings() {
         </TabsList>
 
         <TabsContent value="theme" className="space-y-4">
-          {/* AI-powered palette suggestion. Vendor uploads their logo, we
-              extract the dominant + accent colours locally and propose a
-              theme. Applying writes both the new theme_json AND the logo
-              URL onto the business row (the extractor produced a data
-              URL preview; in production this would upload to Supabase
-              Storage and store the public URL instead). */}
+          {/* AI-powered palette suggestion is the sole entry point on this
+              tab — the raw theme_json editor was removed so vendors don't
+              hand-edit hex codes. Applying writes both the new theme_json
+              AND seeds the logo_url field on the business profile (the
+              extractor returns a data URL preview; in production this
+              would upload to Supabase Storage and store the public URL
+              instead). Operators can still hit theme_json directly via
+              the database / a platform-admin surface if they need to. */}
           <LogoThemeGenerator
             current={config.theme_json}
             busy={saveJson.isPending || updateBusiness.isPending}
@@ -285,13 +287,6 @@ export default function Settings() {
                 setLogoUrl(logoDataUrl);
               }
             }}
-          />
-          <JsonConfigEditor
-            title="theme_json"
-            description="Colors, font, mode, card style. Live-applied via CSS variables."
-            value={config.theme_json}
-            saving={saveJson.isPending}
-            onSave={(v) => saveJson.mutate({ key: "theme_json", value: v as object })}
           />
         </TabsContent>
         <TabsContent value="copy">
