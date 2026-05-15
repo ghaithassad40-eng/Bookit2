@@ -29,6 +29,7 @@ import { useBookings } from "@/hooks/useBookings";
 import { usePayouts, useReleasePayout } from "@/hooks/usePayouts";
 import { calculateSplit, summarisePayouts } from "@/lib/escrow";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
+import { defaultCurrencyForCountry } from "@/lib/location";
 
 interface Ctx {
   business: BusinessRow;
@@ -56,9 +57,10 @@ export default function Payouts() {
   const release = useReleasePayout();
   const [filter, setFilter] = useState<"all" | "held" | PayoutStatus>("all");
 
+  const fallbackCurrency = defaultCurrencyForCountry(business.country);
   const summary = useMemo(
-    () => summarisePayouts(bookings ?? [], payouts ?? [], business.id),
-    [bookings, payouts, business.id],
+    () => summarisePayouts(bookings ?? [], payouts ?? [], business.id, fallbackCurrency),
+    [bookings, payouts, business.id, fallbackCurrency],
   );
 
   const heldBookings: BookingRow[] = useMemo(

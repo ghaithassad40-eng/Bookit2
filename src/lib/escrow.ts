@@ -350,10 +350,14 @@ export function summarisePayouts(
   bookings: BookingRow[],
   payouts: PayoutRow[],
   businessId: string,
+  /** Currency to show when the business has zero bookings or payouts. Pass
+   *  the business's primary currency (typically derived from its country)
+   *  to avoid 'US$0' on empty Payouts dashboards. */
+  fallbackCurrency = "USD",
 ): PayoutSummary {
   const myBookings = bookings.filter((b) => b.business_id === businessId);
   const myPayouts  = payouts.filter((p) => p.business_id === businessId);
-  const currency   = myBookings[0]?.payment_currency ?? myPayouts[0]?.currency ?? "USD";
+  const currency   = myBookings[0]?.payment_currency ?? myPayouts[0]?.currency ?? fallbackCurrency;
 
   const held = myBookings.filter((b) => b.payout_status === "held" && b.payment_status === "paid");
   const transferred = myPayouts.filter((p) => p.status === "transferred");

@@ -16,6 +16,7 @@ import { useServices } from "@/hooks/useServices";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
+import { defaultCurrencyForCountry } from "@/lib/location";
 
 interface Ctx {
   business: BusinessRow;
@@ -26,6 +27,11 @@ export default function Dashboard() {
   const { business } = useOutletContext<Ctx>();
   const { data: bookings, isLoading } = useBookings({ businessId: business.id, limit: 500 });
   const { data: services } = useServices(business.id, { onlyActive: false });
+  // Revenue is reported in the business's primary currency, derived from
+  // its country (KW → KWD, SA → SAR, AE → AED, …). Without this, the
+  // stats fell back to formatCurrency's USD default and a Kuwait vendor
+  // saw 'US$0' for their weekly revenue.
+  const reportingCurrency = defaultCurrencyForCountry(business.country);
 
   const stats = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -80,8 +86,8 @@ export default function Dashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Today's bookings" value={stats.todayCount.toString()} icon={CalendarCheck} loading={isLoading} />
-        <Stat label="7-day revenue" value={formatCurrency(stats.weeklyRevenue)} icon={TrendingUp} loading={isLoading} />
-        <Stat label="Lifetime revenue" value={formatCurrency(stats.totalRevenue)} icon={DollarSign} loading={isLoading} />
+        <Stat label="7-day revenue" value={formatCurrency(stats.weeklyRevenue, reportingCurrency)} icon={TrendingUp} loading={isLoading} />
+        <Stat label="Lifetime revenue" value={formatCurrency(stats.totalRevenue, reportingCurrency)} icon={DollarSign} loading={isLoading} />
         <Stat label="Unique customers" value={stats.customers.toString()} icon={Users} loading={isLoading} />
       </div>
 
