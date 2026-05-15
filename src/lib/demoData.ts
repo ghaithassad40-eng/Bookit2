@@ -544,21 +544,23 @@ const svc = (extra: Partial<ServiceRow>): ServiceRow =>
     is_active: true,
     description: null,
     color: "#3B82F6",
-    currency: "USD",
+    // GCC-only platform — default to KWD; per-business rows override with
+    // KWD / SAR / AED / BHD / QAR / OMR as appropriate.
+    currency: "KWD",
     ...extra,
   } as ServiceRow);
 
 export const DEMO_SERVICES: ServiceRow[] = [
-  svc({ id: "svc-pt",       business_id: "biz-pulse",     name: "Personal Training",   name_ar: "تدريب شخصي",            description: "1:1 coached strength session.",            description_ar: "حصة قوة 1:1 مع مدرّب.",                  duration_minutes: 60, price: 80, capacity: 1,  color: "#22D3EE" }),
-  svc({ id: "svc-open",     business_id: "biz-pulse",     name: "Open Gym",             name_ar: "صالة مفتوحة",            description: "Floor access with on-call coach.",          description_ar: "وصول للأرضية مع مدرّب جاهز عند الطلب.",   duration_minutes: 60, price: 20, capacity: 12, color: "#A3E635" }),
-  svc({ id: "svc-hiit",     business_id: "biz-pulse",     name: "HIIT Class",           name_ar: "حصة HIIT",              description: "Group conditioning circuit.",               description_ar: "تمرين لياقة جماعي مكثّف.",                duration_minutes: 45, price: 25, capacity: 14, color: "#F472B6" }),
-  svc({ id: "svc-cut",      business_id: "biz-lumen",     name: "Signature Cut",        name_ar: "قصّة مميّزة",            description: "Consultation, cut and finish.",             description_ar: "استشارة، قصّ، وتنعيم.",                  duration_minutes: 45, price: 65, capacity: 1,  color: "#C2410C" }),
-  svc({ id: "svc-color",    business_id: "biz-lumen",     name: "Color & Highlights",   name_ar: "صبغة وخصلات",            description: "Custom color with toner.",                  description_ar: "صبغة مخصّصة مع تونر.",                    duration_minutes: 120, price: 180, capacity: 1, color: "#A21CAF" }),
-  svc({ id: "svc-blow",     business_id: "biz-lumen",     name: "Express Blowout",      name_ar: "بلو دراي سريع",           description: "Wash and style.",                           description_ar: "غسيل وتنعيم سريع.",                        duration_minutes: 30, price: 40, capacity: 1,  color: "#0EA5E9" }),
-  svc({ id: "svc-consult",  business_id: "biz-northgate", name: "General Consult",      name_ar: "استشارة عامّة",           description: "Standard 30-min visit.",                    description_ar: "زيارة عاديّة لمدّة 30 دقيقة.",            duration_minutes: 30, price: 90, capacity: 1,  color: "#0EA5E9" }),
-  svc({ id: "svc-physical", business_id: "biz-northgate", name: "Annual Physical",      name_ar: "كشف سنوي شامل",          description: "Comprehensive wellness check.",              description_ar: "فحص صحي شامل.",                            duration_minutes: 60, price: 180, capacity: 1, color: "#10B981" }),
-  svc({ id: "svc-vinyasa",  business_id: "biz-stillpoint", name: "Vinyasa Flow",        name_ar: "فينياسا فلو",            description: "Dynamic 75-min flow.",                       description_ar: "حصة فلو ديناميكية مدّتها 75 دقيقة.",       duration_minutes: 75, price: 22, capacity: 16, color: "#7C3AED" }),
-  svc({ id: "svc-yin",      business_id: "biz-stillpoint", name: "Yin & Restore",       name_ar: "يين واسترخاء",            description: "Slow, grounded practice.",                   description_ar: "تمرين بطيء وهادئ.",                        duration_minutes: 75, price: 22, capacity: 18, color: "#A78BFA" }),
+  svc({ id: "svc-pt",       business_id: "biz-pulse",     name: "Personal Training",   name_ar: "تدريب شخصي",            description: "1:1 coached strength session.",            description_ar: "حصة قوة 1:1 مع مدرّب.",                  duration_minutes: 60, price: 25, currency: "KWD", capacity: 1,  color: "#22D3EE" }),
+  svc({ id: "svc-open",     business_id: "biz-pulse",     name: "Open Gym",             name_ar: "صالة مفتوحة",            description: "Floor access with on-call coach.",          description_ar: "وصول للأرضية مع مدرّب جاهز عند الطلب.",   duration_minutes: 60, price: 6,  currency: "KWD", capacity: 12, color: "#A3E635" }),
+  svc({ id: "svc-hiit",     business_id: "biz-pulse",     name: "HIIT Class",           name_ar: "حصة HIIT",              description: "Group conditioning circuit.",               description_ar: "تمرين لياقة جماعي مكثّف.",                duration_minutes: 45, price: 8,  currency: "KWD", capacity: 14, color: "#F472B6" }),
+  svc({ id: "svc-cut",      business_id: "biz-lumen",     name: "Signature Cut",        name_ar: "قصّة مميّزة",            description: "Consultation, cut and finish.",             description_ar: "استشارة، قصّ، وتنعيم.",                  duration_minutes: 45, price: 20, currency: "KWD", capacity: 1,  color: "#C2410C" }),
+  svc({ id: "svc-color",    business_id: "biz-lumen",     name: "Color & Highlights",   name_ar: "صبغة وخصلات",            description: "Custom color with toner.",                  description_ar: "صبغة مخصّصة مع تونر.",                    duration_minutes: 120, price: 55, currency: "KWD", capacity: 1, color: "#A21CAF" }),
+  svc({ id: "svc-blow",     business_id: "biz-lumen",     name: "Express Blowout",      name_ar: "بلو دراي سريع",           description: "Wash and style.",                           description_ar: "غسيل وتنعيم سريع.",                        duration_minutes: 30, price: 12, currency: "KWD", capacity: 1,  color: "#0EA5E9" }),
+  svc({ id: "svc-consult",  business_id: "biz-northgate", name: "General Consult",      name_ar: "استشارة عامّة",           description: "Standard 30-min visit.",                    description_ar: "زيارة عاديّة لمدّة 30 دقيقة.",            duration_minutes: 30, price: 28, currency: "KWD", capacity: 1,  color: "#0EA5E9" }),
+  svc({ id: "svc-physical", business_id: "biz-northgate", name: "Annual Physical",      name_ar: "كشف سنوي شامل",          description: "Comprehensive wellness check.",              description_ar: "فحص صحي شامل.",                            duration_minutes: 60, price: 55, currency: "KWD", capacity: 1, color: "#10B981" }),
+  svc({ id: "svc-vinyasa",  business_id: "biz-stillpoint", name: "Vinyasa Flow",        name_ar: "فينياسا فلو",            description: "Dynamic 75-min flow.",                       description_ar: "حصة فلو ديناميكية مدّتها 75 دقيقة.",       duration_minutes: 75, price: 7,  currency: "KWD", capacity: 16, color: "#7C3AED" }),
+  svc({ id: "svc-yin",      business_id: "biz-stillpoint", name: "Yin & Restore",       name_ar: "يين واسترخاء",            description: "Slow, grounded practice.",                   description_ar: "تمرين بطيء وهادئ.",                        duration_minutes: 75, price: 7,  currency: "KWD", capacity: 18, color: "#A78BFA" }),
 
   // ─── Galaxy Football Arena (KWD pricing) ───────────────────────────────
   svc({
