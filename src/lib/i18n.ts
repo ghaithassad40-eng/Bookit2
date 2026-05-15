@@ -289,6 +289,13 @@ const STRINGS_EN = {
   "admin.settings.profile.nameAr": "Display name (العربية)",
   "admin.settings.profile.optionalAr": "Optional Arabic translation",
   "admin.settings.profile.slug": "Slug",
+  "admin.settings.profile.slugError.empty": "Slug is required.",
+  "admin.settings.profile.slugError.tooShort": "Slug must be at least 2 characters.",
+  "admin.settings.profile.slugError.tooLong": "Slug must be 40 characters or fewer.",
+  "admin.settings.profile.slugError.invalidChars":
+    "Use only lowercase letters, numbers, and dashes (no leading or trailing dash).",
+  "admin.settings.profile.slugError.reserved":
+    "That slug is reserved. Pick another one.",
   "admin.settings.profile.logo": "Logo URL",
   "admin.settings.profile.save": "Save profile",
   "admin.settings.profile.toastSaved": "Business updated",
@@ -913,6 +920,13 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "admin.settings.profile.nameAr": "اسم العرض (العربية)",
   "admin.settings.profile.optionalAr": "ترجمة عربية اختيارية",
   "admin.settings.profile.slug": "المعرّف (Slug)",
+  "admin.settings.profile.slugError.empty": "المعرّف مطلوب.",
+  "admin.settings.profile.slugError.tooShort": "يجب أن يتكوّن المعرّف من حرفين على الأقل.",
+  "admin.settings.profile.slugError.tooLong": "يجب ألّا يتجاوز المعرّف ٤٠ حرفًا.",
+  "admin.settings.profile.slugError.invalidChars":
+    "استخدم أحرفًا إنجليزية صغيرة وأرقامًا وشرطات فقط (لا تبدأ أو تنتهي بشرطة).",
+  "admin.settings.profile.slugError.reserved":
+    "هذا المعرّف محجوز. اختر معرّفًا آخر.",
   "admin.settings.profile.logo": "رابط الشعار",
   "admin.settings.profile.save": "حفظ الملف",
   "admin.settings.profile.toastSaved": "تم تحديث النشاط",

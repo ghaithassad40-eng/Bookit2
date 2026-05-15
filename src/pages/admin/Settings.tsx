@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useAuth } from "@/hooks/useAuth";
+import { validateSlug } from "@/lib/slug";
 
 interface Ctx {
   business: BusinessRow;
@@ -71,12 +72,24 @@ export default function Settings() {
 
   const updateBusiness = useMutation({
     mutationFn: async () => {
+      // Validate the slug client-side before the round-trip. The DB also
+      // enforces uniqueness; reserved-name + character checks live in
+      // src/lib/slug.ts. Production must also re-validate server-side
+      // (see SECURITY.md) — never trust the client alone.
+      const slugCheck = validateSlug(slug);
+      if (!slugCheck.ok) {
+        const reason = t(
+          `admin.settings.profile.slugError.${slugCheck.code}` as Parameters<typeof t>[0],
+        );
+        throw new Error(reason);
+      }
+      const normalized = slug.trim().toLowerCase();
       const { error } = await supabase
         .from("businesses")
         .update({
           name,
           name_ar: nameAr.trim() ? nameAr.trim() : null,
-          slug,
+          slug: normalized,
           logo_url: logoUrl || null,
         })
         .eq("id", business.id);
