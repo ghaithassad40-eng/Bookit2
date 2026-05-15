@@ -35,7 +35,13 @@ import { getLocation } from "@/lib/location";
 import { downloadIcs } from "@/lib/calendar";
 import { PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payments";
 import { getLocalBookings } from "@/lib/localBookings";
-import { DEMO_SERVICES, DEMO_STAFF, generateDemoSlots } from "@/lib/demoData";
+import { getLocalBookingEquipment } from "@/lib/localBookingEquipment";
+import {
+  DEMO_EQUIPMENT,
+  DEMO_SERVICES,
+  DEMO_STAFF,
+  generateDemoSlots,
+} from "@/lib/demoData";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { useCancelBooking } from "@/hooks/useBookings";
 import { useI18n } from "@/hooks/useI18n";
@@ -92,6 +98,37 @@ export default function Confirmation() {
   const staff = useMemo(
     () => (booking?.staff_id ? DEMO_STAFF.find((s) => s.id === booking.staff_id) ?? null : null),
     [booking],
+  );
+
+  // Equipment line items selected at booking time, resolved against the
+  // canonical equipment catalog so we can render the (translated) name even
+  // if the source row was deactivated since.
+  const equipmentLines = useMemo(() => {
+    if (!booking) return [] as Array<{
+      id: string;
+      name: string;
+      name_ar: string | null;
+      quantity: number;
+      unit_price: number;
+      currency: string;
+      is_free: boolean;
+    }>;
+    return getLocalBookingEquipment(booking.id).map((row) => {
+      const eq = DEMO_EQUIPMENT.find((e) => e.id === row.equipment_id);
+      return {
+        id: row.id,
+        name: eq?.name ?? row.equipment_id,
+        name_ar: eq?.name_ar ?? null,
+        quantity: row.quantity,
+        unit_price: row.unit_price,
+        currency: row.currency,
+        is_free: row.unit_price === 0 && eq?.price == null,
+      };
+    });
+  }, [booking]);
+  const equipmentSubtotal = equipmentLines.reduce(
+    (sum, l) => sum + (l.is_free ? 0 : l.unit_price * l.quantity),
+    0,
   );
 
   const paid =
@@ -352,16 +389,45 @@ export default function Confirmation() {
                 </section>
               )}
 
+              {/* Equipment add-ons */}
+              {equipmentLines.length > 0 && (
+                <section>
+                  <SectionHeader>{t("invoice.equipment")}</SectionHeader>
+                  <dl className="divide-y divide-border/60">
+                    {equipmentLines.map((line) => (
+                      <Row
+                        key={line.id}
+                        label={`${line.quantity}× ${pickLocale(locale, line.name, line.name_ar)}`}
+                        value={
+                          line.is_free
+                            ? t("invoice.equipmentIncluded")
+                            : formatDisplay(line.unit_price * line.quantity, line.currency).display
+                        }
+                      />
+                    ))}
+                  </dl>
+                </section>
+              )}
+
               {/* Charges */}
               {amount != null && (
                 <section className="rounded-2xl border border-border/60 bg-card/50 p-5">
                   <SectionHeader className="mb-3">{t("invoice.charges")}</SectionHeader>
                   {(() => {
+                    const serviceAmount = amount! - equipmentSubtotal;
                     const charge = formatDisplay(amount!, currency);
+                    const serviceLine = formatDisplay(serviceAmount, currency);
+                    const equipmentLine = formatDisplay(equipmentSubtotal, currency);
                     return (
                       <>
                         <dl className="space-y-2 text-sm">
-                          <Line label={t("invoice.subtotal")} value={charge.display} />
+                          <Line label={t("invoice.subtotal")} value={serviceLine.display} />
+                          {equipmentSubtotal > 0 && (
+                            <Line
+                              label={t("invoice.equipmentSubtotal")}
+                              value={equipmentLine.display}
+                            />
+                          )}
                           <Line label={t("invoice.serviceCharge")} value={formatCurrency(0, charge.displayCurrency)} subtle />
                           <Line label={t("invoice.tax")} value={formatCurrency(0, charge.displayCurrency)} subtle />
                         </dl>

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import type { BookingRow } from "@/lib/database.types";
+import type { BookingEquipmentRow, BookingRow } from "@/lib/database.types";
 import type { PaymentResult } from "@/lib/payments";
 import {
   generateLocalBookingReference,
@@ -8,6 +8,10 @@ import {
   saveLocalBooking,
   updateLocalBooking,
 } from "@/lib/localBookings";
+import {
+  newBookingEquipmentId,
+  saveLocalBookingEquipment,
+} from "@/lib/localBookingEquipment";
 
 const useEdge = (import.meta.env.VITE_USE_EDGE_BOOKING as string | undefined) === "true";
 
@@ -43,7 +47,30 @@ function createDemoBooking(input: CreateBookingInput): BookingRow {
     updated_at: now,
   };
   saveLocalBooking(booking);
+
+  // Persist equipment lines so the Confirmation invoice can render them.
+  if (input.equipment && input.equipment.length > 0) {
+    const lines: BookingEquipmentRow[] = input.equipment.map((eq) => ({
+      id: newBookingEquipmentId(),
+      booking_id: booking.id,
+      equipment_id: eq.equipment_id,
+      quantity: eq.quantity,
+      unit_price: eq.unit_price,
+      currency: eq.currency,
+      created_at: now,
+    }));
+    saveLocalBookingEquipment(lines);
+  }
   return booking;
+}
+
+/** A single line in the customer's equipment cart at booking time. */
+export interface BookingEquipmentInput {
+  equipment_id: string;
+  quantity: number;
+  /** 0 when the source equipment row's price is null (free / included). */
+  unit_price: number;
+  currency: string;
 }
 
 export interface CreateBookingInput {
@@ -59,6 +86,8 @@ export interface CreateBookingInput {
   payment?: PaymentResult | null;
   payment_amount?: number | null;
   payment_currency?: string | null;
+  /** Equipment add-ons the customer ticked during booking. */
+  equipment?: BookingEquipmentInput[];
 }
 
 async function createBookingViaRpc(input: CreateBookingInput): Promise<BookingRow> {

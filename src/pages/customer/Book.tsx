@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -12,13 +12,15 @@ import { StaffCard } from "@/components/customer/StaffCard";
 import { SlotPicker } from "@/components/customer/SlotPicker";
 import { BookingForm } from "@/components/customer/BookingForm";
 import { BookingStepper } from "@/components/customer/BookingStepper";
+import { EquipmentShelf } from "@/components/customer/EquipmentShelf";
 import { PaymentSelector } from "@/components/customer/PaymentSelector";
 import { PaymentForm } from "@/components/customer/PaymentForm";
 import { PaymentRegionInfo } from "@/components/customer/PaymentRegionInfo";
 import { useServices } from "@/hooks/useServices";
 import { useStaff } from "@/hooks/useStaff";
 import { useSlots } from "@/hooks/useSlots";
-import { useBookingStore } from "@/store/bookingStore";
+import { useEquipment } from "@/hooks/useEquipment";
+import { useBookingStore, type EquipmentCart } from "@/store/bookingStore";
 import { useCreateBooking } from "@/hooks/useBookings";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 import { charge, resolvePaymentMethodsForCustomer, type PaymentRequest, type PaymentResult } from "@/lib/payments";
@@ -39,6 +41,19 @@ interface Ctx {
   config: BusinessConfigRow;
 }
 
+/** Resolved equipment line item — used by BookingSummary and the
+ *  Confirmation invoice. Snapshot of name + unit_price at booking time. */
+export interface EquipmentLine {
+  equipment_id: string;
+  name: string;
+  name_ar: string | null;
+  quantity: number;
+  unit_price: number;
+  currency: string;
+  line_total: number;
+  is_free: boolean;
+}
+
 export default function Book() {
   const { business, config } = useOutletContext<Ctx>();
   const navigate = useNavigate();
@@ -50,6 +65,7 @@ export default function Book() {
 
   const {
     step, service, staff, slot, customer,
+    equipmentCart, setEquipmentQty,
     paymentMethod, setPaymentMethod, setPaymentResult,
     setStep, setService, setStaff, setSlot, setCustomer, reset,
   } = useBookingStore();
@@ -86,6 +102,50 @@ export default function Book() {
     serviceId: service?.id,
     staffId: rules.allowStaffSelection ? staff?.id : undefined,
   });
+  const { data: equipmentList, isLoading: loadingEquipment } = useEquipment(business.id, {
+    onlyActive: true,
+  });
+  const hasEquipment = (equipmentList?.length ?? 0) > 0;
+
+  // Auto-skip the equipment step when the business has no add-ons configured.
+  // The stepper hides it via the showEquipment prop, but the store still
+  // lands on "equipment" after slot selection; bounce straight to details.
+  useEffect(() => {
+    if (step === "equipment" && !loadingEquipment && !hasEquipment) {
+      setStep("details");
+    }
+  }, [step, loadingEquipment, hasEquipment, setStep]);
+
+  // Resolve equipment add-on totals for the BookingSummary and invoice.
+  // `equipmentTotals` carries (row, qty, lineTotal in service.currency).
+  const equipmentTotals = useMemo(() => {
+    if (!equipmentList || !service) return [] as EquipmentLine[];
+    const out: EquipmentLine[] = [];
+    for (const item of equipmentList) {
+      const qty = equipmentCart[item.id] ?? 0;
+      if (qty <= 0) continue;
+      const unitPrice = item.price ?? 0;
+      out.push({
+        equipment_id: item.id,
+        name: item.name,
+        name_ar: item.name_ar ?? null,
+        quantity: qty,
+        unit_price: unitPrice,
+        currency: item.currency,
+        line_total: unitPrice * qty,
+        is_free: item.price == null,
+      });
+    }
+    return out;
+  }, [equipmentList, equipmentCart, service]);
+
+  // Sum of all paid equipment lines, in the **service** currency (assumed
+  // matching since equipment+services for the same business share currency
+  // by convention). Free lines contribute 0.
+  const equipmentSubtotal = equipmentTotals.reduce(
+    (sum, line) => sum + (line.is_free ? 0 : line.line_total),
+    0,
+  );
 
   const createBooking = useCreateBooking();
 
@@ -94,13 +154,17 @@ export default function Book() {
   function back() {
     if (step === "payment") setStep("review");
     else if (step === "review") setStep("details");
-    else if (step === "details") setStep("slot");
+    else if (step === "details") setStep(hasEquipment ? "equipment" : "slot");
+    else if (step === "equipment") setStep("slot");
     else if (step === "slot") setStep(rules.allowStaffSelection ? "staff" : "service");
     else if (step === "staff") setStep("service");
   }
 
   async function finalizeBooking(payment: PaymentResult | null) {
     if (!service || !slot) return;
+    // Total charged = service price + paid equipment lines (free items are
+    // included for free and don't appear in payment_amount).
+    const total = service.price + equipmentSubtotal;
     try {
       const booking = await createBooking.mutateAsync({
         business_id: business.id,
@@ -112,8 +176,14 @@ export default function Book() {
         customer_email: customer.email || null,
         notes: customer.notes || null,
         payment,
-        payment_amount: payment ? service.price : null,
+        payment_amount: payment ? total : null,
         payment_currency: payment ? service.currency : null,
+        equipment: equipmentTotals.map((line) => ({
+          equipment_id: line.equipment_id,
+          quantity: line.quantity,
+          unit_price: line.is_free ? 0 : line.unit_price,
+          currency: line.currency,
+        })),
       });
       reset();
       navigate(`/business/${business.slug}/confirmation?ref=${encodeURIComponent(booking.booking_reference)}`);
@@ -156,10 +226,13 @@ export default function Book() {
     setCharging(true);
     try {
       const useRedirect = MYFATOORAH_ENABLED || (paymentMethod === "knet" || paymentMethod === "paypal");
+      // PaymentForm passes service.price as `amount`; bump it by the
+      // equipment subtotal so the customer pays the full cart total.
+      const cartAmount = req.amount + equipmentSubtotal;
       if (useRedirect && service && slot) {
         const init = await initiateMyFatoorahPayment({
           method: toMyFatoorahMethod(req.method),
-          amount: req.amount,
+          amount: cartAmount,
           currency: req.currency,
           reference: req.reference,
           business_slug: business.slug,
@@ -190,7 +263,7 @@ export default function Book() {
           customer_phone: customer.phone || null,
           customer_email: customer.email || null,
           notes: customer.notes || null,
-          amount: req.amount,
+          amount: cartAmount,
           currency: req.currency,
           method: req.method,
           createdAt: Date.now(),
@@ -200,8 +273,10 @@ export default function Book() {
         return;
       }
 
-      // Inline (demo) charge for wallets / cards when MyFatoorah is off
-      const result = await charge(req);
+      // Inline (demo) charge for wallets / cards when MyFatoorah is off.
+      // Override the request amount so we charge the cart total, not just
+      // the service price.
+      const result = await charge({ ...req, amount: cartAmount });
       setPaymentResult(result);
       if (!result.success) {
         toast.error(result.error ?? "Payment was declined");
@@ -224,7 +299,11 @@ export default function Book() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         )}
-        <BookingStepper current={step} showStaff={rules.allowStaffSelection} />
+        <BookingStepper
+          current={step}
+          showStaff={rules.allowStaffSelection}
+          showEquipment={hasEquipment}
+        />
       </div>
 
       <AnimatePresence mode="wait">
@@ -306,6 +385,50 @@ export default function Book() {
             </section>
           )}
 
+          {step === "equipment" && (
+            <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
+              <div>
+                <h1 className="text-2xl font-semibold">{t("book.addEquipment")}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("book.addEquipmentSubtitle")}
+                </p>
+                <div className="mt-5">
+                  {loadingEquipment ? (
+                    <div className="space-y-3">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={i} className="h-20 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <EquipmentShelf
+                      equipment={equipmentList ?? []}
+                      cart={equipmentCart}
+                      onChangeQty={setEquipmentQty}
+                    />
+                  )}
+                </div>
+                <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <Button
+                    size="lg"
+                    className="sm:min-w-[200px]"
+                    onClick={() => setStep("details")}
+                  >
+                    {Object.keys(equipmentCart).length > 0
+                      ? t("book.continueWithExtras")
+                      : t("book.continueWithoutExtras")}
+                  </Button>
+                </div>
+              </div>
+              <BookingSummary
+                service={service}
+                staff={staff}
+                slot={slot}
+                equipmentLines={equipmentTotals}
+                equipmentSubtotal={equipmentSubtotal}
+              />
+            </section>
+          )}
+
           {step === "details" && (
             <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
               <div>
@@ -319,7 +442,13 @@ export default function Book() {
                   }}
                 />
               </div>
-              <BookingSummary service={service} staff={staff} slot={slot} />
+              <BookingSummary
+                service={service}
+                staff={staff}
+                slot={slot}
+                equipmentLines={equipmentTotals}
+                equipmentSubtotal={equipmentSubtotal}
+              />
             </section>
           )}
 
@@ -344,7 +473,14 @@ export default function Book() {
                       {requirePayment ? (
                         <>
                           <Lock className="h-4 w-4" />
-                          {t("book.continueToPayment")} · {service ? displayCurrency.format(service.price, service.currency).display : ""}
+                          {t("book.continueToPayment")}
+                          {" · "}
+                          {service
+                            ? displayCurrency.format(
+                                service.price + equipmentSubtotal,
+                                service.currency,
+                              ).display
+                            : ""}
                         </>
                       ) : createBooking.isPending ? (
                         t("common.loading")
@@ -355,7 +491,13 @@ export default function Book() {
                   </div>
                 </CardContent>
               </Card>
-              <BookingSummary service={service} staff={staff} slot={slot} />
+              <BookingSummary
+                service={service}
+                staff={staff}
+                slot={slot}
+                equipmentLines={equipmentTotals}
+                equipmentSubtotal={equipmentSubtotal}
+              />
             </section>
           )}
 
@@ -404,6 +546,8 @@ export default function Book() {
                 service={service}
                 staff={staff}
                 slot={slot}
+                equipmentLines={equipmentTotals}
+                equipmentSubtotal={equipmentSubtotal}
                 paymentLabel={paymentMethod ? "Selected" : "Pending selection"}
               />
             </section>
@@ -444,18 +588,24 @@ function BookingSummary({
   service,
   staff,
   slot,
+  equipmentLines = [],
+  equipmentSubtotal = 0,
   paymentLabel,
 }: {
   service: ReturnType<typeof useBookingStore.getState>["service"];
   staff: ReturnType<typeof useBookingStore.getState>["staff"];
   slot: ReturnType<typeof useBookingStore.getState>["slot"];
+  equipmentLines?: EquipmentLine[];
+  equipmentSubtotal?: number;
   paymentLabel?: string;
 }) {
-  const { t, intl } = useI18n();
+  const { t, intl, locale } = useI18n();
   const intlLoc = intl();
   const { format } = useDisplayCurrency();
   if (!service) return null;
-  const price = format(service.price, service.currency);
+  const total = service.price + equipmentSubtotal;
+  const totalFmt = format(total, service.currency);
+  const servicePriceFmt = format(service.price, service.currency);
   return (
     <Card className="h-fit">
       <CardHeader>
@@ -471,13 +621,39 @@ function BookingSummary({
           />
         )}
         {paymentLabel && <Row label={t("invoice.payment")} value={paymentLabel} />}
+
+        {/* Cart breakdown — only render when equipment lines exist. */}
+        {equipmentLines.length > 0 && (
+          <div className="space-y-1.5 rounded-xl bg-muted/30 p-3">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span>{t("book.cartHeader")}</span>
+              <span>{equipmentLines.length}</span>
+            </div>
+            <Row
+              label={t("book.serviceLine")}
+              value={servicePriceFmt.display}
+            />
+            {equipmentLines.map((line) => (
+              <Row
+                key={line.equipment_id}
+                label={`${line.quantity}× ${pickLocaleSafe(locale, line.name, line.name_ar)}`}
+                value={
+                  line.is_free
+                    ? t("equipment.included")
+                    : format(line.line_total, line.currency).display
+                }
+              />
+            ))}
+          </div>
+        )}
+
         <div className="flex items-start justify-between pt-3 text-base">
           <span className="text-muted-foreground">{t("book.total")}</span>
           <span className="text-right">
-            <span className="block font-semibold">{price.display}</span>
-            {price.converted && (
+            <span className="block font-semibold">{totalFmt.display}</span>
+            {totalFmt.converted && (
               <span className="mt-0.5 block text-[10px] font-mono text-muted-foreground">
-                ≈ {price.native}
+                ≈ {totalFmt.native}
               </span>
             )}
           </span>
@@ -485,4 +661,10 @@ function BookingSummary({
       </CardContent>
     </Card>
   );
+}
+
+// Tiny inline helper so we don't have to import pickLocale from i18n twice.
+function pickLocaleSafe(locale: string, en: string, ar: string | null) {
+  if (locale === "ar" && ar) return ar;
+  return en;
 }

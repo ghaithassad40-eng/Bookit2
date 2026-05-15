@@ -8,6 +8,7 @@ const STEP_KEYS: { key: BookingStep; i18nKey: TranslationKey }[] = [
   { key: "service", i18nKey: "step.service" },
   { key: "staff", i18nKey: "step.staff" },
   { key: "slot", i18nKey: "step.slot" },
+  { key: "equipment", i18nKey: "step.equipment" },
   { key: "details", i18nKey: "step.details" },
   { key: "review", i18nKey: "step.review" },
   { key: "payment", i18nKey: "step.payment" },
@@ -16,11 +17,17 @@ const STEP_KEYS: { key: BookingStep; i18nKey: TranslationKey }[] = [
 interface Props {
   current: BookingStep;
   showStaff?: boolean;
+  /** Hide the Equipment step entirely when the business has no add-ons. */
+  showEquipment?: boolean;
 }
 
-export function BookingStepper({ current, showStaff = true }: Props) {
+export function BookingStepper({ current, showStaff = true, showEquipment = true }: Props) {
   const { t } = useI18n();
-  const steps = showStaff ? STEP_KEYS : STEP_KEYS.filter((s) => s.key !== "staff");
+  const steps = STEP_KEYS.filter((s) => {
+    if (s.key === "staff" && !showStaff) return false;
+    if (s.key === "equipment" && !showEquipment) return false;
+    return true;
+  });
   const currentIndex = steps.findIndex((s) => s.key === current);
 
   return (
