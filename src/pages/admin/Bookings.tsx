@@ -22,6 +22,7 @@ import { formatDate, formatTime } from "@/lib/utils";
 import { toast } from "sonner";
 import { downloadCsv, toCsv } from "@/lib/csv";
 import { useI18n } from "@/hooks/useI18n";
+import type { TranslationKey } from "@/lib/i18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -79,28 +80,36 @@ export default function Bookings() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or reference"
+            placeholder={t("admin.bookings.search")}
             className="pl-9"
           />
         </div>
         <div className="flex gap-1 overflow-x-auto rounded-xl border border-border bg-card/40 p-1">
-          {(["all", ...STATUSES] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setFilter(s)}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                filter === s ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {s.replace("_", " ")} ({grouped[s] ?? 0})
-            </button>
-          ))}
+          {(["all", ...STATUSES] as const).map((s) => {
+            const label =
+              s === "all"
+                ? t("admin.bookings.filterAll")
+                : t(`status.${s}` as TranslationKey);
+            return (
+              <button
+                key={s}
+                onClick={() => setFilter(s)}
+                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  filter === s ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {label} ({grouped[s] ?? 0})
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3">
-          <CardTitle>{data?.length ?? 0} results</CardTitle>
+          <CardTitle>
+            {t("admin.bookings.results").replace("{{count}}", String(data?.length ?? 0))}
+          </CardTitle>
           <Button
             variant="outline"
             size="sm"
@@ -127,11 +136,11 @@ export default function Bookings() {
               const csv = toCsv(rows);
               const stamp = new Date().toISOString().slice(0, 10);
               downloadCsv(`${business.slug}-bookings-${stamp}.csv`, csv);
-              toast.success(`Exported ${rows.length} bookings`);
+              toast.success(t("admin.bookings.exported").replace("{{count}}", String(rows.length)));
             }}
           >
             <Download className="h-3.5 w-3.5" />
-            Export CSV
+            {t("admin.bookings.exportCsv")}
           </Button>
         </CardHeader>
         <CardContent>
@@ -146,10 +155,10 @@ export default function Bookings() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3 text-left">Reference</th>
-                    <th className="px-4 py-3 text-left">Customer</th>
-                    <th className="px-4 py-3 text-left hidden sm:table-cell">Created</th>
-                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-start">{t("admin.bookings.col.reference")}</th>
+                    <th className="px-4 py-3 text-start">{t("admin.bookings.col.customer")}</th>
+                    <th className="px-4 py-3 text-start hidden sm:table-cell">{t("admin.bookings.col.created")}</th>
+                    <th className="px-4 py-3 text-start">{t("admin.bookings.col.status")}</th>
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
@@ -167,11 +176,13 @@ export default function Bookings() {
                         {formatDate(b.created_at)} · {formatTime(b.created_at)}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant={STATUS_VARIANT[b.status]}>{b.status.replace("_", " ")}</Badge>
+                        <Badge variant={STATUS_VARIANT[b.status]}>
+                          {t(`status.${b.status}` as TranslationKey)}
+                        </Badge>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-end">
                         <Button size="sm" variant="ghost" onClick={() => setSelected(b)}>
-                          View
+                          {t("admin.bookings.action.view")}
                         </Button>
                       </td>
                     </tr>
@@ -180,7 +191,10 @@ export default function Bookings() {
               </table>
             </div>
           ) : (
-            <EmptyState title="No bookings yet" description="Once your customers book, they'll show up here." />
+            <EmptyState
+              title={t("admin.bookings.empty")}
+              description={t("admin.bookings.emptyBody")}
+            />
           )}
         </CardContent>
       </Card>
@@ -194,17 +208,21 @@ export default function Bookings() {
             <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-rose-500/15 text-rose-500">
               <XCircle className="h-5 w-5" />
             </div>
-            <DialogTitle>Cancel this booking and refund the customer?</DialogTitle>
+            <DialogTitle>{t("admin.bookings.cancelDialogTitle")}</DialogTitle>
             <DialogDescription>
-              {cancelConfirm?.payment_status === "paid"
-                ? `${cancelConfirm.customer_name}'s slot will be released and the full payment will be refunded to their original payment method. This cannot be undone from the admin UI.`
-                : `${cancelConfirm?.customer_name ?? "Customer"}'s slot will be released. There is no captured payment to refund.`}
+              {(cancelConfirm?.payment_status === "paid"
+                ? t("admin.bookings.cancelDialogPaid")
+                : t("admin.bookings.cancelDialogUnpaid")
+              ).replace(
+                "{{name}}",
+                cancelConfirm?.customer_name ?? t("admin.bookings.fallbackCustomer"),
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline" disabled={cancelMutation.isPending}>
-                Keep booking
+                {t("admin.bookings.keepBooking")}
               </Button>
             </DialogClose>
             <Button
@@ -218,9 +236,10 @@ export default function Bookings() {
                     business_id: cancelConfirm.business_id,
                   });
                   toast.success(
-                    result.refunded
-                      ? `Cancelled and refunded ${cancelConfirm.customer_name}`
-                      : `Cancelled ${cancelConfirm.customer_name}`,
+                    (result.refunded
+                      ? t("admin.bookings.toastCancelRefunded")
+                      : t("admin.bookings.toastCancelled")
+                    ).replace("{{name}}", cancelConfirm.customer_name),
                   );
                   // Keep the detail dialog open and reflect the new status.
                   if (selected?.id === cancelConfirm.id) {
@@ -228,17 +247,19 @@ export default function Bookings() {
                   }
                   setCancelConfirm(null);
                 } catch (err) {
-                  toast.error(err instanceof Error ? err.message : "Cancel failed");
+                  toast.error(
+                    err instanceof Error ? err.message : t("admin.bookings.toastCancelFailed"),
+                  );
                 }
               }}
             >
               {cancelMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Cancelling…
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("admin.bookings.cancelling")}
                 </>
               ) : (
                 <>
-                  <XCircle className="h-4 w-4" /> Yes, cancel & refund
+                  <XCircle className="h-4 w-4" /> {t("admin.bookings.confirmCancel")}
                 </>
               )}
             </Button>
@@ -253,14 +274,15 @@ export default function Bookings() {
           </DialogHeader>
           {selected && (
             <div className="space-y-2 text-sm">
-              <Row label="Reference" value={selected.booking_reference} />
-              <Row label="Status" value={selected.status} />
-              {selected.customer_email && <Row label="Email" value={selected.customer_email} />}
-              {selected.customer_phone && <Row label="Phone" value={selected.customer_phone} />}
-              {selected.notes && <Row label="Notes" value={selected.notes} />}
-              <Row label="Created" value={`${formatDate(selected.created_at)} · ${formatTime(selected.created_at)}`} />
+              <Row label={t("admin.bookings.col.reference")} value={selected.booking_reference} />
+              <Row label={t("admin.bookings.col.status")} value={t(`status.${selected.status}` as TranslationKey)} />
+              {selected.customer_email && <Row label={t("admin.bookings.row.email")} value={selected.customer_email} />}
+              {selected.customer_phone && <Row label={t("admin.bookings.row.phone")} value={selected.customer_phone} />}
+              {selected.notes && <Row label={t("admin.bookings.row.notes")} value={selected.notes} />}
+              <Row label={t("admin.bookings.col.created")} value={`${formatDate(selected.created_at)} · ${formatTime(selected.created_at)}`} />
               <div className="flex flex-wrap gap-2 pt-3">
                 {STATUSES.filter((s) => s !== selected.status).map((s) => {
+                  const statusLabel = t(`status.${s}` as TranslationKey);
                   // "Cancelled" is special — it triggers the refund flow via a
                   // confirmation dialog. The other statuses are plain updates.
                   if (s === "cancelled") {
@@ -273,7 +295,7 @@ export default function Bookings() {
                         onClick={() => setCancelConfirm(selected)}
                       >
                         <XCircle className="h-3.5 w-3.5" />
-                        Cancel & refund
+                        {t("admin.bookings.action.cancelRefund")}
                       </Button>
                     );
                   }
@@ -290,14 +312,18 @@ export default function Bookings() {
                             status: s,
                             businessId: selected.business_id,
                           });
-                          toast.success(`Marked ${s.replace("_", " ")}`);
+                          toast.success(
+                            t("admin.bookings.toastMarked").replace("{{status}}", statusLabel),
+                          );
                           setSelected({ ...selected, status: s });
                         } catch (e) {
-                          toast.error(e instanceof Error ? e.message : "Update failed");
+                          toast.error(
+                            e instanceof Error ? e.message : t("admin.bookings.toastUpdateFailed"),
+                          );
                         }
                       }}
                     >
-                      Mark {s.replace("_", " ")}
+                      {t("admin.bookings.action.mark")} {statusLabel}
                     </Button>
                   );
                 })}
