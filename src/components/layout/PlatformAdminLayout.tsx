@@ -4,6 +4,7 @@ import { Building2, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
 import { Button } from "@/components/ui/button";
+import { LoadingSplash } from "@/components/ui/LoadingSplash";
 import { cn } from "@/lib/utils";
 
 /**
@@ -29,7 +30,14 @@ export function PlatformAdminLayout() {
     }
   }, [loading, user, demoUser, isPlatformAdmin, navigate]);
 
-  if (loading || !isPlatformAdmin) {
+  // While auth is resolving, show the brand splash. Once we know the user
+  // *isn't* a platform admin we render nothing and let the useEffect above
+  // bounce them away — flashing the splash before the redirect would just
+  // be noise.
+  if (loading) {
+    return <LoadingSplash />;
+  }
+  if (!isPlatformAdmin) {
     return null;
   }
 

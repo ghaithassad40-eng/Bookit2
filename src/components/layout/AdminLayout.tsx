@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useI18n } from "@/hooks/useI18n";
 import { pickLocale } from "@/lib/i18n";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSplash } from "@/components/ui/LoadingSplash";
 import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { cn, initials } from "@/lib/utils";
@@ -52,12 +52,7 @@ export function AdminLayout() {
   }, [loading, user, demoUser, navigate]);
 
   if (loading || isLoading) {
-    return (
-      <div className="container py-12 space-y-6">
-        <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-72 w-full" />
-      </div>
-    );
+    return <LoadingSplash />;
   }
 
   if (!data) {

@@ -13,8 +13,58 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <!--
+      Boot splash. Renders immediately on HTML parse — before the React bundle
+      downloads / parses / mounts — so the user sees the brand animation the
+      instant the page opens. Hidden by main.tsx once React renders (with a
+      5s safety timer so a JS failure can never leave it stuck on screen).
+      Inlined intentionally; do not extract to an external stylesheet.
+    -->
+    <style>
+      .boot-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background: #0a1226;
+        background-image: radial-gradient(
+          circle at 50% 38%,
+          #16264a 0%,
+          #0a1226 55%,
+          #060a18 100%
+        );
+        transition: opacity 0.45s ease;
+      }
+      .boot-loader.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .boot-loader__video {
+        width: min(320px, 64vw);
+        height: auto;
+        max-height: 60vh;
+        object-fit: contain;
+        /* Subtle glow so the video sits in the gradient rather than on top */
+        filter: drop-shadow(0 8px 40px rgba(201, 162, 39, 0.18));
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-loader__video { animation: none; }
+      }
+    </style>
   </head>
   <body class="bg-background text-foreground antialiased">
+    <div id="boot-loader" class="boot-loader" aria-hidden="true">
+      <video
+        class="boot-loader__video"
+        src="/bookit-loader.mp4"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      ></video>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

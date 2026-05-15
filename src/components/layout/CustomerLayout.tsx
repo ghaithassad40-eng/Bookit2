@@ -1,7 +1,7 @@
 import { Link, Outlet, useParams } from "react-router-dom";
 import { useBusiness } from "@/hooks/useBusiness";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSplash } from "@/components/ui/LoadingSplash";
 import { MusicControls } from "@/components/customer/MusicControls";
 import { LanguagePicker } from "@/components/customer/LanguagePicker";
 import { initials } from "@/lib/utils";
@@ -17,12 +17,7 @@ export function CustomerLayout() {
   const { customer, signOut } = useCustomerAuth();
 
   if (isLoading) {
-    return (
-      <div className="container py-12 space-y-6">
-        <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-72 w-full" />
-      </div>
-    );
+    return <LoadingSplash />;
   }
 
   if (error || !data) {
