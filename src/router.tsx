@@ -13,6 +13,7 @@ import Confirmation from "@/pages/customer/Confirmation";
 import PaymentCallback from "@/pages/customer/PaymentCallback";
 import PaymentFailed from "@/pages/customer/PaymentFailed";
 import MyFatoorahMock from "@/pages/customer/MyFatoorahMock";
+import Account from "@/pages/customer/Account";
 import Login from "@/pages/admin/Login";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
@@ -54,6 +55,10 @@ const mainRoutes: RouteObject[] = [
   // MyFatoorah-style hosted page (only used when running without real
   // MyFatoorah credentials — see src/lib/myfatoorah.ts).
   { path: "/payment/myfatoorah-mock", element: <MyFatoorahMock /> },
+  // Customer self-service hub — orders, profile, saved payment methods.
+  // Lives on the main host (not per-business) since customers cross
+  // businesses. The page itself bounces anonymous visitors back to /.
+  { path: "/account", element: <Account /> },
   {
     path: "/business/:slug",
     element: <CustomerLayout />,

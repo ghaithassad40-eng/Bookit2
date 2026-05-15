@@ -130,6 +130,62 @@ export function signOutCustomer(): void {
   setStoredCustomer(null);
 }
 
+export interface UpdateProfileInput {
+  name?: string;
+  phone?: string | null;
+}
+
+/** Update the signed-in customer's profile fields. Returns the updated
+ *  CustomerProfile or null when no customer is signed in. Email is not
+ *  editable here — changing email is a security-sensitive operation
+ *  that needs a re-auth + email-verification flow before it can ship. */
+export function updateCustomerProfile(input: UpdateProfileInput): CustomerProfile | null {
+  const current = getStoredCustomer();
+  if (!current) return null;
+  const registry = getRegistry();
+  const existing = registry[current.email];
+  if (!existing) return null;
+  const next: CustomerProfile = {
+    ...existing,
+    name: input.name?.trim() ? input.name.trim() : existing.name,
+    phone:
+      input.phone === undefined
+        ? existing.phone
+        : input.phone?.trim()
+          ? input.phone.trim()
+          : null,
+  };
+  registry[current.email] = next;
+  writeJson(REGISTRY_KEY, registry);
+  setStoredCustomer(next);
+  return next;
+}
+
+export type PasswordChangeError = "wrong-current" | "short-new" | "no-account";
+
+export interface PasswordChangeResult {
+  ok: boolean;
+  error?: PasswordChangeError;
+}
+
+/** Change the signed-in customer's password. Requires the current
+ *  password — same minimum length rule as sign-up (6 chars). */
+export function changeCustomerPassword(
+  current: string,
+  next: string,
+): PasswordChangeResult {
+  const customer = getStoredCustomer();
+  if (!customer) return { ok: false, error: "no-account" };
+  if (next.length < 6) return { ok: false, error: "short-new" };
+  const passwords = getPasswords();
+  if (passwords[customer.email] !== current) {
+    return { ok: false, error: "wrong-current" };
+  }
+  passwords[customer.email] = next;
+  writeJson(PASSWORDS_KEY, passwords);
+  return { ok: true };
+}
+
 /**
  * Subscribe to customer-auth changes. Fires when this tab signs in/out
  * (via our custom event) AND when another tab does (via the `storage` event).

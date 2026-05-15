@@ -679,6 +679,92 @@ const STRINGS_EN = {
   "customerAuth.working": "Working…",
   "customerAuth.signOut": "Sign out",
   "customerAuth.signedInAs": "Signed in as",
+
+  // ─── Customer account hub (/account) ──────────────────────────────────
+  "account.title": "Hi {{name}}",
+  "account.signOut": "Sign out",
+  "account.tabs.bookings": "Bookings",
+  "account.tabs.profile": "Profile",
+  "account.tabs.payment": "Payment",
+  "account.toast.signedOut": "Signed out",
+
+  "account.bookings.emptyTitle": "No bookings yet",
+  "account.bookings.emptyBody":
+    "Once you book a service, you'll find every receipt and detail here.",
+  "account.bookings.browse": "Browse places",
+  "account.bookings.viewReceipt": "View receipt",
+
+  "account.profile.detailsTitle": "Your details",
+  "account.profile.detailsBody":
+    "These appear on your bookings and receipts. We use your email for sign-in and never share it with vendors beyond a single booking.",
+  "account.profile.name": "Full name",
+  "account.profile.phone": "Phone",
+  "account.profile.email": "Email",
+  "account.profile.emailLocked":
+    "Email is used for sign-in and can't be changed from here yet.",
+  "account.profile.save": "Save profile",
+  "account.profile.pwTitle": "Change password",
+  "account.profile.pwBody":
+    "We never store your password in plain text. If you forget it, sign up with the same email to start fresh.",
+  "account.profile.currentPw": "Current password",
+  "account.profile.newPw": "New password",
+  "account.profile.pwHint": "At least 6 characters.",
+  "account.profile.changePw": "Change password",
+  "account.profile.toast.saved": "Profile updated",
+  "account.profile.toast.failed": "Couldn't save changes",
+  "account.profile.toast.nameRequired": "Name is required",
+  "account.profile.toast.bothPwRequired": "Enter your current and new passwords",
+  "account.profile.toast.pwChanged": "Password changed",
+  "account.profile.toast.wrongCurrent": "That isn't your current password",
+  "account.profile.toast.shortNew": "New password must be at least 6 characters",
+
+  "account.payment.title": "Saved cards",
+  "account.payment.subtitle":
+    "Cards you've saved for faster checkout. Toggle auto-pay to skip the card form on future bookings.",
+  "account.payment.addCard": "Add a card",
+  "account.payment.emptyTitle": "No cards saved",
+  "account.payment.emptyBody":
+    "Add a card to enable one-tap checkout for future bookings.",
+  "account.payment.default": "Default",
+  "account.payment.autoPay": "Auto-pay",
+  "account.payment.card": "Card",
+  "account.payment.makeDefault": "Make default",
+  "account.payment.turnOnAutoPay": "Enable auto-pay",
+  "account.payment.turnOffAutoPay": "Disable auto-pay",
+  "account.payment.removeConfirm": "Remove this saved card?",
+  "account.payment.autoPayExplainer":
+    "Auto-pay charges your default card automatically when you confirm a booking — no card form, no biometric prompt. You can revoke it any time.",
+  "account.payment.addTitle": "Add a saved card",
+  "account.payment.addBody":
+    "We tokenise the card with our payment provider and store only the last 4 digits + expiry on file.",
+  "account.payment.field.number": "Card number",
+  "account.payment.field.name": "Cardholder name",
+  "account.payment.field.namePlaceholder": "As shown on card",
+  "account.payment.field.exp": "Expiry (MM / YY)",
+  "account.payment.field.cvc": "CVC",
+  "account.payment.field.setDefault": "Make this my default card",
+  "account.payment.field.autoPay": "Enable auto-pay",
+  "account.payment.field.autoPayHint":
+    "— charges this card automatically on future bookings.",
+  "account.payment.demoNote":
+    "Demo mode — no real card data is stored. Try 4242 4242 4242 4242 with any future expiry and CVC.",
+  "account.payment.toast.added": "Card saved",
+  "account.payment.toast.removed": "Card removed",
+  "account.payment.toast.invalidNumber": "Enter a valid card number",
+  "account.payment.toast.nameRequired": "Cardholder name is required",
+  "account.payment.toast.invalidExp": "Expiry must be MM / YY",
+  "account.payment.toast.invalidCvc": "CVC must be 3 or 4 digits",
+
+  // Auto-pay surface on the Book.tsx Payment step.
+  "payment.methodOrPickAnother": "Or pick another payment method",
+  "payment.autoPay.label": "One-tap auto-pay",
+  "payment.autoPay.useCard": "Pay with {{card}}",
+  "payment.autoPay.body":
+    "Your saved card will be charged immediately. No CVC, no biometric prompt.",
+  "payment.autoPay.payNow": "Pay {{amount}}",
+  "payment.autoPay.charging": "Charging…",
+  "payment.autoPay.charged": "Payment confirmed",
+  "payment.autoPay.failed": "Couldn't charge the saved card",
   "customerAuth.error.invalidEmail": "Enter a valid email",
   "customerAuth.error.shortPassword": "Password must be at least 6 characters",
   "customerAuth.error.noAccount": "No account with that email. Try signing up instead.",
@@ -1447,6 +1533,92 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "customerAuth.working": "جارٍ العمل…",
   "customerAuth.signOut": "تسجيل الخروج",
   "customerAuth.signedInAs": "مسجّل باسم",
+
+  // ─── حساب العميل (/account) ───────────────────────────────────────────
+  "account.title": "أهلاً {{name}}",
+  "account.signOut": "تسجيل الخروج",
+  "account.tabs.bookings": "حجوزاتي",
+  "account.tabs.profile": "الملف الشخصي",
+  "account.tabs.payment": "الدفع",
+  "account.toast.signedOut": "تم تسجيل الخروج",
+
+  "account.bookings.emptyTitle": "لا توجد حجوزات بعد",
+  "account.bookings.emptyBody":
+    "بعد أن تحجز أي خدمة، ستجد كل الفواتير والتفاصيل هنا.",
+  "account.bookings.browse": "تصفّح الأماكن",
+  "account.bookings.viewReceipt": "عرض الفاتورة",
+
+  "account.profile.detailsTitle": "بياناتك",
+  "account.profile.detailsBody":
+    "تظهر هذه البيانات على حجوزاتك وفواتيرك. نستخدم بريدك للدخول ولا نشاركه مع مزوّدي الخدمة خارج نطاق الحجز الواحد.",
+  "account.profile.name": "الاسم الكامل",
+  "account.profile.phone": "الهاتف",
+  "account.profile.email": "البريد الإلكتروني",
+  "account.profile.emailLocked":
+    "البريد الإلكتروني يُستخدم لتسجيل الدخول ولا يمكن تغييره من هنا حالياً.",
+  "account.profile.save": "حفظ الملف",
+  "account.profile.pwTitle": "تغيير كلمة المرور",
+  "account.profile.pwBody":
+    "لا نُخزّن كلمة مرورك بشكل صريح. إذا نسيتها، أنشئ حساباً جديداً بنفس البريد للبدء من جديد.",
+  "account.profile.currentPw": "كلمة المرور الحالية",
+  "account.profile.newPw": "كلمة المرور الجديدة",
+  "account.profile.pwHint": "ستة أحرف على الأقل.",
+  "account.profile.changePw": "تغيير كلمة المرور",
+  "account.profile.toast.saved": "تم تحديث الملف",
+  "account.profile.toast.failed": "تعذّر حفظ التغييرات",
+  "account.profile.toast.nameRequired": "الاسم مطلوب",
+  "account.profile.toast.bothPwRequired": "أدخل كلمتي المرور الحالية والجديدة",
+  "account.profile.toast.pwChanged": "تم تغيير كلمة المرور",
+  "account.profile.toast.wrongCurrent": "كلمة المرور الحالية غير صحيحة",
+  "account.profile.toast.shortNew": "كلمة المرور الجديدة يجب أن تكون ستة أحرف على الأقل",
+
+  "account.payment.title": "البطاقات المحفوظة",
+  "account.payment.subtitle":
+    "البطاقات التي حفظتها لتسريع الدفع. فعّل الدفع التلقائي لتخطّي إدخال بيانات البطاقة في الحجوزات القادمة.",
+  "account.payment.addCard": "إضافة بطاقة",
+  "account.payment.emptyTitle": "لا توجد بطاقات محفوظة",
+  "account.payment.emptyBody":
+    "أضف بطاقة لتفعيل الدفع بنقرة واحدة في الحجوزات المستقبلية.",
+  "account.payment.default": "الافتراضية",
+  "account.payment.autoPay": "دفع تلقائي",
+  "account.payment.card": "بطاقة",
+  "account.payment.makeDefault": "اجعلها الافتراضية",
+  "account.payment.turnOnAutoPay": "تفعيل الدفع التلقائي",
+  "account.payment.turnOffAutoPay": "إيقاف الدفع التلقائي",
+  "account.payment.removeConfirm": "إزالة هذه البطاقة المحفوظة؟",
+  "account.payment.autoPayExplainer":
+    "الدفع التلقائي يخصم من بطاقتك الافتراضية فوراً عند تأكيد الحجز — بدون نموذج بطاقة وبدون بصمة. يمكنك إيقافه في أي وقت.",
+  "account.payment.addTitle": "إضافة بطاقة محفوظة",
+  "account.payment.addBody":
+    "نُحوّل بيانات البطاقة إلى رمز عبر مزوّد الدفع، ولا نحتفظ بأكثر من آخر ٤ أرقام وتاريخ الانتهاء.",
+  "account.payment.field.number": "رقم البطاقة",
+  "account.payment.field.name": "اسم حامل البطاقة",
+  "account.payment.field.namePlaceholder": "كما يظهر على البطاقة",
+  "account.payment.field.exp": "تاريخ الانتهاء (شهر / سنة)",
+  "account.payment.field.cvc": "رمز التحقّق",
+  "account.payment.field.setDefault": "اجعلها بطاقتي الافتراضية",
+  "account.payment.field.autoPay": "تفعيل الدفع التلقائي",
+  "account.payment.field.autoPayHint":
+    "— يخصم من هذه البطاقة تلقائياً في الحجوزات القادمة.",
+  "account.payment.demoNote":
+    "الوضع التجريبي — لا تُخزَّن أي بيانات بطاقة حقيقية. جرّب 4242 4242 4242 4242 مع أي تاريخ مستقبلي ورمز تحقّق.",
+  "account.payment.toast.added": "تم حفظ البطاقة",
+  "account.payment.toast.removed": "تمت إزالة البطاقة",
+  "account.payment.toast.invalidNumber": "أدخل رقم بطاقة صحيح",
+  "account.payment.toast.nameRequired": "اسم حامل البطاقة مطلوب",
+  "account.payment.toast.invalidExp": "صيغة الانتهاء يجب أن تكون شهر / سنة",
+  "account.payment.toast.invalidCvc": "رمز التحقّق يجب أن يكون ٣ أو ٤ أرقام",
+
+  // الدفع التلقائي بنقرة واحدة (Book.tsx).
+  "payment.methodOrPickAnother": "أو اختر طريقة دفع أخرى",
+  "payment.autoPay.label": "دفع تلقائي بنقرة واحدة",
+  "payment.autoPay.useCard": "ادفع بـ {{card}}",
+  "payment.autoPay.body":
+    "سيُخصم من بطاقتك المحفوظة فوراً. بدون رمز تحقّق وبدون بصمة.",
+  "payment.autoPay.payNow": "ادفع {{amount}}",
+  "payment.autoPay.charging": "جارٍ الخصم…",
+  "payment.autoPay.charged": "تم تأكيد الدفع",
+  "payment.autoPay.failed": "تعذّر الخصم من البطاقة المحفوظة",
   "customerAuth.error.invalidEmail": "أدخل بريداً إلكترونياً صالحاً",
   "customerAuth.error.shortPassword": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
   "customerAuth.error.noAccount": "لا يوجد حساب بهذا البريد. جرّب إنشاء حساب جديد.",

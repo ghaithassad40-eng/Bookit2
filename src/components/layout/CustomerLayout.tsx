@@ -90,15 +90,20 @@ export function CustomerLayout() {
             <div className="flex items-center gap-2">
               {customer && (
                 <div
-                  className="hidden items-center gap-1.5 rounded-full border border-border bg-card/60 px-2.5 py-1 text-xs sm:inline-flex"
+                  className="hidden items-center gap-1.5 rounded-full border border-border bg-card/60 ps-2.5 pe-1.5 py-0.5 text-xs sm:inline-flex"
                   title={`${t("customerAuth.signedInAs")} ${customer.email}`}
                 >
-                  <UserCircle2 className="h-3.5 w-3.5 text-accent" />
-                  <span className="max-w-[120px] truncate">{customer.name}</span>
+                  <Link
+                    to="/account"
+                    className="flex items-center gap-1.5 text-foreground transition-colors hover:text-accent"
+                  >
+                    <UserCircle2 className="h-3.5 w-3.5 text-accent" />
+                    <span className="max-w-[120px] truncate">{customer.name}</span>
+                  </Link>
                   <button
                     onClick={signOut}
                     aria-label={t("customerAuth.signOut")}
-                    className="ms-1 text-muted-foreground hover:text-foreground"
+                    className="ms-1 grid h-5 w-5 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     <LogOut className="h-3 w-3" />
                   </button>
