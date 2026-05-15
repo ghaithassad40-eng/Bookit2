@@ -77,8 +77,10 @@ deps, browser-extension malware.
 ### Slug squatting
 - `src/lib/slug.ts` rejects reserved words (`admin`, `platform`, `login`,
   `payment`, `privacy`, `terms`, …) and validates `^[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$`.
-- Enforced client-side in `Settings.tsx` on every slug update. **Backend
-  must mirror this** — see *Production checklist*.
+- Enforced client-side in `Settings.tsx` on every slug update.
+- Mirrored in `supabase/migrations/0011_production_validation.sql` via the
+  `reject_reserved_slug` trigger — direct table writes hit the same
+  RESERVED list + regex.
 
 ### XSS / injection surface
 - React escapes all interpolated strings; no `dangerouslySetInnerHTML` is
@@ -91,44 +93,38 @@ deps, browser-extension malware.
 
 ---
 
-## Production checklist (must complete before launch)
+## Production hardening status
 
-> Anything below this line is **not** enforced in the current codebase and
-> must be wired into Supabase / your hosting platform before allowing
-> non-demo traffic.
+### ✅ Done (migrations 0009 / 0010 / 0011 — apply via `supabase db push`)
 
-### 1. Row-Level Security (RLS)
-Enable RLS on every table and ship policies that match the in-app gates.
-At minimum:
+| Item | Where |
+|---|---|
+| RLS enabled + scoped on every table | `0010_production_rls.sql` |
+| `businesses` public read = `status='approved'` only | `0010` |
+| `bookings` customer-scoped read by `auth.email()` | `0010` |
+| `bookings` customer cancel restricted to `status→cancelled` | `0010` |
+| `equipment` / `booking_equipment` / `reviews` RLS | `0010` |
+| `customer_payment_methods` self-only (no platform-admin override) | `0010` |
+| `audit_log` read-by-role, no direct insert | `0010` |
+| `user_roles` table + `is_platform_admin()` helper | `0009` + `0010` |
+| Reserved-slug rejection at the DB | `0011` trigger |
+| Slug format regex enforced at the DB | `0011` trigger |
+| `create_booking_atomic` with `SELECT FOR UPDATE` slot lock | `0011` RPC |
+| `create_booking_atomic` rejects mismatched `slot.business_id` | `0011` |
+| `cancel_booking_atomic` with ownership re-check | `0011` RPC |
+| Slot `booked_count` decremented on cancel | `0011` |
+| Audit log triggers on `businesses.status`, `bookings.status`, `payouts` | `0011` |
 
-- `businesses`: vendors can `SELECT` only their own row; platform admins
-  can `SELECT/UPDATE` any row. Public `SELECT` is allowed *only* when
-  `status = 'approved'`.
-- `bookings`: customers can `SELECT/UPDATE/DELETE` only rows where
-  `customer_email = auth.email()`; vendors can `SELECT/UPDATE` rows for
-  their own `business_id`. **This is the server-side mirror of the
-  Confirmation.tsx ownership gate** — without it, the gate is a
-  client-only check that an attacker can bypass with a raw API call.
-- `business_configs`, `services`, `staff`, `time_slots`: scoped by
-  `business_id` ownership.
-- `payouts`: vendor read-only on own rows; platform admin full access.
+### ⚠️ Required for go-live (NOT yet automated — see DEPLOYMENT.md)
 
-### 2. Server-side slug enforcement
-- Add a CHECK constraint: `slug ~ '^[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$'`.
-- Add a UNIQUE index on `slug`.
-- Replicate `RESERVED_SLUGS` from `src/lib/slug.ts` in a Postgres
-  function or trigger and reject inserts/updates that hit it.
+### 1. Server-side role enforcement at the application boundary
+- Edge Functions that mutate sensitive state must verify the JWT's
+  `is_platform_admin()` server-side, not just check role in the client.
+  The DB-level `is_platform_admin()` helper already exists; Edge
+  Functions need to call it via the user's JWT before performing
+  privileged work.
 
-### 3. Server-side role enforcement
-- The `useAuth.ts` rule "demoUser.role is ignored in production" is a
-  client check. The backend must additionally refuse any mutation that
-  would require `platform_admin` unless the JWT's `app_metadata.role`
-  claim is `platform_admin`.
-- The Edge Function that approves/rejects businesses must re-check the
-  caller's role server-side. Do not rely on the client-side route guard
-  alone.
-
-### 4. Booking cancellation / refund authorization
+### 2. Booking cancellation / refund authorization
 - The refund Edge Function must independently verify that the calling
   customer's email matches the booking's `customer_email` before
   triggering the MyFatoorah refund. The Confirmation.tsx check is the
