@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,18 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
     }
   }, [openOverride, isFirstVisit]);
 
+  // Lock body scroll + hide the page underneath while the modal is open so
+  // the hero copy / CTAs behind it can't bleed through the backdrop.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   function commit() {
     setCountry(pickedCountry);
     if (pickedLocale !== locale) setLocale(pickedLocale);
@@ -53,22 +66,28 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
     onClose?.();
   }
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] grid place-items-center p-4"
+          className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="welcome-picker-title"
         >
-          {/* Backdrop */}
+          {/* Backdrop — near-opaque so the page underneath cannot bleed
+              through the modal at any point. */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={dismiss}
-            className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
+            className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl"
           />
 
           {/* Modal */}
@@ -77,7 +96,7 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ type: "spring", damping: 22, stiffness: 240 }}
-            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl dark:bg-slate-950"
+            className="relative z-10 my-auto w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl dark:bg-slate-950"
           >
             {/* Hero band — solid brand colour, white text, guaranteed contrast */}
             <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-emerald-500 px-6 pb-7 pt-6 text-white">
@@ -93,7 +112,7 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
                 <Sparkles className="h-5 w-5" />
               </div>
 
-              <h2 className="mt-4 text-2xl font-bold tracking-tight text-white">
+              <h2 id="welcome-picker-title" className="mt-4 text-2xl font-bold tracking-tight text-white">
                 {t("welcome.title")}
               </h2>
               <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-white/85">
@@ -202,6 +221,7 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
