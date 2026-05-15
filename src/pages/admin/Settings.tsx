@@ -28,6 +28,7 @@ export default function Settings() {
   const { business, config } = useOutletContext<Ctx>();
   const qc = useQueryClient();
   const [name, setName] = useState(business.name);
+  const [nameAr, setNameAr] = useState(business.name_ar ?? "");
   const [slug, setSlug] = useState(business.slug);
   const [logoUrl, setLogoUrl] = useState(business.logo_url ?? "");
 
@@ -67,7 +68,12 @@ export default function Settings() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("businesses")
-        .update({ name, slug, logo_url: logoUrl || null })
+        .update({
+          name,
+          name_ar: nameAr.trim() ? nameAr.trim() : null,
+          slug,
+          logo_url: logoUrl || null,
+        })
         .eq("id", business.id);
       if (error) throw error;
     },
@@ -118,8 +124,16 @@ export default function Settings() {
           <CardDescription>Public-facing identity for /business/{business.slug}.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-3">
-          <Field label="Display name">
+          <Field label="Display name (English)">
             <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+          <Field label="Display name (العربية)">
+            <Input
+              dir="rtl"
+              value={nameAr}
+              onChange={(e) => setNameAr(e.target.value)}
+              placeholder="ترجمة عربية اختيارية"
+            />
           </Field>
           <Field label="Slug">
             <Input value={slug} onChange={(e) => setSlug(e.target.value)} />

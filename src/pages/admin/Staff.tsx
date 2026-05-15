@@ -22,9 +22,13 @@ interface Ctx {
 
 const empty: Partial<StaffRow> = {
   name: "",
+  name_ar: "",
   role: "",
+  role_ar: "",
   specialty: "",
+  specialty_ar: "",
   bio: "",
+  bio_ar: "",
   is_active: true,
   rating: 5,
 };
@@ -142,18 +146,42 @@ export default function Staff() {
             <DialogTitle>{editing?.id ? "Edit staff" : "New staff"}</DialogTitle>
           </DialogHeader>
           {editing && (
-            <div className="space-y-3">
-              <Field label="Name">
-                <Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
-              </Field>
+            <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Role">
+                <Field label="Name (English)">
+                  <Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
+                </Field>
+                <Field label="Name (العربية)">
+                  <Input
+                    dir="rtl"
+                    value={editing.name_ar ?? ""}
+                    onChange={(e) => setEditing({ ...editing, name_ar: e.target.value })}
+                    placeholder="اختياري"
+                  />
+                </Field>
+                <Field label="Role (English)">
                   <Input value={editing.role ?? ""} onChange={(e) => setEditing({ ...editing, role: e.target.value })} />
                 </Field>
-                <Field label="Specialty">
+                <Field label="Role (العربية)">
+                  <Input
+                    dir="rtl"
+                    value={editing.role_ar ?? ""}
+                    onChange={(e) => setEditing({ ...editing, role_ar: e.target.value })}
+                    placeholder="اختياري"
+                  />
+                </Field>
+                <Field label="Specialty (English)">
                   <Input
                     value={editing.specialty ?? ""}
                     onChange={(e) => setEditing({ ...editing, specialty: e.target.value })}
+                  />
+                </Field>
+                <Field label="Specialty (العربية)">
+                  <Input
+                    dir="rtl"
+                    value={editing.specialty_ar ?? ""}
+                    onChange={(e) => setEditing({ ...editing, specialty_ar: e.target.value })}
+                    placeholder="اختياري"
                   />
                 </Field>
                 <Field label="Rating">
@@ -173,10 +201,18 @@ export default function Staff() {
                   />
                 </Field>
               </div>
-              <Field label="Bio">
+              <Field label="Bio (English)">
                 <Textarea
                   value={editing.bio ?? ""}
                   onChange={(e) => setEditing({ ...editing, bio: e.target.value })}
+                />
+              </Field>
+              <Field label="Bio (العربية)">
+                <Textarea
+                  dir="rtl"
+                  value={editing.bio_ar ?? ""}
+                  onChange={(e) => setEditing({ ...editing, bio_ar: e.target.value })}
+                  placeholder="اختياري"
                 />
               </Field>
             </div>

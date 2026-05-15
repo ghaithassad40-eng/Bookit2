@@ -102,16 +102,22 @@ export default function Slots() {
                   {formatDate(day + "T00:00:00")}
                 </h3>
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  {daySlots.map((s) => (
+                  {daySlots.map((s) => {
+                    const svc = services?.find((x) => x.id === s.service_id);
+                    const stf = staff?.find((x) => x.id === s.staff_id);
+                    return (
                     <div
                       key={s.id}
                       className="flex items-center justify-between rounded-xl border border-border/60 bg-card/40 px-3 py-2 text-sm"
                     >
-                      <div>
+                      <div className="min-w-0">
                         <div className="font-medium">
                           {formatTime(s.start_time)} – {formatTime(s.end_time)}
                         </div>
                         <div className="text-xs text-muted-foreground">
+                          {svc ? svc.name : "Any service"}
+                          {stf ? ` · ${stf.name}` : ""}
+                          {" · "}
                           {s.booked_count}/{s.capacity} booked
                         </div>
                       </div>
@@ -143,7 +149,8 @@ export default function Slots() {
                         </Button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))
