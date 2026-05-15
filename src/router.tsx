@@ -6,6 +6,7 @@ import {
 import Home from "@/pages/Home";
 import Legal from "@/pages/Legal";
 import NotFound from "@/pages/NotFound";
+import Health from "@/pages/Health";
 import { CustomerLayout } from "@/components/layout/CustomerLayout";
 import Landing from "@/pages/customer/Landing";
 import Book from "@/pages/customer/Book";
@@ -52,6 +53,9 @@ const mainRoutes: RouteObject[] = [
   { path: "/", element: <Home /> },
   { path: "/privacy", element: <Legal kind="privacy" /> },
   { path: "/terms", element: <Legal kind="terms" /> },
+  // Deployment smoke-test page. Run after each deploy to verify every
+  // backend integration is wired. Public on purpose; no secrets leak.
+  { path: "/health", element: <Health /> },
   // MyFatoorah-style hosted page (only used when running without real
   // MyFatoorah credentials — see src/lib/myfatoorah.ts).
   { path: "/payment/myfatoorah-mock", element: <MyFatoorahMock /> },
