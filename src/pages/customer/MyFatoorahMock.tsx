@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Loader2, ShieldCheck, ChevronLeft } from "lucide-react";
+import { Fingerprint, Lock, Loader2, ShieldCheck, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,8 +13,13 @@ import {
   formatExpiry,
   isExpiryFuture,
   luhnValid,
+  PAYMENT_METHODS,
   type PaymentMethodId,
 } from "@/lib/payments";
+
+/** Wallet-style methods get a biometric-prompt mock; card-style methods get
+ *  the card-entry form. Anything else (or 'any') defaults to the card form. */
+const WALLET_METHODS = new Set<PaymentMethodId>(["apple_pay", "google_pay", "samsung_pay"]);
 
 /**
  * A mock of the MyFatoorah hosted payment page. This URL is hit when
@@ -30,7 +35,6 @@ export default function MyFatoorahMock() {
   const [cvc, setCvc] = useState("123");
   const [holder, setHolder] = useState("");
   const [otp, setOtp] = useState("");
-  const [stage, setStage] = useState<"card" | "otp" | "processing">("card");
   const [error, setError] = useState<string | null>(null);
 
   const amount = parseFloat(params.get("amount") ?? "0");
@@ -40,7 +44,22 @@ export default function MyFatoorahMock() {
   const method = (params.get("method") ?? "any") as PaymentMethodId | "any";
   const returnTo = params.get("returnTo") ?? "/";
 
+  // Wallet methods (Apple Pay / Google Pay / Samsung Pay) skip the card form
+  // entirely — they're tokenised on the device, so the staging mock shows a
+  // single biometric-confirm step. Card-style methods (visa, knet, mada,
+  // stcpay, uaecc, amex) get the existing card form.
+  const isWallet = method !== "any" && WALLET_METHODS.has(method as PaymentMethodId);
+  const [stage, setStage] = useState<"card" | "wallet" | "otp" | "processing">(
+    isWallet ? "wallet" : "card",
+  );
+  // If the customer flips method mid-stream via the back button + a new
+  // attempt, keep the stage aligned. (Rare in practice but cheap to handle.)
+  useEffect(() => {
+    setStage(isWallet ? "wallet" : "card");
+  }, [isWallet]);
+
   const brand = detectCardBrand(number);
+  const walletLabel = isWallet ? PAYMENT_METHODS[method as PaymentMethodId]?.label ?? "Wallet" : "";
 
   function returnWithStatus(approved: boolean) {
     window.localStorage.setItem(`bookit.demo.mf.${reference}`, approved ? "approved" : "declined");
@@ -97,6 +116,52 @@ export default function MyFatoorahMock() {
 
         <div className="grid gap-6 md:grid-cols-[1fr_280px]">
           <div>
+            {stage === "wallet" && (
+              <Card className="border-slate-200 bg-white">
+                <CardContent className="space-y-5 pt-6 text-center">
+                  <PaymentBrandMark
+                    method={method as PaymentMethodId}
+                    className="mx-auto h-14 w-24"
+                  />
+                  <div>
+                    <h2 className="text-base font-semibold">{walletLabel}</h2>
+                    <p className="mt-1 text-xs text-slate-600">
+                      Confirm with the biometric prompt on your device to authorise this payment.
+                    </p>
+                  </div>
+                  <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-slate-700">
+                    <Fingerprint className="h-7 w-7" />
+                  </div>
+                  <div className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-[11px] text-slate-600">
+                    <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                    Tokenised — your card number is never sent to the merchant.
+                  </div>
+                  {error && <p className="text-xs text-rose-600">{error}</p>}
+                  <Button
+                    className="w-full bg-[#0E3A8A] text-white hover:bg-[#102f6f]"
+                    size="lg"
+                    onClick={() => {
+                      setError(null);
+                      setStage("processing");
+                      // Wallet payments are pre-tokenised, so the bank-OTP step
+                      // is skipped. Mirror that by going straight to processing
+                      // and returning a success status.
+                      setTimeout(() => returnWithStatus(true), 1100);
+                    }}
+                  >
+                    Authorize {formatCurrency(amount, currency)} with {walletLabel}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setStage("card")}
+                    className="text-[11px] text-slate-500 underline-offset-4 hover:text-slate-900 hover:underline"
+                  >
+                    Pay with a card instead
+                  </button>
+                </CardContent>
+              </Card>
+            )}
+
             {stage === "card" && (
               <Card className="border-slate-200 bg-white">
                 <CardContent className="space-y-4 pt-6">
