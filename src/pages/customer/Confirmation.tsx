@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { PaymentBrandMark } from "@/components/customer/PaymentBrandMark";
 import { LocationCard } from "@/components/customer/LocationCard";
+import { ReviewForm } from "@/components/customer/ReviewForm";
 import { getLocation } from "@/lib/location";
 import { downloadIcs } from "@/lib/calendar";
 import { PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payments";
@@ -405,6 +406,19 @@ export default function Confirmation() {
             </div>
           </Card>
         </motion.div>
+
+        {/* Review form — visible whenever there's a booking, until the
+            customer cancels (we don't want to ask for a review on a
+            cancelled booking). */}
+        {booking && !isCancelled && (
+          <div className="mt-6" data-no-print>
+            <ReviewForm
+              businessId={business.id}
+              bookingReference={booking.booking_reference}
+              customerName={booking.customer_name}
+            />
+          </div>
+        )}
 
         {/* Where to go */}
         {getLocation(business) && (

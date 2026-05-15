@@ -152,6 +152,24 @@ const STRINGS_EN = {
     "We've sent the refund to your original payment method. Expect it in 3–7 business days.",
   "booking.cancelFailed": "Could not cancel the booking",
 
+  // post-booking review form
+  "review.title": "Leave a review",
+  "review.subtitle": "How was your experience? Your feedback helps other customers.",
+  "review.commentPlaceholder": "Tell us what stood out (optional)…",
+  "review.submit": "Post review",
+  "review.posting": "Posting…",
+  "review.posted": "Thanks — your review is live",
+  "review.thanks": "Thanks for your review",
+  "review.publishedAs": "Posted as",
+  "review.ratingRequired": "Pick a star rating first",
+  "review.failed": "Couldn't post the review — try again in a moment",
+  "review.rating1": "Poor",
+  "review.rating2": "Fair",
+  "review.rating3": "Good",
+  "review.rating4": "Great",
+  "review.rating5": "Excellent",
+  "review.noComment": "★ rated — no comment left.",
+
   // landing page sections
   "landing.services": "Services",
   "landing.servicesSubtitle": "Pick one and book in under a minute.",
@@ -297,6 +315,23 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "booking.refundIssuedBody":
     "أرسلنا المبلغ إلى طريقة الدفع الأصلية. توقّع وصوله خلال ٣ إلى ٧ أيام عمل.",
   "booking.cancelFailed": "تعذّر إلغاء الحجز",
+
+  "review.title": "اترك تقييمك",
+  "review.subtitle": "كيف كانت تجربتك؟ ملاحظاتك تساعد العملاء الآخرين.",
+  "review.commentPlaceholder": "أخبرنا بما أعجبك (اختياري)…",
+  "review.submit": "نشر التقييم",
+  "review.posting": "جارٍ النشر…",
+  "review.posted": "شكراً — تم نشر تقييمك",
+  "review.thanks": "شكراً على تقييمك",
+  "review.publishedAs": "نُشر باسم",
+  "review.ratingRequired": "اختر التقييم بالنجوم أولاً",
+  "review.failed": "تعذّر نشر التقييم — حاول مرة أخرى بعد قليل",
+  "review.rating1": "ضعيف",
+  "review.rating2": "مقبول",
+  "review.rating3": "جيد",
+  "review.rating4": "ممتاز",
+  "review.rating5": "رائع",
+  "review.noComment": "★ تقييم بدون تعليق.",
 
   "landing.services": "الخدمات",
   "landing.servicesSubtitle": "اختر واحدة واحجز خلال أقل من دقيقة.",

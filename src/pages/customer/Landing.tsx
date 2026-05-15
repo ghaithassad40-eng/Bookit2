@@ -9,8 +9,10 @@ import { LocationCard } from "@/components/customer/LocationCard";
 import { useI18n } from "@/hooks/useI18n";
 import { useServices } from "@/hooks/useServices";
 import { useStaff } from "@/hooks/useStaff";
+import { useBusinessReviews } from "@/hooks/useReviews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils";
 
 interface Ctx {
   business: BusinessRow;
@@ -22,7 +24,12 @@ export default function Landing() {
   const { t, dir, locale } = useI18n();
   const { data: services, isLoading: servicesLoading } = useServices(business.id);
   const { data: staff, isLoading: staffLoading } = useStaff(business.id);
+  const { data: realReviews } = useBusinessReviews(business.id);
   const layout = config.layout_json;
+  // Show real customer reviews when any exist, otherwise fall back to the
+  // bilingual demo testimonials so brand-new businesses don't show an empty
+  // section.
+  const hasRealReviews = !!realReviews && realReviews.length > 0;
 
   const testimonials =
     locale === "ar"
@@ -92,11 +99,48 @@ export default function Landing() {
         </section>
       )}
 
-      {layout.showTestimonials && (
+      {(layout.showTestimonials || hasRealReviews) && (
         <section className="container py-12 sm:py-20">
           <h2 className="mb-8 text-2xl font-semibold sm:text-3xl">{t("landing.whatGuestsSay")}</h2>
           <div className="grid gap-4 md:grid-cols-3">
-            {testimonials.map((review) => (
+            {hasRealReviews
+              ? realReviews!.slice(0, 6).map((review) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm"
+                  >
+                    <Quote className="h-5 w-5 text-accent" />
+                    <p className="mt-3 text-sm text-foreground/90">
+                      {review.comment ? `"${review.comment}"` : t("review.noComment")}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <div className="min-w-0">
+                        <div className="truncate text-xs font-medium text-foreground">
+                          {review.customer_name}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {formatDate(review.created_at)}
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={
+                              i < review.rating
+                                ? "h-3 w-3 fill-amber-400 text-amber-400"
+                                : "h-3 w-3 text-amber-400/25"
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              : testimonials.map((review) => (
               <motion.div
                 key={review.name}
                 initial={{ opacity: 0, y: 10 }}
