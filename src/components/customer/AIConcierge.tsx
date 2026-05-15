@@ -159,19 +159,19 @@ export function AIConcierge() {
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] backdrop-blur-xl">
+    <div className="overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card to-card/40 backdrop-blur-xl">
       {/* header */}
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-brand-navy/50 to-brand-gold/40 ring-1 ring-white/15">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-brand-navy to-brand-gold ring-1 ring-border">
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <div>
             <div className="text-sm font-semibold leading-tight">{labels.title}</div>
-            <div className="text-[11px] text-white/50">{labels.subtitle}</div>
+            <div className="text-[11px] text-muted-foreground/80">{labels.subtitle}</div>
           </div>
         </div>
-        <div className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/60 sm:flex">
+        <div className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] text-muted-foreground sm:flex">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
           {labels.online}
         </div>
@@ -206,12 +206,12 @@ export function AIConcierge() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-2.5 text-white/60"
+            className="flex items-center gap-2.5 text-muted-foreground"
           >
-            <div className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.08]">
+            <div className="grid h-7 w-7 place-items-center rounded-full bg-muted">
               <Bot className="h-3.5 w-3.5" />
             </div>
-            <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-white/[0.05] px-3.5 py-2.5">
+            <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-muted/80 px-3.5 py-2.5">
               <Dot delay={0} />
               <Dot delay={120} />
               <Dot delay={240} />
@@ -222,12 +222,12 @@ export function AIConcierge() {
 
       {/* starters */}
       {messages.length <= 1 && !thinking && (
-        <div className="flex flex-wrap gap-2 border-t border-white/10 px-4 py-3 sm:px-6">
+        <div className="flex flex-wrap gap-2 border-t border-border px-4 py-3 sm:px-6">
           {starters.map((s) => (
             <button
               key={s}
               onClick={() => ask(s)}
-              className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+              className="rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs text-foreground/80 transition-colors hover:border-accent/40 hover:bg-muted"
             >
               {s}
             </button>
@@ -241,18 +241,18 @@ export function AIConcierge() {
           e.preventDefault();
           ask(input);
         }}
-        className="flex items-center gap-2 border-t border-white/10 px-3 py-3 sm:px-4"
+        className="flex items-center gap-2 border-t border-border px-3 py-3 sm:px-4"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={labels.placeholder}
-          className="flex-1 rounded-xl border border-transparent bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-white/20 focus:bg-white/[0.06] disabled:opacity-50"
+          className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/60 focus:border-accent/60 focus:bg-muted disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={!input.trim() || thinking}
-          className="grid h-10 w-10 place-items-center rounded-xl bg-white text-black shadow-lg shadow-white/10 transition-opacity disabled:opacity-30"
+          className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-brand-navy/20 transition-opacity disabled:opacity-30"
           aria-label="Send"
         >
           {thinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <CornerDownLeft className="h-4 w-4" />}
@@ -267,10 +267,10 @@ function Bubble({ message }: { message: Message }) {
     return (
       <div className="flex justify-end">
         <div className="flex max-w-[80%] items-start gap-2.5">
-          <div className="rounded-2xl rounded-tr-sm bg-white px-3.5 py-2 text-sm text-black">
+          <div className="rounded-2xl rounded-tr-sm bg-primary px-3.5 py-2 text-sm text-primary-foreground">
             {message.text}
           </div>
-          <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.08] text-white/70">
+          <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground">
             <User className="h-3.5 w-3.5" />
           </div>
         </div>
@@ -280,10 +280,10 @@ function Bubble({ message }: { message: Message }) {
 
   return (
     <div className="flex items-start gap-2.5">
-      <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-500/40 to-emerald-400/40 text-white ring-1 ring-white/15">
+      <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-navy to-brand-gold text-white ring-1 ring-border">
         <Bot className="h-3.5 w-3.5" />
       </div>
-      <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white/[0.05] px-3.5 py-2 text-sm leading-relaxed text-white/90">
+      <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-muted px-3.5 py-2 text-sm leading-relaxed text-foreground">
         {message.text}
       </div>
     </div>
@@ -313,18 +313,18 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
   return (
     <Link
       to={`/business/${business.slug}`}
-      className="group block rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-white/25 hover:bg-white/[0.06]"
+      className="group block rounded-2xl border border-border bg-card/80 p-4 transition-all hover:border-accent/40 hover:bg-muted"
     >
       <div className="flex items-start gap-3">
-        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/[0.06] ring-1 ring-white/10">
-          <Icon className="h-4 w-4 text-white/85" />
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-muted ring-1 ring-border">
+          <Icon className="h-4 w-4 text-foreground/90" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <div className="truncate text-sm font-semibold">{businessName}</div>
-            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/40 transition-all group-hover:translate-x-0.5 group-hover:text-white" />
+            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70 transition-all group-hover:translate-x-0.5 group-hover:text-foreground" />
           </div>
-          <div className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-white/40">
+          <div className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
             {industryLabel}
           </div>
           {equipmentChips.length > 0 ? (
@@ -343,16 +343,16 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
                 </span>
               ))}
               {matchedEquipment && matchedEquipment.length > 2 && (
-                <span className="text-[10px] text-white/40">
+                <span className="text-[10px] text-muted-foreground/70">
                   +{matchedEquipment.length - 2}
                 </span>
               )}
             </div>
           ) : showService && price && serviceName ? (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2 py-0.5 text-[11px] text-white/70">
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-muted/80 px-2 py-0.5 text-[11px] text-muted-foreground">
               {serviceName}
-              <span className="text-white/40">·</span>
-              <span className="font-medium text-white/90">
+              <span className="text-muted-foreground/70">·</span>
+              <span className="font-medium text-foreground">
                 {price.converted ? `≈ ${price.display}` : price.display}
               </span>
             </div>
@@ -368,7 +368,7 @@ function Dot({ delay }: { delay: number }) {
     <motion.span
       animate={{ y: [0, -3, 0] }}
       transition={{ duration: 0.9, repeat: Infinity, delay: delay / 1000 }}
-      className="h-1.5 w-1.5 rounded-full bg-white/60"
+      className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60"
     />
   );
 }

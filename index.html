@@ -5,7 +5,7 @@
     <link rel="icon" type="image/png" href="/Bookit.png" />
     <link rel="apple-touch-icon" href="/Bookit.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
-    <meta name="theme-color" content="#0a1226" />
+    <meta name="theme-color" content="#FAFAF7" />
     <title>Bookit — Book services & places across the GCC</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,12 +27,12 @@
         z-index: 9999;
         display: grid;
         place-items: center;
-        background: #0a1226;
+        background: #fafaf7;
         background-image: radial-gradient(
           circle at 50% 38%,
-          #16264a 0%,
-          #0a1226 55%,
-          #060a18 100%
+          rgba(201, 162, 39, 0.10) 0%,
+          rgba(201, 162, 39, 0.04) 35%,
+          #fafaf7 70%
         );
         transition: opacity 0.45s ease;
       }
@@ -45,8 +45,8 @@
         height: auto;
         max-height: 60vh;
         object-fit: contain;
-        /* Subtle glow so the video sits in the gradient rather than on top */
-        filter: drop-shadow(0 8px 40px rgba(201, 162, 39, 0.18));
+        /* Subtle navy shadow under the logo on the light backdrop */
+        filter: drop-shadow(0 12px 32px rgba(27, 42, 78, 0.18));
       }
       @media (prefers-reduced-motion: reduce) {
         .boot-loader__video { animation: none; }

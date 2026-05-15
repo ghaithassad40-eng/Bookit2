@@ -111,7 +111,7 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
             className="relative z-10 my-auto w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl dark:bg-slate-950"
           >
             {/* Hero band — solid brand colour, white text, guaranteed contrast */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-emerald-500 px-6 pb-7 pt-6 text-white">
+            <div className="relative overflow-hidden bg-gradient-to-br from-brand-navy via-brand-navy to-brand-gold px-6 pb-7 pt-6 text-white">
               <button
                 onClick={dismiss}
                 aria-label="Close"

@@ -27,15 +27,15 @@ export function LoadingSplash({
 }: Props) {
   return (
     <div
-      className="relative grid place-items-center overflow-hidden bg-[#0a1226]"
+      className="relative grid place-items-center overflow-hidden bg-[#fafaf7]"
       style={fullParent ? { minHeight: "100%" } : { minHeight }}
     >
-      {/* Brand-coloured radial gradient backdrop — matches the boot splash. */}
+      {/* Soft gold radial — matches the boot splash on a clean cream backdrop. */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 50% 38%, #16264a 0%, #0a1226 55%, #060a18 100%)",
+            "radial-gradient(circle at 50% 38%, rgba(201,162,39,0.10) 0%, rgba(201,162,39,0.04) 35%, #fafaf7 70%)",
         }}
       />
       <div className="relative flex flex-col items-center gap-5">
@@ -48,10 +48,10 @@ export function LoadingSplash({
           preload="auto"
           aria-hidden="true"
           className="h-auto w-[min(320px,64vw)] max-h-[60vh] object-contain"
-          style={{ filter: "drop-shadow(0 8px 40px rgba(201, 162, 39, 0.18))" }}
+          style={{ filter: "drop-shadow(0 12px 32px rgba(27, 42, 78, 0.18))" }}
         />
         {message && (
-          <p className="text-sm text-white/70">{message}</p>
+          <p className="text-sm text-muted-foreground">{message}</p>
         )}
       </div>
     </div>

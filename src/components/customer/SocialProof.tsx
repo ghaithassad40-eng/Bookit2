@@ -250,10 +250,10 @@ export function SocialProof() {
   return (
     <>
       {/* Section A — Reviews */}
-      <section id="reviews" className="relative z-10 border-t border-white/5">
+      <section id="reviews" className="relative z-10 border-t border-border/60">
         <div className="container py-20">
           <div className="mb-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/70 backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground backdrop-blur">
               <Heart className="h-3.5 w-3.5 text-pink-300" />
               {ar ? "محبوب في الخليج" : "Loved across the GCC"}
             </div>
@@ -262,7 +262,7 @@ export function SocialProof() {
                 ? "حجوزات حقيقية. أنشطة حقيقية. عملاء حقيقيون."
                 : "Real bookings. Real businesses. Real customers."}
             </h2>
-            <p className="mt-3 max-w-xl text-sm text-white/60 sm:text-base">
+            <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
               {ar
                 ? "كل أسبوع، آلاف الحجوزات تمرّ عبر بكيت من ست دول خليجية."
                 : "Every week, thousands of bookings flow through Bookit from six GCC countries."}
@@ -279,13 +279,13 @@ export function SocialProof() {
             ].map((s) => (
               <div
                 key={s.l}
-                className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 backdrop-blur"
+                className="rounded-2xl border border-border bg-card/60 p-4 backdrop-blur"
               >
                 <div className={cn("inline-flex items-center gap-1.5", s.tint)}>
                   <s.icon className="h-3.5 w-3.5" />
-                  <span className="text-xl font-semibold text-white sm:text-2xl">{s.v}</span>
+                  <span className="text-xl font-semibold text-foreground sm:text-2xl">{s.v}</span>
                 </div>
-                <div className="mt-1 text-[11px] uppercase tracking-wider text-white/40">
+                <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground/70">
                   {s.l}
                 </div>
               </div>
@@ -301,15 +301,15 @@ export function SocialProof() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 backdrop-blur"
+                className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-card/40 p-6 backdrop-blur"
               >
-                <Quote className="absolute end-4 top-4 h-5 w-5 text-white/15" />
+                <Quote className="absolute end-4 top-4 h-5 w-5 text-muted-foreground/30" />
                 <div className="flex gap-0.5 text-amber-300">
                   {Array.from({ length: r.rating }).map((_, idx) => (
                     <Star key={idx} className="h-3.5 w-3.5 fill-current" />
                   ))}
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-white/85">
+                <p className="mt-3 text-sm leading-relaxed text-foreground/90">
                   {ar ? r.quoteAr : `"${r.quote}"`}
                 </p>
                 <div className="mt-5 flex items-center gap-3">
@@ -317,10 +317,10 @@ export function SocialProof() {
                     {r.initials}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-white">
+                    <div className="truncate text-sm font-semibold text-foreground">
                       {ar ? r.nameAr : r.name}
                     </div>
-                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/55">
+                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       <Flag code={r.country} className="h-3 w-4" />
                       <span>{ar ? r.cityAr : r.city}</span>
                       <span className="opacity-50">·</span>
@@ -335,12 +335,12 @@ export function SocialProof() {
       </section>
 
       {/* Section B — Community & Live Activity */}
-      <section id="community" className="relative z-10 border-t border-white/5">
+      <section id="community" className="relative z-10 border-t border-border/60">
         <div className="container py-20">
           <div className="grid gap-8 lg:grid-cols-5">
             {/* Headline + Stats */}
             <div className="lg:col-span-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/70 backdrop-blur">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground backdrop-blur">
                 <Users className="h-3.5 w-3.5 text-blue-300" />
                 {ar ? "مجتمع بكيت" : "Bookit Community"}
               </div>
@@ -349,7 +349,7 @@ export function SocialProof() {
                   ? "في كل دقيقة شيء يحدث على بكيت."
                   : "Something's always happening on Bookit."}
               </h2>
-              <p className="mt-3 text-sm text-white/60 sm:text-base">
+              <p className="mt-3 text-sm text-muted-foreground sm:text-base">
                 {ar
                   ? "حجوزات، مراجعات، أنشطة جديدة، تحويلات إلى البنوك — كلها مباشرة من جميع أنحاء الخليج."
                   : "Bookings, reviews, new businesses signing up, payouts settling — all live from across the Gulf."}
@@ -381,14 +381,14 @@ export function SocialProof() {
                 ].map((f) => (
                   <div
                     key={f.title}
-                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 backdrop-blur"
+                    className="flex items-start gap-3 rounded-2xl border border-border bg-card/60 p-3.5 backdrop-blur"
                   >
                     <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-blue-500/20 to-emerald-400/20 ring-1 ring-white/10">
-                      <f.icon className="h-4 w-4 text-white/90" />
+                      <f.icon className="h-4 w-4 text-foreground" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-white">{f.title}</div>
-                      <div className="mt-0.5 text-xs leading-relaxed text-white/55">
+                      <div className="text-sm font-semibold text-foreground">{f.title}</div>
+                      <div className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                         {f.body}
                       </div>
                     </div>
@@ -399,16 +399,16 @@ export function SocialProof() {
 
             {/* Live activity feed */}
             <div className="lg:col-span-3">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-5 backdrop-blur">
+              <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-b from-card to-card/40 p-5 backdrop-blur">
                 <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[hsl(220_60%_45%_/_0.20)] blur-3xl" />
                 <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-[hsl(43_75%_55%_/_0.18)] blur-3xl" />
 
                 <div className="relative flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">
                     <span className="grid h-1.5 w-1.5 place-items-center rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                     {ar ? "نشاط مباشر" : "Live activity"}
                   </div>
-                  <div className="text-[10px] text-white/40">
+                  <div className="text-[10px] text-muted-foreground/70">
                     {ar ? "آخر تحديث الآن" : "updated just now"}
                   </div>
                 </div>
@@ -430,7 +430,7 @@ export function SocialProof() {
                           animate={{ opacity: 1 - idx * 0.06, y: 0 }}
                           exit={{ opacity: 0, y: 8 }}
                           transition={{ duration: 0.35 }}
-                          className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5"
+                          className="flex items-start gap-3 rounded-xl border border-border/40 bg-card/60 px-3 py-2.5"
                         >
                           <div
                             className={cn(
@@ -441,10 +441,10 @@ export function SocialProof() {
                             <Icon className="h-3.5 w-3.5" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-xs font-medium text-white/90 sm:text-sm">
+                            <div className="truncate text-xs font-medium text-foreground sm:text-sm">
                               {ar ? item.textAr : item.text}
                             </div>
-                            <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-white/40">
+                            <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-muted-foreground/70">
                               <Flag code={item.countryCode} className="h-2.5 w-3.5" />
                               <span>
                                 {item.minutes === 0
@@ -464,7 +464,7 @@ export function SocialProof() {
                 </ul>
 
                 {/* Fade gradient at the bottom */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 rounded-b-3xl bg-gradient-to-t from-[#0a1226] to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 rounded-b-3xl bg-gradient-to-t from-[#fafaf7] to-transparent" />
               </div>
             </div>
           </div>
@@ -472,11 +472,11 @@ export function SocialProof() {
       </section>
 
       {/* Section C — Featured feedback (owner story) */}
-      <section className="relative z-10 border-t border-white/5">
+      <section className="relative z-10 border-t border-border/60">
         <div className="container py-20">
-          <div className="grid gap-6 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-white/[0.01] p-8 backdrop-blur sm:p-10 lg:grid-cols-3">
+          <div className="grid gap-6 rounded-3xl border border-border bg-gradient-to-br from-card via-card/60 to-card/40 p-8 backdrop-blur sm:p-10 lg:grid-cols-3">
             <div className="lg:col-span-1">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/70 backdrop-blur">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground backdrop-blur">
                 <Sparkles className="h-3.5 w-3.5 text-emerald-300" />
                 {ar ? "قصة من العملاء" : "Owner story"}
               </div>
@@ -485,8 +485,8 @@ export function SocialProof() {
                   AS
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-white">Ahmad S.</div>
-                  <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/55">
+                  <div className="text-sm font-semibold text-foreground">Ahmad S.</div>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <Flag code="KW" className="h-3 w-4" />
                     <span>{ar ? "مالك بادل بوينت — الكويت" : "Owner, Padel Point — Kuwait"}</span>
                   </div>
@@ -500,10 +500,10 @@ export function SocialProof() {
                 ].map((s) => (
                   <div
                     key={s.l}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5 text-center"
+                    className="rounded-xl border border-border bg-card/80 p-2.5 text-center"
                   >
-                    <div className="text-base font-semibold text-white">{s.v}</div>
-                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/45">
+                    <div className="text-base font-semibold text-foreground">{s.v}</div>
+                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-muted-foreground/80">
                       {s.l}
                     </div>
                   </div>
@@ -512,8 +512,8 @@ export function SocialProof() {
             </div>
 
             <div className="lg:col-span-2">
-              <Quote className="h-6 w-6 text-white/20" />
-              <blockquote className="mt-3 text-pretty text-lg leading-relaxed text-white/90 sm:text-xl">
+              <Quote className="h-6 w-6 text-muted-foreground/40" />
+              <blockquote className="mt-3 text-pretty text-lg leading-relaxed text-foreground sm:text-xl">
                 {ar
                   ? "«قبل بكيت، كان موظف الاستقبال يجاوب على المكالمات ثماني ساعات يومياً. اليوم العملاء يحجزون بأنفسهم، الموظف صار يساعد على الأرض، ودخل الملاعب ارتفع 38٪ في ثلاثة أشهر. أهم شي إن الواجهة بالعربي تشتغل صح من اليمين لليسار — ما نحس إنها مترجمة.»"
                   : "“Before Bookit, our front desk took calls eight hours a day. Now customers self-book, the desk works on the floor, and pitch revenue climbed 38% in three months. What sealed it for us: the Arabic side feels native — not a translation.”"}

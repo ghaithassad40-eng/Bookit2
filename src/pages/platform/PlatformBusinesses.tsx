@@ -41,17 +41,17 @@ const STATUS_FILTER_ORDER: (BusinessStatus | "all")[] = [
 /** Background tint + dot colour per status. Kept terminal-light (no big
  *  pill badges) so the table reads at a glance. */
 const STATUS_DOT: Record<BusinessStatus, string> = {
-  pending: "bg-amber-400",
-  approved: "bg-emerald-400",
-  suspended: "bg-rose-400",
-  rejected: "bg-slate-500",
+  pending: "bg-amber-500",
+  approved: "bg-emerald-500",
+  suspended: "bg-rose-500",
+  rejected: "bg-muted-foreground",
 };
 
 const STATUS_TEXT: Record<BusinessStatus, string> = {
-  pending: "text-amber-300",
-  approved: "text-emerald-300",
-  suspended: "text-rose-300",
-  rejected: "text-slate-400",
+  pending: "text-amber-600",
+  approved: "text-emerald-600",
+  suspended: "text-rose-600",
+  rejected: "text-muted-foreground",
 };
 
 export default function PlatformBusinesses() {
@@ -125,15 +125,15 @@ export default function PlatformBusinesses() {
       {/* Console-style page header — left-aligned label + monospace path */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             <span>{t("platform.consoleLabel")}</span>
-            <span className="text-slate-700">/</span>
+            <span className="text-muted-foreground/40">/</span>
             <span className="text-brand-gold">{t("platform.nav.businesses")}</span>
           </div>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+          <h1 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
             {t("platform.businesses.title")}
           </h1>
-          <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             {t("platform.businesses.subtitle")}
           </p>
         </div>
@@ -142,15 +142,15 @@ export default function PlatformBusinesses() {
       {/* Search + filter chips — sharper edges, monospace counts */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+          <Search className="pointer-events-none absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("platform.businesses.search")}
-            className="h-9 border-white/[0.08] bg-[#0a1124] ps-9 text-sm text-slate-200 placeholder:text-slate-500 focus-visible:ring-brand-gold/40"
+            className="h-9 ps-9 text-sm focus-visible:ring-brand-gold/40"
           />
         </div>
-        <div className="flex gap-0.5 overflow-x-auto rounded-md border border-white/[0.08] bg-[#0a1124] p-0.5">
+        <div className="flex gap-0.5 overflow-x-auto rounded-md border border-border bg-card p-0.5">
           {STATUS_FILTER_ORDER.map((s) => {
             const label =
               s === "all"
@@ -164,12 +164,12 @@ export default function PlatformBusinesses() {
                 className={cn(
                   "shrink-0 rounded px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors",
                   active
-                    ? "bg-white/[0.08] text-white"
-                    : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200",
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >
                 {label}{" "}
-                <span className="ms-1 font-mono tabular-nums text-slate-500">
+                <span className="ms-1 font-mono tabular-nums text-muted-foreground/70">
                   {(counts[s] ?? 0).toLocaleString()}
                 </span>
               </button>
@@ -179,41 +179,41 @@ export default function PlatformBusinesses() {
       </div>
 
       {/* Data table — dense, terminal-like, sharper than the vendor admin */}
-      <div className="overflow-hidden rounded-md border border-white/[0.08] bg-[#0a1124]">
-        <div className="flex items-center justify-between border-b border-white/[0.06] bg-[#0c1428] px-4 py-2.5">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+      <div className="overflow-hidden rounded-md border border-border bg-card">
+        <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {t("platform.businesses.results").replace(
               "{{count}}",
               String(filtered.length),
             )}
           </div>
           {!isLoading && filtered.length > 0 && (
-            <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/70">
               {filter === "all" ? "ALL" : filter.toUpperCase()} · {filtered.length} ROWS
             </div>
           )}
         </div>
 
         {isLoading ? (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-border">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="px-4 py-3.5">
-                <div className="h-3 w-1/3 animate-pulse rounded bg-white/[0.04]" />
-                <div className="mt-2 h-2.5 w-1/2 animate-pulse rounded bg-white/[0.02]" />
+                <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+                <div className="mt-2 h-2.5 w-1/2 animate-pulse rounded bg-muted/60" />
               </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="px-4 py-16 text-center">
-            <Building2 className="mx-auto mb-2 h-5 w-5 text-slate-600" />
-            <div className="text-sm text-slate-400">
+            <Building2 className="mx-auto mb-2 h-5 w-5 text-muted-foreground/60" />
+            <div className="text-sm text-muted-foreground">
               {t("platform.businesses.empty")}
             </div>
           </div>
         ) : (
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              <tr className="border-b border-border text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 <th className="px-4 py-2 font-medium">{t("platform.col.status")}</th>
                 <th className="px-4 py-2 font-medium">{t("platform.col.business")}</th>
                 <th className="hidden px-4 py-2 font-medium md:table-cell">
@@ -227,11 +227,11 @@ export default function PlatformBusinesses() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-border">
               {filtered.map((b) => {
                 const status = (b.status ?? "approved") as BusinessStatus;
                 return (
-                  <tr key={b.id} className="group transition-colors hover:bg-white/[0.025]">
+                  <tr key={b.id} className="group transition-colors hover:bg-muted/40">
                     {/* Status — dot + label, compact */}
                     <td className="px-4 py-3 align-top">
                       <div className="inline-flex items-center gap-2">
@@ -253,31 +253,31 @@ export default function PlatformBusinesses() {
                     </td>
                     {/* Business */}
                     <td className="px-4 py-3 align-top">
-                      <div className="font-medium text-slate-100">
+                      <div className="font-medium">
                         {pickLocale(locale, b.name, b.name_ar)}
                       </div>
-                      <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-slate-500">
+                      <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
                         <span>/{b.slug}</span>
                       </div>
                       {status === "rejected" && b.rejection_reason && (
-                        <div className="mt-1 text-[10px] text-rose-300/80">
+                        <div className="mt-1 text-[10px] text-rose-600/80">
                           {t("approval.vendorBanner.reasonLabel")}: {b.rejection_reason}
                         </div>
                       )}
                     </td>
                     {/* Industry */}
-                    <td className="hidden px-4 py-3 align-top text-[11px] uppercase tracking-wider text-slate-400 md:table-cell">
+                    <td className="hidden px-4 py-3 align-top text-[11px] uppercase tracking-wider text-muted-foreground md:table-cell">
                       {b.industry}
                     </td>
                     {/* Country */}
                     <td className="hidden px-4 py-3 align-top md:table-cell">
                       {b.country ? (
-                        <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-slate-400">
+                        <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                           <Flag code={b.country as FlagCode} className="h-3 w-4" />
                           {b.country}
                         </span>
                       ) : (
-                        <span className="text-[11px] text-slate-600">—</span>
+                        <span className="text-[11px] text-muted-foreground/60">—</span>
                       )}
                     </td>
                     {/* Actions */}
@@ -388,11 +388,11 @@ function RowAction({
 }) {
   const toneClass: Record<typeof tone, string> = {
     emerald:
-      "border-emerald-400/20 text-emerald-300 hover:bg-emerald-400/10 hover:border-emerald-400/40",
+      "border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/10 hover:border-emerald-500/50",
     amber:
-      "border-amber-400/20 text-amber-300 hover:bg-amber-400/10 hover:border-amber-400/40",
+      "border-amber-500/30 text-amber-700 hover:bg-amber-500/10 hover:border-amber-500/50",
     rose:
-      "border-rose-400/20 text-rose-300 hover:bg-rose-400/10 hover:border-rose-400/40",
+      "border-rose-500/30 text-rose-700 hover:bg-rose-500/10 hover:border-rose-500/50",
   };
   return (
     <button
