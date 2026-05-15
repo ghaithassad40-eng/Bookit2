@@ -67,8 +67,13 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
   }
 
   function dismiss() {
-    // Skip without choosing → store ALL so we don't ask again
-    setCountry("ALL");
+    // Dismissing without explicitly choosing should NOT trap the user in the
+    // 'ALL' regional bucket. Instead, accept the best-guess pre-selection —
+    // the timezone-detected country if available, otherwise fall back to
+    // whatever was already stored, otherwise KW (matches the modal's default
+    // tile highlight). The next visit will skip the prompt the same way the
+    // commit path does, but the user keeps regional filtering.
+    setCountry(pickedCountry ?? country ?? "KW");
     setOpen(false);
     onClose?.();
   }
