@@ -116,6 +116,7 @@ export function hasGoogleMapsKey(): boolean {
 // Country / region helpers
 // ---------------------------------------------------------------------------
 
+// GCC countries (Kuwait, Saudi Arabia, UAE, Bahrain, Qatar, Oman).
 const COUNTRY_NAMES: Record<string, string> = {
   KW: "Kuwait",
   SA: "Saudi Arabia",
@@ -123,10 +124,6 @@ const COUNTRY_NAMES: Record<string, string> = {
   BH: "Bahrain",
   QA: "Qatar",
   OM: "Oman",
-  EG: "Egypt",
-  JO: "Jordan",
-  US: "United States",
-  GB: "United Kingdom",
 };
 
 const COUNTRY_TO_CURRENCY: Record<string, string> = {
@@ -136,10 +133,6 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   BH: "BHD",
   QA: "QAR",
   OM: "OMR",
-  EG: "EGP",
-  JO: "JOD",
-  US: "USD",
-  GB: "GBP",
 };
 
 export function countryName(code: string | null | undefined): string {

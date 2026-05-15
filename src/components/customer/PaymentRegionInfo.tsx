@@ -15,6 +15,7 @@ interface RegionRow {
   notes?: { method: PaymentMethodId; via: string }[];
 }
 
+// Bookit covers the six GCC member states only.
 const REGIONS: RegionRow[] = [
   {
     code: "KW",
@@ -64,20 +65,6 @@ const REGIONS: RegionRow[] = [
     flag: countryFlag("OM"),
     label: "Oman",
     currency: "OMR",
-    methods: ["visa", "apple_pay", "google_pay"],
-  },
-  {
-    code: "EG",
-    flag: countryFlag("EG"),
-    label: "Egypt",
-    currency: "EGP",
-    methods: ["visa", "apple_pay", "google_pay"],
-  },
-  {
-    code: "JO",
-    flag: countryFlag("JO"),
-    label: "Jordan",
-    currency: "JOD",
     methods: ["visa", "apple_pay", "google_pay"],
   },
 ];

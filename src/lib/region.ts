@@ -8,7 +8,9 @@
 
 import { countryName as _name, countryFlag as _flag } from "./location";
 
-export type CountryCode = "KW" | "SA" | "AE" | "BH" | "QA" | "OM" | "EG" | "JO" | "ALL";
+// Bookit is GCC-only — the Gulf Cooperation Council member states.
+// Kuwait, Saudi Arabia, UAE, Bahrain, Qatar, Oman.
+export type CountryCode = "KW" | "SA" | "AE" | "BH" | "QA" | "OM" | "ALL";
 
 export interface CountryMeta {
   code: CountryCode;
@@ -22,20 +24,18 @@ export interface CountryMeta {
 }
 
 export const COUNTRIES: CountryMeta[] = [
-  { code: "KW", name: "Kuwait",        nameAr: "الكويت",  flag: _flag("KW"), currency: "KWD", timezones: ["Asia/Kuwait"] },
-  { code: "SA", name: "Saudi Arabia",  nameAr: "السعودية", flag: _flag("SA"), currency: "SAR", timezones: ["Asia/Riyadh"] },
-  { code: "AE", name: "UAE",            nameAr: "الإمارات", flag: _flag("AE"), currency: "AED", timezones: ["Asia/Dubai"] },
-  { code: "BH", name: "Bahrain",        nameAr: "البحرين", flag: _flag("BH"), currency: "BHD", timezones: ["Asia/Bahrain"] },
-  { code: "QA", name: "Qatar",          nameAr: "قطر",     flag: _flag("QA"), currency: "QAR", timezones: ["Asia/Qatar"] },
-  { code: "OM", name: "Oman",           nameAr: "عُمان",    flag: _flag("OM"), currency: "OMR", timezones: ["Asia/Muscat"] },
-  { code: "EG", name: "Egypt",          nameAr: "مصر",      flag: _flag("EG"), currency: "EGP", timezones: ["Africa/Cairo"] },
-  { code: "JO", name: "Jordan",         nameAr: "الأردن",   flag: _flag("JO"), currency: "JOD", timezones: ["Asia/Amman"] },
+  { code: "KW", name: "Kuwait",       nameAr: "الكويت",   flag: _flag("KW"), currency: "KWD", timezones: ["Asia/Kuwait"] },
+  { code: "SA", name: "Saudi Arabia", nameAr: "السعودية", flag: _flag("SA"), currency: "SAR", timezones: ["Asia/Riyadh"] },
+  { code: "AE", name: "UAE",          nameAr: "الإمارات",  flag: _flag("AE"), currency: "AED", timezones: ["Asia/Dubai"] },
+  { code: "BH", name: "Bahrain",      nameAr: "البحرين",   flag: _flag("BH"), currency: "BHD", timezones: ["Asia/Bahrain"] },
+  { code: "QA", name: "Qatar",        nameAr: "قطر",       flag: _flag("QA"), currency: "QAR", timezones: ["Asia/Qatar"] },
+  { code: "OM", name: "Oman",         nameAr: "عُمان",      flag: _flag("OM"), currency: "OMR", timezones: ["Asia/Muscat"] },
 ];
 
 export const ALL_COUNTRY: CountryMeta = {
   code: "ALL",
-  name: "All countries",
-  nameAr: "كل البلدان",
+  name: "All GCC countries",
+  nameAr: "كل دول الخليج",
   flag: "🌍",
   currency: "USD",
   timezones: [],
