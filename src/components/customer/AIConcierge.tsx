@@ -21,6 +21,7 @@ import {
 import { useConciergeContext } from "@/hooks/useConciergeContext";
 import { localConciergeReply, type ConciergeMatch } from "@/lib/concierge";
 import { useI18n } from "@/hooks/useI18n";
+import { pickLocale, type TranslationKey } from "@/lib/i18n";
 import { useRegion } from "@/hooks/useRegion";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 
@@ -291,10 +292,19 @@ function Bubble({ message }: { message: Message }) {
 
 function SuggestionCard({ match }: { match: ConciergeMatch }) {
   const { business, matchedServices } = match;
-  const Icon = INDUSTRY_ICONS[business.industry?.toLowerCase()] ?? Sparkles;
+  const industryKey = business.industry?.toLowerCase() ?? "";
+  const Icon = INDUSTRY_ICONS[industryKey] ?? Sparkles;
   const showService = matchedServices[0];
   const { format } = useDisplayCurrency();
+  const { locale, t } = useI18n();
   const price = showService ? format(showService.price, showService.currency) : null;
+  const businessName = pickLocale(locale, business.name, business.name_ar);
+  const industryLabel = industryKey
+    ? t(`industry.${industryKey}` as TranslationKey, business.industry)
+    : business.industry;
+  const serviceName = showService
+    ? pickLocale(locale, showService.name, showService.name_ar)
+    : null;
 
   return (
     <Link
@@ -307,15 +317,15 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <div className="truncate text-sm font-semibold">{business.name}</div>
+            <div className="truncate text-sm font-semibold">{businessName}</div>
             <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/40 transition-all group-hover:translate-x-0.5 group-hover:text-white" />
           </div>
           <div className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-white/40">
-            {business.industry}
+            {industryLabel}
           </div>
-          {showService && price && (
+          {showService && price && serviceName && (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2 py-0.5 text-[11px] text-white/70">
-              {showService.name}
+              {serviceName}
               <span className="text-white/40">·</span>
               <span className="font-medium text-white/90">
                 {price.converted ? `≈ ${price.display}` : price.display}
