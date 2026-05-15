@@ -61,10 +61,10 @@ export default function Settings() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Payout settings saved");
+      toast.success(t("admin.settings.payouts.toastSaved"));
       qc.invalidateQueries({ queryKey: ["business", business.slug] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Save failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.settings.payouts.toastFailed")),
   });
 
   const updateBusiness = useMutation({
@@ -81,10 +81,10 @@ export default function Settings() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Business updated");
+      toast.success(t("admin.settings.profile.toastSaved"));
       qc.invalidateQueries({ queryKey: ["business", business.slug] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Update failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.settings.profile.toastFailed")),
   });
 
   const saveJson = useMutation({
@@ -100,10 +100,10 @@ export default function Settings() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Config saved");
+      toast.success(t("admin.settings.copyCard.toastSaved"));
       qc.invalidateQueries({ queryKey: ["business", business.slug] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Save failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("admin.settings.copyCard.toastFailed")),
   });
 
   return (
@@ -123,30 +123,32 @@ export default function Settings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Business profile</CardTitle>
-          <CardDescription>Public-facing identity for /business/{business.slug}.</CardDescription>
+          <CardTitle>{t("admin.settings.profile.title")}</CardTitle>
+          <CardDescription>
+            {t("admin.settings.profile.desc").replace("{{slug}}", business.slug)}
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-3">
-          <Field label="Display name (English)">
+          <Field label={t("admin.settings.profile.nameEn")}>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
-          <Field label="Display name (العربية)">
+          <Field label={t("admin.settings.profile.nameAr")}>
             <Input
               dir="rtl"
               value={nameAr}
               onChange={(e) => setNameAr(e.target.value)}
-              placeholder="ترجمة عربية اختيارية"
+              placeholder={t("admin.settings.profile.optionalAr")}
             />
           </Field>
-          <Field label="Slug">
+          <Field label={t("admin.settings.profile.slug")}>
             <Input value={slug} onChange={(e) => setSlug(e.target.value)} />
           </Field>
-          <Field label="Logo URL">
+          <Field label={t("admin.settings.profile.logo")}>
             <Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} />
           </Field>
           <div className="sm:col-span-3">
             <Button disabled={updateBusiness.isPending} onClick={() => updateBusiness.mutate()}>
-              Save profile
+              {t("admin.settings.profile.save")}
             </Button>
           </div>
         </CardContent>
@@ -158,19 +160,18 @@ export default function Settings() {
             <Wallet className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <CardTitle>Payouts &amp; commission</CardTitle>
-            <CardDescription>
-              Funds are held in escrow until each booking's service window closes, then split: your share is
-              wired to your bank, the platform fee is netted automatically.
-            </CardDescription>
+            <CardTitle>{t("admin.settings.payouts.title")}</CardTitle>
+            <CardDescription>{t("admin.settings.payouts.desc")}</CardDescription>
           </div>
           <Badge variant={payoutsEnabled ? "success" : "warning"} className="gap-1">
             <ShieldCheck className="h-3 w-3" />
-            {payoutsEnabled ? "Active" : "Setup required"}
+            {payoutsEnabled
+              ? t("admin.settings.payouts.active")
+              : t("admin.settings.payouts.setupRequired")}
           </Badge>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2">
-          <Field label="Commission (%)">
+          <Field label={t("admin.settings.payouts.commission")}>
             <Input
               type="number"
               step="0.01"
@@ -180,30 +181,30 @@ export default function Settings() {
               onChange={(e) => setCommissionPct(e.target.value)}
             />
             <p className="text-[11px] text-muted-foreground">
-              Stored as basis points · 1 bps = 0.01% · max 50%
+              {t("admin.settings.payouts.commissionHint")}
             </p>
           </Field>
-          <Field label="IBAN (last 4)">
+          <Field label={t("admin.settings.payouts.iban")}>
             <Input
               value={iban}
               onChange={(e) => setIban(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="4321"
             />
             <p className="text-[11px] text-muted-foreground">
-              Display only — your full IBAN is held by the payment provider.
+              {t("admin.settings.payouts.ibanHint")}
             </p>
           </Field>
-          <Field label="Connected account ID">
+          <Field label={t("admin.settings.payouts.acct")}>
             <Input
               value={connectedId}
               onChange={(e) => setConnectedId(e.target.value)}
               placeholder="acct_…"
             />
             <p className="text-[11px] text-muted-foreground">
-              Identifier returned by the payment provider after KYC onboarding.
+              {t("admin.settings.payouts.acctHint")}
             </p>
           </Field>
-          <Field label="Status">
+          <Field label={t("admin.settings.payouts.status")}>
             <div className="flex items-center gap-3 rounded-xl border border-border bg-card/50 px-3 py-2.5">
               <button
                 type="button"
@@ -221,13 +222,17 @@ export default function Settings() {
                 />
               </button>
               <span className="text-sm">
-                Payouts {payoutsEnabled ? "enabled" : "disabled"}
+                {payoutsEnabled
+                  ? t("admin.settings.payouts.enabled")
+                  : t("admin.settings.payouts.disabled")}
               </span>
             </div>
           </Field>
           <div className="sm:col-span-2">
             <Button disabled={saveEscrow.isPending} onClick={() => saveEscrow.mutate()}>
-              {saveEscrow.isPending ? "Saving..." : "Save payout settings"}
+              {saveEscrow.isPending
+                ? t("admin.settings.payouts.saving")
+                : t("admin.settings.payouts.save")}
             </Button>
           </div>
         </CardContent>
@@ -235,10 +240,10 @@ export default function Settings() {
 
       <Tabs defaultValue="theme">
         <TabsList>
-          <TabsTrigger value="theme">Theme</TabsTrigger>
-          <TabsTrigger value="copy">Copy</TabsTrigger>
-          <TabsTrigger value="rules">Booking rules</TabsTrigger>
-          <TabsTrigger value="layout">Layout</TabsTrigger>
+          <TabsTrigger value="theme">{t("admin.settings.tabs.theme")}</TabsTrigger>
+          <TabsTrigger value="copy">{t("admin.settings.tabs.copy")}</TabsTrigger>
+          <TabsTrigger value="rules">{t("admin.settings.tabs.rules")}</TabsTrigger>
+          <TabsTrigger value="layout">{t("admin.settings.tabs.layout")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="theme">
@@ -307,14 +312,15 @@ interface CopyEditorProps {
   onSaveAr: (value: Partial<CopyJson>) => void;
 }
 
-const COPY_FIELDS: { key: keyof CopyJson; label: string; textarea?: boolean }[] = [
-  { key: "heroTitle", label: "Hero title" },
-  { key: "heroSubtitle", label: "Hero subtitle", textarea: true },
-  { key: "ctaText", label: "Primary CTA" },
-  { key: "confirmationMessage", label: "Confirmation message", textarea: true },
+const COPY_FIELDS: { key: keyof CopyJson; labelKey: string; textarea?: boolean }[] = [
+  { key: "heroTitle", labelKey: "admin.settings.copyCard.heroTitle" },
+  { key: "heroSubtitle", labelKey: "admin.settings.copyCard.heroSubtitle", textarea: true },
+  { key: "ctaText", labelKey: "admin.settings.copyCard.cta" },
+  { key: "confirmationMessage", labelKey: "admin.settings.copyCard.confirmation", textarea: true },
 ];
 
 function CopyEditor({ copy, copyAr, saving, onSaveEn, onSaveAr }: CopyEditorProps) {
+  const { t } = useI18n();
   const [en, setEn] = useState<CopyJson>(copy);
   const [ar, setAr] = useState<Partial<CopyJson>>(copyAr ?? {});
 
@@ -326,18 +332,16 @@ function CopyEditor({ copy, copyAr, saving, onSaveEn, onSaveAr }: CopyEditorProp
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Copy</CardTitle>
-        <CardDescription>
-          Hero, CTAs, and confirmation messaging. Arabic translations are
-          optional — the Arabic site falls back to the English value per field
-          when a translation is missing.
-        </CardDescription>
+        <CardTitle>{t("admin.settings.copyCard.title")}</CardTitle>
+        <CardDescription>{t("admin.settings.copyCard.desc")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {COPY_FIELDS.map((f) => (
+        {COPY_FIELDS.map((f) => {
+          const baseLabel = t(f.labelKey as Parameters<typeof t>[0]);
+          return (
           <div key={f.key} className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label>{f.label} (English)</Label>
+              <Label>{baseLabel} (English)</Label>
               {f.textarea ? (
                 <Textarea
                   value={en[f.key] ?? ""}
@@ -351,25 +355,26 @@ function CopyEditor({ copy, copyAr, saving, onSaveEn, onSaveAr }: CopyEditorProp
               )}
             </div>
             <div className="space-y-1.5">
-              <Label>{f.label} (العربية)</Label>
+              <Label>{baseLabel} (العربية)</Label>
               {f.textarea ? (
                 <Textarea
                   dir="rtl"
                   value={ar[f.key] ?? ""}
                   onChange={(e) => set("ar", f.key, e.target.value)}
-                  placeholder="ترجمة عربية اختيارية"
+                  placeholder={t("admin.settings.copyCard.optionalAr")}
                 />
               ) : (
                 <Input
                   dir="rtl"
                   value={ar[f.key] ?? ""}
                   onChange={(e) => set("ar", f.key, e.target.value)}
-                  placeholder="ترجمة عربية اختيارية"
+                  placeholder={t("admin.settings.copyCard.optionalAr")}
                 />
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
         <div className="flex justify-end">
           <Button
             disabled={saving}
@@ -384,7 +389,7 @@ function CopyEditor({ copy, copyAr, saving, onSaveEn, onSaveAr }: CopyEditorProp
               onSaveAr(arPayload);
             }}
           >
-            {saving ? "Saving…" : "Save copy"}
+            {saving ? t("admin.settings.copyCard.saving") : t("admin.settings.copyCard.save")}
           </Button>
         </div>
       </CardContent>
