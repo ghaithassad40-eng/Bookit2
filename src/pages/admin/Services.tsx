@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import { defaultCurrencyForCountry } from "@/lib/location";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -41,6 +42,7 @@ function buildEmptyService(country: string | null | undefined): Partial<ServiceR
 export default function Services() {
   const { business } = useOutletContext<Ctx>();
   const empty = buildEmptyService(business.country);
+  const { t } = useI18n();
   const { data: services, isLoading } = useServices(business.id, { onlyActive: false });
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Partial<ServiceRow> | null>(null);
@@ -88,11 +90,11 @@ export default function Services() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Services</h1>
-          <p className="text-sm text-muted-foreground">Define what customers can book.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("admin.services.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("admin.services.subtitle")}</p>
         </div>
         <Button onClick={() => setEditing(empty)}>
-          <Plus className="h-4 w-4" /> New service
+          <Plus className="h-4 w-4" /> {t("admin.services.newBtn")}
         </Button>
       </header>
 

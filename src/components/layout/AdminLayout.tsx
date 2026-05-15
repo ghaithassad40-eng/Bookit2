@@ -11,20 +11,29 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useBusiness } from "@/hooks/useBusiness";
+import { useI18n } from "@/hooks/useI18n";
+import { pickLocale } from "@/lib/i18n";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { cn, initials } from "@/lib/utils";
 import { useEffect } from "react";
+import type { TranslationKey } from "@/lib/i18n";
 
-const NAV = [
-  { to: "", icon: LayoutDashboard, label: "Overview" },
-  { to: "bookings", icon: CalendarRange, label: "Bookings" },
-  { to: "services", icon: Tags, label: "Services" },
-  { to: "staff", icon: Users, label: "Staff" },
-  { to: "slots", icon: Sparkles, label: "Slots" },
-  { to: "payouts", icon: Banknote, label: "Payouts" },
-  { to: "settings", icon: Settings, label: "Settings" },
+interface NavItem {
+  to: string;
+  icon: typeof LayoutDashboard;
+  labelKey: TranslationKey;
+}
+
+const NAV: NavItem[] = [
+  { to: "", icon: LayoutDashboard, labelKey: "admin.nav.overview" },
+  { to: "bookings", icon: CalendarRange, labelKey: "admin.nav.bookings" },
+  { to: "services", icon: Tags, labelKey: "admin.nav.services" },
+  { to: "staff", icon: Users, labelKey: "admin.nav.staff" },
+  { to: "slots", icon: Sparkles, labelKey: "admin.nav.slots" },
+  { to: "payouts", icon: Banknote, labelKey: "admin.nav.payouts" },
+  { to: "settings", icon: Settings, labelKey: "admin.nav.settings" },
 ];
 
 export function AdminLayout() {
@@ -32,6 +41,7 @@ export function AdminLayout() {
   const { user, demoUser, isDemoMode, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { data, isLoading } = useBusiness(slug);
+  const { t, locale } = useI18n();
 
   const authedIdentity = user?.email ?? demoUser?.email ?? null;
 
@@ -51,13 +61,16 @@ export function AdminLayout() {
   if (!data) {
     return (
       <div className="container py-24 text-center">
-        <h1 className="text-2xl font-semibold">Workspace not found</h1>
-        <p className="mt-2 text-muted-foreground">No business with slug "{slug}".</p>
+        <h1 className="text-2xl font-semibold">{t("admin.workspaceNotFound")}</h1>
+        <p className="mt-2 text-muted-foreground">
+          {t("admin.workspaceNotFoundBody")} "{slug}".
+        </p>
       </div>
     );
   }
 
   const { business, config } = data;
+  const businessName = pickLocale(locale, business.name, business.name_ar);
 
   return (
     <ThemeProvider theme={config.theme_json}>
@@ -69,9 +82,9 @@ export function AdminLayout() {
                 {initials(business.name)}
               </div>
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{business.name}</div>
+                <div className="truncate text-sm font-semibold">{businessName}</div>
                 <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                  Admin
+                  {t("admin.adminBadge")}
                 </div>
               </div>
             </div>
@@ -91,7 +104,7 @@ export function AdminLayout() {
                   }
                 >
                   <item.icon className="h-4 w-4" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </NavLink>
               ))}
             </nav>
@@ -105,7 +118,7 @@ export function AdminLayout() {
                 }}
               >
                 <LogOut className="h-4 w-4" />
-                Sign out
+                {t("admin.signOut")}
               </Button>
             </div>
           </aside>
@@ -114,13 +127,13 @@ export function AdminLayout() {
             <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl">
               <div className="flex items-center gap-3 lg:hidden">
                 <Link to={`/admin/${slug}`} className="font-semibold">
-                  {business.name}
+                  {businessName}
                 </Link>
               </div>
-              <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
+              <div className="ms-auto flex items-center gap-3 text-sm text-muted-foreground">
                 {isDemoMode && (
                   <span className="hidden items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-600 sm:inline-flex dark:text-amber-300">
-                    Demo mode
+                    {t("admin.demoMode")}
                   </span>
                 )}
                 <span className="hidden sm:inline">{authedIdentity}</span>
@@ -128,8 +141,7 @@ export function AdminLayout() {
             </header>
             {isDemoMode && (
               <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-xs text-amber-900 dark:text-amber-100">
-                You're exploring in demo mode — changes are saved to this browser only.
-                Connect Supabase to publish them.
+                {t("admin.demoBanner")}
               </div>
             )}
             <main className="flex-1 p-4 sm:p-6 lg:p-8">
@@ -149,7 +161,7 @@ export function AdminLayout() {
                   }
                 >
                   <item.icon className="h-4 w-4" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </NavLink>
               ))}
             </nav>

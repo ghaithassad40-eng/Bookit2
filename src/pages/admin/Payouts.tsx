@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty";
 import { useBookings } from "@/hooks/useBookings";
 import { usePayouts, useReleasePayout } from "@/hooks/usePayouts";
+import { useI18n } from "@/hooks/useI18n";
 import { calculateSplit, summarisePayouts } from "@/lib/escrow";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 import { defaultCurrencyForCountry } from "@/lib/location";
@@ -56,6 +57,7 @@ export default function Payouts() {
   const { data: payouts, isLoading: loadingPayouts } = usePayouts(business.id);
   const release = useReleasePayout();
   const [filter, setFilter] = useState<"all" | "held" | PayoutStatus>("all");
+  const { t } = useI18n();
 
   const fallbackCurrency = defaultCurrencyForCountry(business.country);
   const summary = useMemo(
@@ -112,9 +114,9 @@ export default function Payouts() {
     <div className="space-y-6">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Payouts &amp; Escrow</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("admin.payouts.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Every customer payment is held in escrow, then split — commission to the platform, the rest to you.
+            {t("admin.payouts.subtitle")}
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs">

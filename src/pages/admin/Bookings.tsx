@@ -21,6 +21,7 @@ import {
 import { formatDate, formatTime } from "@/lib/utils";
 import { toast } from "sonner";
 import { downloadCsv, toCsv } from "@/lib/csv";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -51,6 +52,7 @@ export default function Bookings() {
   const [cancelConfirm, setCancelConfirm] = useState<BookingRow | null>(null);
   const updateStatus = useUpdateBookingStatus();
   const cancelMutation = useCancelBooking();
+  const { t } = useI18n();
 
   const { data, isLoading } = useBookings({
     businessId: business.id,
@@ -67,8 +69,8 @@ export default function Bookings() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Bookings</h1>
-        <p className="text-sm text-muted-foreground">All reservations across all services.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("admin.bookings.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("admin.bookings.subtitle")}</p>
       </header>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

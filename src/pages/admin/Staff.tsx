@@ -14,6 +14,7 @@ import { EmptyState } from "@/components/ui/empty";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { initials } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -38,6 +39,7 @@ export default function Staff() {
   const { data: staff, isLoading } = useStaff(business.id, false);
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Partial<StaffRow> | null>(null);
+  const { t } = useI18n();
 
   const upsert = useMutation({
     mutationFn: async (input: Partial<StaffRow>) => {
@@ -71,11 +73,11 @@ export default function Staff() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Staff</h1>
-          <p className="text-sm text-muted-foreground">Manage your team members and specialists.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("admin.staff.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("admin.staff.subtitle")}</p>
         </div>
         <Button onClick={() => setEditing(empty)}>
-          <Plus className="h-4 w-4" /> New staff
+          <Plus className="h-4 w-4" /> {t("admin.staff.newBtn")}
         </Button>
       </header>
 

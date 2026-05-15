@@ -12,6 +12,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -27,6 +28,7 @@ type ConfigKey =
 export default function Settings() {
   const { business, config } = useOutletContext<Ctx>();
   const qc = useQueryClient();
+  const { t } = useI18n();
   const [name, setName] = useState(business.name);
   const [nameAr, setNameAr] = useState(business.name_ar ?? "");
   const [slug, setSlug] = useState(business.slug);
@@ -106,9 +108,9 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("admin.settings.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          Tune branding, copy, and booking rules. Changes apply instantly across the customer experience.
+          {t("admin.settings.subtitle")}
         </p>
       </header>
 

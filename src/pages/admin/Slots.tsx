@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/ui/empty";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatTime, groupBy } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -29,6 +30,7 @@ export default function Slots() {
   const { data: staff } = useStaff(business.id, false);
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const [draft, setDraft] = useState({
     service_id: "",
     staff_id: "",
@@ -78,17 +80,17 @@ export default function Slots() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Slots</h1>
-          <p className="text-sm text-muted-foreground">Create and toggle bookable time windows.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("admin.slots.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("admin.slots.subtitle")}</p>
         </div>
         <Button onClick={() => setOpen(true)}>
-          <Plus className="h-4 w-4" /> New slot
+          <Plus className="h-4 w-4" /> {t("admin.slots.newBtn")}
         </Button>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle>Upcoming slots</CardTitle>
+          <CardTitle>{t("admin.slots.upcoming")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
@@ -115,7 +117,7 @@ export default function Slots() {
                           {formatTime(s.start_time)} – {formatTime(s.end_time)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {svc ? svc.name : "Any service"}
+                          {svc ? svc.name : t("admin.slots.anyService")}
                           {stf ? ` · ${stf.name}` : ""}
                           {" · "}
                           {s.booked_count}/{s.capacity} booked

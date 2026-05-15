@@ -17,6 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 import { defaultCurrencyForCountry } from "@/lib/location";
+import { useI18n } from "@/hooks/useI18n";
+import { pickLocale } from "@/lib/i18n";
 
 interface Ctx {
   business: BusinessRow;
@@ -27,11 +29,13 @@ export default function Dashboard() {
   const { business } = useOutletContext<Ctx>();
   const { data: bookings, isLoading } = useBookings({ businessId: business.id, limit: 500 });
   const { data: services } = useServices(business.id, { onlyActive: false });
+  const { t, locale } = useI18n();
   // Revenue is reported in the business's primary currency, derived from
   // its country (KW → KWD, SA → SAR, AE → AED, …). Without this, the
   // stats fell back to formatCurrency's USD default and a Kuwait vendor
   // saw 'US$0' for their weekly revenue.
   const reportingCurrency = defaultCurrencyForCountry(business.country);
+  const businessName = pickLocale(locale, business.name, business.name_ar);
 
   const stats = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -77,23 +81,23 @@ export default function Dashboard() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("admin.overview.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            What's happening at {business.name} today.
+            {t("admin.overview.subtitle").replace("{{business}}", businessName)}
           </p>
         </div>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Today's bookings" value={stats.todayCount.toString()} icon={CalendarCheck} loading={isLoading} />
-        <Stat label="7-day revenue" value={formatCurrency(stats.weeklyRevenue, reportingCurrency)} icon={TrendingUp} loading={isLoading} />
-        <Stat label="Lifetime revenue" value={formatCurrency(stats.totalRevenue, reportingCurrency)} icon={DollarSign} loading={isLoading} />
-        <Stat label="Unique customers" value={stats.customers.toString()} icon={Users} loading={isLoading} />
+        <Stat label={t("admin.overview.todaysBookings")} value={stats.todayCount.toString()} icon={CalendarCheck} loading={isLoading} />
+        <Stat label={t("admin.overview.weeklyRevenue")} value={formatCurrency(stats.weeklyRevenue, reportingCurrency)} icon={TrendingUp} loading={isLoading} />
+        <Stat label={t("admin.overview.lifetimeRevenue")} value={formatCurrency(stats.totalRevenue, reportingCurrency)} icon={DollarSign} loading={isLoading} />
+        <Stat label={t("admin.overview.uniqueCustomers")} value={stats.customers.toString()} icon={Users} loading={isLoading} />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Booking trend (14d)</CardTitle>
+          <CardTitle>{t("admin.overview.bookingTrend")}</CardTitle>
         </CardHeader>
         <CardContent className="h-72">
           {isLoading ? (
