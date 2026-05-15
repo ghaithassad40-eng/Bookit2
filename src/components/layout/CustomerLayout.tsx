@@ -8,7 +8,7 @@ import { initials } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { localizedCopy, pickLocale } from "@/lib/i18n";
-import { LogOut, UserCircle2 } from "lucide-react";
+import { Clock, LogOut, UserCircle2 } from "lucide-react";
 
 export function CustomerLayout() {
   const { slug } = useParams();
@@ -37,6 +37,39 @@ export function CustomerLayout() {
   }
 
   const { business, config: rawConfig } = data;
+
+  // Approval gate — block public access to businesses that haven't been
+  // approved by the platform yet (or have been suspended). Rows with no
+  // `status` column are treated as approved for back-compat with older prod
+  // data. Vendors hitting their own /admin/<slug> bypass this gate because
+  // they go through AdminLayout, not CustomerLayout.
+  const approved = !business.status || business.status === "approved";
+  if (!approved) {
+    const isSuspended = business.status === "suspended";
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-4 py-12 text-foreground">
+        <div className="max-w-md text-center">
+          <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
+            <Clock className="h-6 w-6" />
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {isSuspended ? t("approval.suspended.title") : t("approval.comingSoon.title")}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {isSuspended ? t("approval.suspended.body") : t("approval.comingSoon.body")}
+          </p>
+          <div className="mt-5">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground"
+            >
+              {t("approval.browseOthers")}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
   // Apply locale-aware copy override (Arabic businesses see Arabic hero/CTA/etc.)
   const config = {
     ...rawConfig,

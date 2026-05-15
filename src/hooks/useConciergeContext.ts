@@ -4,12 +4,21 @@ import type { BusinessRow, ServiceRow } from "@/lib/database.types";
 import type { ConciergeContext } from "@/lib/concierge";
 import { DEMO_BUSINESSES, DEMO_SERVICES } from "@/lib/demoData";
 
+/** Approval gate — never surface unapproved businesses in the concierge.
+ *  Rows without `status` (legacy prod data) are treated as approved. */
+function onlyApproved(businesses: BusinessRow[]): BusinessRow[] {
+  return businesses.filter((b) => !b.status || b.status === "approved");
+}
+
 function buildIndex(businesses: BusinessRow[], services: ServiceRow[]): ConciergeContext {
+  const approved = onlyApproved(businesses);
+  const approvedIds = new Set(approved.map((b) => b.id));
   const servicesByBusiness: Record<string, ServiceRow[]> = {};
   for (const svc of services) {
+    if (!approvedIds.has(svc.business_id)) continue;
     (servicesByBusiness[svc.business_id] ||= []).push(svc);
   }
-  return { businesses, servicesByBusiness };
+  return { businesses: approved, servicesByBusiness };
 }
 
 const DEMO_CONTEXT: ConciergeContext = buildIndex(

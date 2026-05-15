@@ -542,6 +542,14 @@ const STRINGS_EN = {
   "customerAuth.error.emailTaken": "An account with that email already exists. Sign in instead.",
   "customerAuth.error.nameRequired": "Tell us your name",
 
+  // Approval state — visible to the customer on /business/:slug when the
+  // business hasn't been approved by the platform yet.
+  "approval.comingSoon.title": "Coming soon",
+  "approval.comingSoon.body": "This business is being reviewed by our team and isn't taking bookings yet. Check back shortly.",
+  "approval.suspended.title": "Currently unavailable",
+  "approval.suspended.body": "This business has been temporarily suspended. Try one of the other places on Bookit.",
+  "approval.browseOthers": "Browse other places",
+
   // booking cancel + refund
   "booking.cancel": "Cancel booking",
   "booking.cancelConfirmTitle": "Cancel this booking?",
@@ -1103,6 +1111,12 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "customerAuth.error.wrongPassword": "كلمة المرور غير صحيحة. حاول مرة أخرى.",
   "customerAuth.error.emailTaken": "يوجد حساب بهذا البريد. سجّل الدخول بدلاً من ذلك.",
   "customerAuth.error.nameRequired": "أخبرنا باسمك",
+
+  "approval.comingSoon.title": "قريباً",
+  "approval.comingSoon.body": "هذا النشاط قيد المراجعة لدى فريقنا ولا يستقبل الحجوزات بعد. عُد بعد قليل.",
+  "approval.suspended.title": "غير متاح حالياً",
+  "approval.suspended.body": "هذا النشاط معلَّق مؤقّتاً. جرّب أحد الأماكن الأخرى على بكيت.",
+  "approval.browseOthers": "تصفّح الأماكن الأخرى",
 
   "booking.cancel": "إلغاء الحجز",
   "booking.cancelConfirmTitle": "هل تريد إلغاء هذا الحجز؟",

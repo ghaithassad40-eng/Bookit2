@@ -68,11 +68,18 @@ export default function Home() {
       });
   }, []);
 
-  // Apply country filter. "ALL" or null shows everything.
+  // Apply two filters before the customer ever sees the catalogue:
+  //   1. Approval status — only businesses approved by the platform admin
+  //      are visible. Rows without a status (older prod data) are treated
+  //      as approved so we don't silently hide existing customers.
+  //   2. Country — respects the customer's region pick.
   const businesses = (() => {
     if (allBusinesses === null) return null;
-    if (!country || country === "ALL") return allBusinesses;
-    return allBusinesses.filter((b) => b.country === country);
+    const approved = allBusinesses.filter(
+      (b) => !b.status || b.status === "approved",
+    );
+    if (!country || country === "ALL") return approved;
+    return approved.filter((b) => b.country === country);
   })();
 
   return (
