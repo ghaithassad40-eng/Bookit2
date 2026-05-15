@@ -22,10 +22,21 @@ import type { PaymentMethodId, PaymentResult } from "./payments";
 const MYFATOORAH_FLAG =
   (import.meta.env.VITE_MYFATOORAH_ENABLED as string | undefined) === "true";
 
-export const MYFATOORAH_ENABLED =
-  MYFATOORAH_FLAG && (import.meta.env.DEV || isSupabaseConfigured);
+// Sandboxed preview environments (e.g. Claude's in-app preview) only allow
+// top-level navigations to localhost — but MyFatoorah's hosted page lives on
+// demo.myfatoorah.com, so the post-initiate redirect dies. When we're running
+// on a loopback host, treat MyFatoorah as disabled and let the same-origin
+// `/payment/myfatoorah-mock` page take over so the flow stays demoable.
+function isPreviewOnlyHost(): boolean {
+  if (typeof window === "undefined") return false;
+  const h = window.location.hostname;
+  return h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0" || h === "[::1]";
+}
 
-const useDevProxy = MYFATOORAH_FLAG && import.meta.env.DEV;
+export const MYFATOORAH_ENABLED =
+  MYFATOORAH_FLAG && (import.meta.env.DEV || isSupabaseConfigured) && !isPreviewOnlyHost();
+
+const useDevProxy = MYFATOORAH_ENABLED && import.meta.env.DEV;
 
 async function devPost<T>(path: string, body: unknown): Promise<T> {
   const resp = await fetch(path, {
