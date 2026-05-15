@@ -60,6 +60,8 @@ interface InitiateRequest {
   // Optional pre-created booking id to bind to the invoice.
   booking_id?: string | null;
   language?: "EN" | "AR";
+  /** ISO currency to display on the hosted page. Settlement stays `currency`. */
+  displayCurrency?: string;
 }
 
 interface InitiateResult {
@@ -260,7 +262,10 @@ serve(async (req) => {
 
     const commonBody = {
       CustomerName: payload.customer.name,
-      DisplayCurrencyIso: payload.currency,
+      // If the customer's region differs from the merchant's, show them
+      // the price in their own currency on MyFatoorah's hosted page —
+      // settlement still happens in `payload.currency`.
+      DisplayCurrencyIso: (payload as { displayCurrency?: string }).displayCurrency ?? payload.currency,
       MobileCountryCode: "+965",
       CustomerMobile: (payload.customer.phone ?? "").replace(/\D/g, "") || "00000000",
       CustomerEmail: payload.customer.email ?? "noreply@bookit.local",

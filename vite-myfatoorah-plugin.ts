@@ -189,6 +189,7 @@ export function myfatoorahDevProxy(opts: MyFatoorahDevOptions = {}): Plugin {
             customer: { name: string; phone?: string | null; email?: string | null };
             booking_id?: string | null;
             language?: "EN" | "AR";
+            displayCurrency?: string;
           }>(req);
 
           if (!body.amount || !body.currency || !body.reference || !body.business_slug) {
@@ -216,7 +217,10 @@ export function myfatoorahDevProxy(opts: MyFatoorahDevOptions = {}): Plugin {
 
           const common = {
             CustomerName: body.customer.name || "Customer",
-            DisplayCurrencyIso: body.currency,
+            // If the customer's region differs from the merchant's, show
+            // them the price in their own currency on MyFatoorah's hosted
+            // page — settlement still happens in `body.currency`.
+            DisplayCurrencyIso: (body as { displayCurrency?: string }).displayCurrency ?? body.currency,
             MobileCountryCode: "+965",
             CustomerMobile: (body.customer.phone ?? "").replace(/\D/g, "") || "00000000",
             CustomerEmail: body.customer.email ?? "noreply@bookit.local",

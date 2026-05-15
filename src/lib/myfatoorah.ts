@@ -91,6 +91,10 @@ export interface InitiateBody {
   booking_id?: string | null;
   /** Locale to render MyFatoorah's hosted page in. */
   language?: "EN" | "AR";
+  /** Currency the hosted page should DISPLAY to the customer (e.g. AED for
+   *  a UAE customer paying a KWD invoice). Settlement currency stays
+   *  `currency`. Maps to MyFatoorah's `DisplayCurrencyIso`. */
+  displayCurrency?: string;
 }
 
 export interface InitiateResponse {

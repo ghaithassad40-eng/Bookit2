@@ -13,6 +13,7 @@ import {
   type PaymentRequest,
 } from "@/lib/payments";
 import { formatCurrency } from "@/lib/utils";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 
 interface Props {
   method: PaymentMethodId;
@@ -62,6 +63,8 @@ function CardForm({
   submitting,
   onSubmit,
 }: Omit<Props, "method">) {
+  const { format } = useDisplayCurrency();
+  const price = format(amount, currency);
   const [number, setNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
@@ -156,10 +159,17 @@ function CardForm({
         </div>
       </div>
 
-      <SubmitButton submitting={submitting}>
-        <CreditCard className="h-4 w-4" />
-        Pay {formatCurrency(amount, currency)}
-      </SubmitButton>
+      <div>
+        <SubmitButton submitting={submitting}>
+          <CreditCard className="h-4 w-4" />
+          Pay {price.display}
+        </SubmitButton>
+        {price.converted && (
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            You'll be charged <span className="font-mono">{price.native}</span> in the merchant's currency.
+          </p>
+        )}
+      </div>
     </form>
   );
 }
@@ -177,6 +187,8 @@ function WalletMethod({
   onSubmit,
 }: Props) {
   const m = PAYMENT_METHODS[method];
+  const { format } = useDisplayCurrency();
+  const price = format(amount, currency);
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-border bg-gradient-to-br from-card to-card/40 p-6 text-center">
@@ -191,13 +203,20 @@ function WalletMethod({
           Reference <span className="font-mono">{reference}</span>
         </div>
       </div>
-      <SubmitButton
-        submitting={submitting}
-        onClick={() => onSubmit({ method, amount, currency, reference })}
-      >
-        <PaymentBrandMark method={method} className="h-7 w-12" />
-        Pay {formatCurrency(amount, currency)}
-      </SubmitButton>
+      <div>
+        <SubmitButton
+          submitting={submitting}
+          onClick={() => onSubmit({ method, amount, currency, reference })}
+        >
+          <PaymentBrandMark method={method} className="h-7 w-12" />
+          Pay {price.display}
+        </SubmitButton>
+        {price.converted && (
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            You'll be charged <span className="font-mono">{price.native}</span>.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -215,6 +234,8 @@ function RedirectMethod({
   onSubmit,
 }: Props) {
   const m = PAYMENT_METHODS[method];
+  const { format } = useDisplayCurrency();
+  const price = format(amount, currency);
   return (
     <div className="space-y-4">
       <motion.div
@@ -235,7 +256,10 @@ function RedirectMethod({
             : "You'll be taken to your Knet bank portal to authorise the payment, then returned here."}
         </p>
         <div className="mt-4 grid gap-2 text-xs">
-          <Row k="Amount" v={formatCurrency(amount, currency)} />
+          <Row k="Amount" v={price.display} />
+          {price.converted && (
+            <Row k="Charged in merchant currency" v={price.native} mono />
+          )}
           <Row k="Merchant reference" v={reference} mono />
         </div>
       </motion.div>

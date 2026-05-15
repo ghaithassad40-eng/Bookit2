@@ -23,6 +23,7 @@ import { useCreateBooking } from "@/hooks/useBookings";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 import { charge, enabledPaymentMethods, type PaymentRequest, type PaymentResult } from "@/lib/payments";
 import { useI18n } from "@/hooks/useI18n";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import {
   MYFATOORAH_ENABLED,
   initiateMyFatoorahPayment,
@@ -42,6 +43,7 @@ export default function Book() {
 
   const { t, intl, locale } = useI18n();
   const intlLocale = intl(business.country);
+  const displayCurrency = useDisplayCurrency();
 
   const {
     step, service, staff, slot, customer,
@@ -123,6 +125,10 @@ export default function Book() {
             email: customer.email || null,
           },
           language: locale === "ar" ? "AR" : "EN",
+          displayCurrency:
+            displayCurrency.currency !== req.currency
+              ? displayCurrency.currency
+              : undefined,
         });
         if (!init.success || !init.paymentUrl) {
           toast.error(init.error ?? "Could not start payment");
@@ -294,7 +300,7 @@ export default function Book() {
                       {requirePayment ? (
                         <>
                           <Lock className="h-4 w-4" />
-                          {t("book.continueToPayment")} · {service ? formatCurrency(service.price, service.currency, intlLocale) : ""}
+                          {t("book.continueToPayment")} · {service ? displayCurrency.format(service.price, service.currency).display : ""}
                         </>
                       ) : createBooking.isPending ? (
                         t("common.loading")
@@ -386,7 +392,9 @@ function BookingSummary({
 }) {
   const { t, intl } = useI18n();
   const intlLoc = intl();
+  const { format } = useDisplayCurrency();
   if (!service) return null;
+  const price = format(service.price, service.currency);
   return (
     <Card className="h-fit">
       <CardHeader>
@@ -402,9 +410,16 @@ function BookingSummary({
           />
         )}
         {paymentLabel && <Row label={t("invoice.payment")} value={paymentLabel} />}
-        <div className="flex items-center justify-between pt-3 text-base">
+        <div className="flex items-start justify-between pt-3 text-base">
           <span className="text-muted-foreground">{t("book.total")}</span>
-          <span className="font-semibold">{formatCurrency(service.price, service.currency, intlLoc)}</span>
+          <span className="text-right">
+            <span className="block font-semibold">{price.display}</span>
+            {price.converted && (
+              <span className="mt-0.5 block text-[10px] font-mono text-muted-foreground">
+                ≈ {price.native}
+              </span>
+            )}
+          </span>
         </div>
       </CardContent>
     </Card>

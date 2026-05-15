@@ -2,8 +2,9 @@ import { motion } from "framer-motion";
 import { Clock, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { ServiceRow } from "@/lib/database.types";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 
 interface Props {
   service: ServiceRow;
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export function ServiceCard({ service, selected, onSelect }: Props) {
+  const { format } = useDisplayCurrency();
+  const price = format(service.price, service.currency);
   return (
     <motion.button
       type="button"
@@ -40,8 +43,13 @@ export function ServiceCard({ service, selected, onSelect }: Props) {
                 </p>
               )}
             </div>
-            <div className="text-right text-base font-semibold">
-              {formatCurrency(service.price, service.currency)}
+            <div className="text-right">
+              <div className="text-base font-semibold">{price.display}</div>
+              {price.converted && (
+                <div className="mt-0.5 text-[10px] font-mono text-muted-foreground">
+                  ≈ {price.native}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 pt-1">

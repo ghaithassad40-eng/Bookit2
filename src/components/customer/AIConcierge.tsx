@@ -20,9 +20,9 @@ import {
 } from "lucide-react";
 import { useConciergeContext } from "@/hooks/useConciergeContext";
 import { localConciergeReply, type ConciergeMatch } from "@/lib/concierge";
-import { formatCurrency } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
 import { useRegion } from "@/hooks/useRegion";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 
 const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   gym: Dumbbell,
@@ -293,6 +293,8 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
   const { business, matchedServices } = match;
   const Icon = INDUSTRY_ICONS[business.industry?.toLowerCase()] ?? Sparkles;
   const showService = matchedServices[0];
+  const { format } = useDisplayCurrency();
+  const price = showService ? format(showService.price, showService.currency) : null;
 
   return (
     <Link
@@ -311,12 +313,12 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
           <div className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-white/40">
             {business.industry}
           </div>
-          {showService && (
+          {showService && price && (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2 py-0.5 text-[11px] text-white/70">
               {showService.name}
               <span className="text-white/40">·</span>
               <span className="font-medium text-white/90">
-                {formatCurrency(showService.price, showService.currency)}
+                {price.converted ? `≈ ${price.display}` : price.display}
               </span>
             </div>
           )}

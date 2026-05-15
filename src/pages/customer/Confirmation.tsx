@@ -24,6 +24,7 @@ import { downloadIcs } from "@/lib/calendar";
 import { PAYMENT_METHODS, type PaymentMethodId } from "@/lib/payments";
 import { getLocalBookings } from "@/lib/localBookings";
 import { DEMO_SERVICES, DEMO_STAFF, generateDemoSlots } from "@/lib/demoData";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { formatCurrency, formatDate, formatTime, initials } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -37,6 +38,7 @@ export default function Confirmation() {
   const [params] = useSearchParams();
   const reference = params.get("ref");
   const [copied, setCopied] = useState(false);
+  const { format: formatDisplay } = useDisplayCurrency();
 
   const booking = useMemo(
     () => (reference ? getLocalBookings().find((b) => b.booking_reference === reference) ?? null : null),
@@ -222,17 +224,29 @@ export default function Confirmation() {
               {amount != null && (
                 <section className="rounded-2xl border border-border/60 bg-card/50 p-5">
                   <SectionHeader className="mb-3">Charges</SectionHeader>
-                  <dl className="space-y-2 text-sm">
-                    <Line label="Subtotal" value={formatCurrency(amount, currency)} />
-                    <Line label="Service charge" value={formatCurrency(0, currency)} subtle />
-                    <Line label="Tax" value={formatCurrency(0, currency)} subtle />
-                  </dl>
-                  <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                    <span className="text-sm font-medium">Total paid</span>
-                    <span className="text-xl font-semibold tracking-tight">
-                      {formatCurrency(amount, currency)}
-                    </span>
-                  </div>
+                  {(() => {
+                    const charge = formatDisplay(amount!, currency);
+                    return (
+                      <>
+                        <dl className="space-y-2 text-sm">
+                          <Line label="Subtotal" value={charge.display} />
+                          <Line label="Service charge" value={formatCurrency(0, charge.displayCurrency)} subtle />
+                          <Line label="Tax" value={formatCurrency(0, charge.displayCurrency)} subtle />
+                        </dl>
+                        <div className="mt-3 flex items-start justify-between border-t border-border pt-3">
+                          <span className="text-sm font-medium">Total paid</span>
+                          <span className="text-right">
+                            <span className="block text-xl font-semibold tracking-tight">{charge.display}</span>
+                            {charge.converted && (
+                              <span className="mt-0.5 block text-[11px] font-mono text-muted-foreground">
+                                Settled as {charge.native}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </section>
               )}
 
