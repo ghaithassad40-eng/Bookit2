@@ -38,9 +38,11 @@ export function PlatformAdminLayout() {
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[260px_1fr]">
         <aside className="hidden border-r border-border/60 bg-card/40 backdrop-blur-xl lg:flex lg:flex-col">
           <div className="flex h-16 items-center gap-2 border-b border-border/60 px-5">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-blue-500 to-emerald-400 text-white">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
+            <img
+              src="/Bookit.png"
+              alt="Bookit"
+              className="h-8 w-8 rounded-lg object-contain bg-white p-0.5"
+            />
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold">Bookit</div>
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">

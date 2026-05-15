@@ -3,50 +3,71 @@
 @tailwind utilities;
 
 @layer base {
+  /* Bookit brand palette
+     ---------------------
+     Drawn directly from the logo: deep navy on white with rich gold as
+     the single accent. The two raw brand colours are also exposed as
+     standalone tokens (--brand-navy, --brand-gold) so components that
+     want the literal logo colour can reach for it without recomputing
+     contrast off the primary scale. */
   :root {
+    /* Raw brand colours — match the logo's "B" wordmark and checkmark. */
+    --brand-navy: 220 49% 21%;       /* #1B2A4E — the "Bookit" wordmark */
+    --brand-navy-deep: 220 55% 13%;  /* #0F1A33 — the darker silhouette */
+    --brand-gold: 43 65% 49%;        /* #C9A227 — checkmark + accent lines */
+    --brand-gold-warm: 41 73% 55%;   /* #D4A436 — slightly warmer gold */
+
+    /* Semantic tokens (light mode) */
     --background: 0 0% 100%;
-    --foreground: 240 10% 8%;
+    --foreground: 220 49% 14%;        /* near-navy body text */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 8%;
+    --card-foreground: 220 49% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 8%;
-    --primary: 222 47% 11%;
+    --popover-foreground: 220 49% 14%;
+    --primary: var(--brand-navy);     /* CTAs default to navy */
     --primary-foreground: 0 0% 100%;
-    --secondary: 160 84% 39%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 5% 40%;
+    --secondary: var(--brand-gold);   /* secondary CTA fills with gold */
+    --secondary-foreground: 220 55% 13%;
+    --accent: var(--brand-gold);      /* highlights, badges, ring */
+    --accent-foreground: 220 55% 13%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 40%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 217 91% 60%;
+    --border: 220 14% 90%;
+    --input: 220 14% 90%;
+    --ring: var(--brand-gold);
     --radius: 1rem;
     --font-sans: "Inter";
   }
 
   .dark {
-    --background: 240 10% 4%;
-    --foreground: 210 20% 98%;
-    --card: 240 10% 6%;
-    --card-foreground: 210 20% 98%;
-    --popover: 240 10% 6%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 160 84% 39%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
-    --muted: 240 5% 12%;
-    --muted-foreground: 240 5% 65%;
-    --destructive: 0 84% 60%;
+    /* Brand tokens unchanged — same hue, just used differently against
+       the dark navy backdrop. Gold pops more on navy than it does on white. */
+    --brand-navy: 220 49% 21%;
+    --brand-navy-deep: 220 55% 13%;
+    --brand-gold: 43 68% 56%;        /* nudge brighter for dark-mode legibility */
+    --brand-gold-warm: 41 75% 62%;
+
+    --background: 220 55% 6%;         /* near-black navy backdrop */
+    --foreground: 220 14% 96%;
+    --card: 220 45% 10%;
+    --card-foreground: 220 14% 96%;
+    --popover: 220 45% 10%;
+    --popover-foreground: 220 14% 96%;
+    --primary: var(--brand-gold);     /* on dark, gold is the primary CTA */
+    --primary-foreground: 220 55% 8%;
+    --secondary: var(--brand-navy);
+    --secondary-foreground: 220 14% 96%;
+    --accent: var(--brand-gold);
+    --accent-foreground: 220 55% 8%;
+    --muted: 220 35% 14%;
+    --muted-foreground: 220 14% 66%;
+    --destructive: 0 84% 62%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 6% 18%;
-    --input: 240 6% 18%;
-    --ring: 217 91% 60%;
+    --border: 220 30% 18%;
+    --input: 220 30% 18%;
+    --ring: var(--brand-gold);
   }
 
   * {

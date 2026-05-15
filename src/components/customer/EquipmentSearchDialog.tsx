@@ -73,7 +73,7 @@ export function EquipmentSearchDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-blue-500/15 to-emerald-400/15 text-accent">
+          <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-navy/15 to-brand-gold/20 text-accent">
             <Sparkles className="h-5 w-5" />
           </div>
           <DialogTitle>{t("equipmentSearch.title")}</DialogTitle>

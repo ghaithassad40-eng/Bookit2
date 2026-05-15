@@ -163,7 +163,7 @@ export function AIConcierge() {
       {/* header */}
       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-blue-500/30 to-emerald-400/30 ring-1 ring-white/15">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-brand-navy/50 to-brand-gold/40 ring-1 ring-white/15">
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <div>

@@ -47,6 +47,14 @@ export default {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
+        // Logo-literal brand colours — for cases where a component wants
+        // the actual logo navy / gold regardless of light/dark mode.
+        brand: {
+          navy: "hsl(var(--brand-navy))",
+          "navy-deep": "hsl(var(--brand-navy-deep))",
+          gold: "hsl(var(--brand-gold))",
+          "gold-warm": "hsl(var(--brand-gold-warm))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

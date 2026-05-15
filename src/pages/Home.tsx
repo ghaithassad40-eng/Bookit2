@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   Activity,
   ArrowRight,
-  CalendarCheck,
   CircleDot,
   Dumbbell,
   Goal,
@@ -92,7 +91,7 @@ export default function Home() {
   })();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0a0a0f] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[#0a1226] text-white">
       {/* First-visit country + language prompt */}
       <WelcomePicker />
 
@@ -104,9 +103,11 @@ export default function Home() {
 
       {/* ambient background */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[640px] w-[1100px] -translate-x-1/2 rounded-full bg-blue-500/15 blur-[120px]" />
-        <div className="absolute top-[40%] -right-40 h-[420px] w-[640px] rounded-full bg-emerald-400/10 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 h-[420px] w-[640px] rounded-full bg-violet-500/10 blur-[120px]" />
+        {/* Brand-coloured ambient glow — navy → gold echoes the logo
+            against the deep navy backdrop. */}
+        <div className="absolute -top-40 left-1/2 h-[640px] w-[1100px] -translate-x-1/2 rounded-full bg-[hsl(220_60%_35%_/_0.35)] blur-[120px]" />
+        <div className="absolute top-[40%] -right-40 h-[420px] w-[640px] rounded-full bg-[hsl(43_75%_55%_/_0.18)] blur-[120px]" />
+        <div className="absolute bottom-0 left-0 h-[420px] w-[640px] rounded-full bg-[hsl(220_55%_45%_/_0.20)] blur-[120px]" />
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
@@ -121,9 +122,11 @@ export default function Home() {
       <header className="relative z-10 border-b border-white/5">
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-semibold">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-blue-500 to-emerald-400 shadow-lg shadow-blue-500/25">
-              <CalendarCheck className="h-4 w-4 text-white" />
-            </div>
+            <img
+              src="/Bookit.png"
+              alt="Bookit"
+              className="h-9 w-9 rounded-lg object-contain bg-white p-0.5 shadow-lg shadow-brand-gold/20"
+            />
             <span className="text-base">Bookit</span>
           </Link>
           <nav className="hidden items-center gap-7 text-sm text-white/60 md:flex">
@@ -321,7 +324,7 @@ export default function Home() {
                       to={`/business/${b.slug}`}
                       className="group relative block h-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 transition-all hover:border-white/20 hover:from-white/[0.06]"
                     >
-                      <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-blue-500/15 blur-3xl transition-opacity group-hover:opacity-100" />
+                      <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[hsl(43_75%_55%_/_0.18)] blur-3xl transition-opacity group-hover:opacity-100" />
                       <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] backdrop-blur">
                         <Icon className="h-5 w-5 text-white/80" />
                       </div>
@@ -450,9 +453,11 @@ export default function Home() {
       <footer className="relative z-10 border-t border-white/5">
         <div className="container flex flex-col items-center justify-between gap-3 py-8 text-xs text-white/40 sm:flex-row">
           <div className="flex items-center gap-2">
-            <div className="grid h-5 w-5 place-items-center rounded bg-gradient-to-br from-blue-500 to-emerald-400">
-              <CalendarCheck className="h-3 w-3 text-white" />
-            </div>
+            <img
+              src="/Bookit.png"
+              alt="Bookit"
+              className="h-5 w-5 rounded bg-white/95 object-contain p-px"
+            />
             <span>© {new Date().getFullYear()} {t("home.footer.copyright")}</span>
           </div>
           <div className="flex items-center gap-4">

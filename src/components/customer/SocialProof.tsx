@@ -313,7 +313,7 @@ export function SocialProof() {
                   {ar ? r.quoteAr : `"${r.quote}"`}
                 </p>
                 <div className="mt-5 flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-emerald-400 text-xs font-semibold text-white shadow-lg shadow-blue-500/25">
+                  <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-brand-navy to-brand-gold text-xs font-semibold text-white shadow-lg shadow-brand-navy/30">
                     {r.initials}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -400,8 +400,8 @@ export function SocialProof() {
             {/* Live activity feed */}
             <div className="lg:col-span-3">
               <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-5 backdrop-blur">
-                <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-blue-500/15 blur-3xl" />
-                <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
+                <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[hsl(220_60%_45%_/_0.20)] blur-3xl" />
+                <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-[hsl(43_75%_55%_/_0.18)] blur-3xl" />
 
                 <div className="relative flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
@@ -464,7 +464,7 @@ export function SocialProof() {
                 </ul>
 
                 {/* Fade gradient at the bottom */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 rounded-b-3xl bg-gradient-to-t from-[#0a0a0f] to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 rounded-b-3xl bg-gradient-to-t from-[#0a1226] to-transparent" />
               </div>
             </div>
           </div>
@@ -481,7 +481,7 @@ export function SocialProof() {
                 {ar ? "قصة من العملاء" : "Owner story"}
               </div>
               <div className="mt-4 flex items-center gap-3">
-                <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-blue-500 to-emerald-400 text-sm font-semibold text-white shadow-lg shadow-blue-500/25">
+                <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-brand-navy to-brand-gold text-sm font-semibold text-white shadow-lg shadow-brand-navy/30">
                   AS
                 </div>
                 <div>

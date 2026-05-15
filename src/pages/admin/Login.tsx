@@ -100,9 +100,11 @@ export default function Login() {
     <div className="grid min-h-screen place-items-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-emerald-400 text-white shadow-lg shadow-blue-500/25">
-            <ShieldCheck className="h-5 w-5" />
-          </div>
+          <img
+            src="/Bookit.png"
+            alt="Bookit"
+            className="mx-auto mb-3 h-20 w-20 rounded-2xl object-contain bg-white shadow-lg shadow-brand-navy/20"
+          />
           <h1 className="text-2xl font-semibold tracking-tight">{t("login.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("login.subtitle")}
