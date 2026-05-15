@@ -173,21 +173,56 @@ export interface CallbackResult {
   error?: string;
 }
 
+/**
+ * Read the mock page's localStorage decision flag (set by the demo
+ * `/payment/myfatoorah-mock` route when the user authorises/declines a
+ * staging transaction). Returns a fully-formed CallbackResult so callers can
+ * skip the network round-trip when the payment never left the browser.
+ */
+function readMockDecision(query: CallbackQuery): CallbackResult | null {
+  const ref = query.reference ?? "";
+  if (!ref) return null;
+  const decision = window.localStorage.getItem(`bookit.demo.mf.${ref}`);
+  if (!decision) return null;
+  return {
+    success: decision === "approved",
+    status: decision === "approved" ? "Paid" : decision === "declined" ? "Failed" : "Pending",
+    transactionId: decision ? `MF-${ref}` : null,
+    invoiceId: query.invoiceId ? Number(query.invoiceId) : null,
+    customerReference: ref,
+    amount: null,
+    cardNumber: null,
+    paymentGateway: "MyFatoorah (demo)",
+  };
+}
+
 export async function verifyMyFatoorahCallback(query: CallbackQuery): Promise<CallbackResult> {
   if (!MYFATOORAH_ENABLED) {
     // In demo mode, the mock page already sets a localStorage flag.
-    const ref = query.reference ?? "";
-    const decision = window.localStorage.getItem(`bookit.demo.mf.${ref}`);
-    return {
-      success: decision === "approved",
-      status: decision === "approved" ? "Paid" : decision === "declined" ? "Failed" : "Pending",
-      transactionId: decision ? `MF-${ref}` : null,
-      invoiceId: query.invoiceId ? Number(query.invoiceId) : null,
-      customerReference: ref,
-      amount: null,
-      cardNumber: null,
-      paymentGateway: "MyFatoorah (demo)",
-    };
+    return (
+      readMockDecision(query) ?? {
+        success: false,
+        status: "Pending",
+        transactionId: null,
+        invoiceId: query.invoiceId ? Number(query.invoiceId) : null,
+        customerReference: query.reference ?? null,
+        amount: null,
+        cardNumber: null,
+        paymentGateway: "MyFatoorah (demo)",
+      }
+    );
+  }
+
+  // Live MyFatoorah is enabled, but the URL came back from the dev mock page
+  // (paymentId prefixed with MFTEST-). The staging API has no record of that
+  // invoice — querying it returns "No data match the provided values" and we
+  // route the customer to /payment/failed even though they completed the
+  // mock-side flow successfully. Short-circuit to the mock localStorage
+  // decision so the demo flow can be tested end-to-end against a real
+  // MyFatoorah staging key.
+  if (typeof query.paymentId === "string" && query.paymentId.startsWith("MFTEST-")) {
+    const mock = readMockDecision(query);
+    if (mock) return mock;
   }
 
   const body = {
