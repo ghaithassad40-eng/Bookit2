@@ -144,6 +144,38 @@ export function AdminLayout() {
                 {t("admin.demoBanner")}
               </div>
             )}
+            {/* Approval-state banner. Shown for pending/suspended/rejected
+                businesses so the vendor knows their page isn't yet (or no
+                longer) visible to customers. */}
+            {business.status && business.status !== "approved" && (
+              <div
+                className={`border-b px-4 py-3 text-center text-xs ${
+                  business.status === "pending"
+                    ? "border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-100"
+                    : "border-rose-500/30 bg-rose-500/10 text-rose-900 dark:text-rose-100"
+                }`}
+              >
+                <span className="font-semibold">
+                  {business.status === "pending"
+                    ? t("approval.vendorBanner.pending.title")
+                    : business.status === "suspended"
+                      ? t("approval.vendorBanner.suspended.title")
+                      : t("approval.vendorBanner.rejected.title")}
+                </span>{" "}
+                <span className="opacity-80">
+                  {business.status === "pending"
+                    ? t("approval.vendorBanner.pending.body")
+                    : business.status === "suspended"
+                      ? t("approval.vendorBanner.suspended.body")
+                      : t("approval.vendorBanner.rejected.body")}
+                </span>
+                {business.status === "rejected" && business.rejection_reason && (
+                  <div className="mt-1 text-[11px] opacity-80">
+                    {t("approval.vendorBanner.reasonLabel")}: {business.rejection_reason}
+                  </div>
+                )}
+              </div>
+            )}
             <main className="flex-1 p-4 sm:p-6 lg:p-8">
               <Outlet context={{ business, config }} />
             </main>

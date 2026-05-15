@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Ctx {
   business: BusinessRow;
@@ -30,6 +31,7 @@ export default function Settings() {
   const { business, config } = useOutletContext<Ctx>();
   const qc = useQueryClient();
   const { t } = useI18n();
+  const { isPlatformAdmin } = useAuth();
   const [name, setName] = useState(business.name);
   const [nameAr, setNameAr] = useState(business.name_ar ?? "");
   const [slug, setSlug] = useState(business.slug);
@@ -179,9 +181,16 @@ export default function Settings() {
               max="50"
               value={commissionPct}
               onChange={(e) => setCommissionPct(e.target.value)}
+              // Vendors can't lower their own commission to 0% — only a
+              // platform admin can change this value. Field stays visible
+              // (read-only) so the vendor knows what they're paying.
+              disabled={!isPlatformAdmin}
+              readOnly={!isPlatformAdmin}
             />
             <p className="text-[11px] text-muted-foreground">
-              {t("admin.settings.payouts.commissionHint")}
+              {isPlatformAdmin
+                ? t("admin.settings.payouts.commissionHint")
+                : t("admin.settings.payouts.commissionLocked")}
             </p>
           </Field>
           <Field label={t("admin.settings.payouts.iban")}>

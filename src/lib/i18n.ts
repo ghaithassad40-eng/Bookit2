@@ -549,6 +549,22 @@ const STRINGS_EN = {
   "approval.suspended.title": "Currently unavailable",
   "approval.suspended.body": "This business has been temporarily suspended. Try one of the other places on Bookit.",
   "approval.browseOthers": "Browse other places",
+  "approval.vendorBanner.pending.title": "Awaiting platform approval",
+  "approval.vendorBanner.pending.body":
+    "Your business is being reviewed by the Bookit team. Customers can't see your page yet — you can keep editing your services, staff and copy in the meantime.",
+  "approval.vendorBanner.suspended.title": "Business suspended",
+  "approval.vendorBanner.suspended.body":
+    "Your business has been suspended by the platform. Reach out to support to resolve the issue.",
+  "approval.vendorBanner.rejected.title": "Signup rejected",
+  "approval.vendorBanner.rejected.body":
+    "We couldn't approve your business at this time.",
+  "approval.vendorBanner.reasonLabel": "Reason",
+  "approval.statusBadge.pending": "Pending review",
+  "approval.statusBadge.approved": "Approved",
+  "approval.statusBadge.suspended": "Suspended",
+  "approval.statusBadge.rejected": "Rejected",
+  "admin.settings.payouts.commissionLocked":
+    "Set by the platform — contact support to change.",
 
   // booking cancel + refund
   "booking.cancel": "Cancel booking",
@@ -1117,6 +1133,22 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "approval.suspended.title": "غير متاح حالياً",
   "approval.suspended.body": "هذا النشاط معلَّق مؤقّتاً. جرّب أحد الأماكن الأخرى على بكيت.",
   "approval.browseOthers": "تصفّح الأماكن الأخرى",
+  "approval.vendorBanner.pending.title": "بانتظار موافقة المنصّة",
+  "approval.vendorBanner.pending.body":
+    "نشاطك قيد المراجعة من فريق بكيت. صفحتك ليست ظاهرة للعملاء بعد — يمكنك متابعة تحرير الخدمات والفريق والنصوص في غضون ذلك.",
+  "approval.vendorBanner.suspended.title": "النشاط معلّق",
+  "approval.vendorBanner.suspended.body":
+    "تمّ تعليق نشاطك من قِبل المنصّة. تواصل مع الدعم لحلّ المشكلة.",
+  "approval.vendorBanner.rejected.title": "تمّ رفض التسجيل",
+  "approval.vendorBanner.rejected.body":
+    "لم نتمكّن من اعتماد نشاطك في هذا الوقت.",
+  "approval.vendorBanner.reasonLabel": "السبب",
+  "approval.statusBadge.pending": "قيد المراجعة",
+  "approval.statusBadge.approved": "معتمَد",
+  "approval.statusBadge.suspended": "معلَّق",
+  "approval.statusBadge.rejected": "مرفوض",
+  "admin.settings.payouts.commissionLocked":
+    "تحدّدها المنصّة — تواصل مع الدعم لتغييرها.",
 
   "booking.cancel": "إلغاء الحجز",
   "booking.cancelConfirmTitle": "هل تريد إلغاء هذا الحجز؟",
