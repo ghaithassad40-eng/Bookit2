@@ -39,6 +39,7 @@ import { DEMO_SERVICES, DEMO_STAFF, generateDemoSlots } from "@/lib/demoData";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { useCancelBooking } from "@/hooks/useBookings";
 import { useI18n } from "@/hooks/useI18n";
+import { pickLocale } from "@/lib/i18n";
 import { formatCurrency, formatDate, formatTime, initials } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -57,7 +58,7 @@ export default function Confirmation() {
   // successful cancel, without having to refetch from localStorage.
   const [overlay, setOverlay] = useState<Partial<BookingRow> | null>(null);
   const { format: formatDisplay } = useDisplayCurrency();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const cancelMutation = useCancelBooking();
 
   const baseBooking = useMemo(
@@ -102,7 +103,7 @@ export default function Confirmation() {
 
   function handleAddToCalendar() {
     if (!booking || !slotTimes) {
-      toast.error("Couldn't find the slot times to build the calendar event");
+      toast.error(t("invoice.calendarError"));
       return;
     }
     downloadIcs({
@@ -119,7 +120,7 @@ export default function Confirmation() {
     if (!reference) return;
     void navigator.clipboard?.writeText(reference);
     setCopied(true);
-    toast.success("Reference copied");
+    toast.success(t("invoice.referenceCopied"));
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -194,13 +195,14 @@ export default function Confirmation() {
           ) : (
             <>
               <Badge variant="success" className="mb-3 px-3 py-1 text-xs">
-                Booking confirmed
+                {t("invoice.bookingConfirmed")}
               </Badge>
               <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
                 {config.copy_json.confirmationMessage}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                We've emailed a copy of this invoice to you{booking?.customer_email ? ` at ${booking.customer_email}` : ""}.
+                {t("invoice.emailedCopy")}
+                {booking?.customer_email ? ` ${t("invoice.emailedCopyAt")} ${booking.customer_email}` : ""}.
               </p>
             </>
           )}
@@ -230,13 +232,13 @@ export default function Confirmation() {
                   </div>
                 </div>
               </div>
-              <div className="text-left sm:text-right">
+              <div className="text-start sm:text-end">
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Receipt className="h-3 w-3" /> Invoice
+                  <Receipt className="h-3 w-3" /> {t("invoice.invoice")}
                 </div>
                 <div className="mt-1.5 font-mono text-sm font-semibold">{invoiceNumber}</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
-                  Issued {formatDate(issuedAt.toISOString())} · {formatTime(issuedAt.toISOString())}
+                  {t("invoice.issued")} {formatDate(issuedAt.toISOString())} · {formatTime(issuedAt.toISOString())}
                 </div>
               </div>
             </div>
@@ -246,13 +248,13 @@ export default function Confirmation() {
               <div className="flex flex-col items-start justify-between gap-3 rounded-2xl bg-muted/30 p-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-2.5 text-sm">
                   <Hash className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Booking reference</span>
+                  <span className="text-muted-foreground">{t("invoice.bookingReference")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-base font-semibold">{reference ?? "—"}</span>
                   <button
                     onClick={handleCopy}
-                    aria-label="Copy reference"
+                    aria-label={t("invoice.copyReference")}
                     className="grid h-8 w-8 place-items-center rounded-lg border border-border/60 bg-card transition-colors hover:bg-muted"
                   >
                     {copied ? (
@@ -266,23 +268,31 @@ export default function Confirmation() {
 
               {/* Booking details */}
               <section>
-                <SectionHeader>Booking details</SectionHeader>
+                <SectionHeader>{t("invoice.bookingDetails")}</SectionHeader>
                 <dl className="divide-y divide-border/60">
-                  <Row label="Service" value={service?.name ?? "—"} />
-                  {staff && <Row label="Specialist" value={staff.name} />}
-                  {service && <Row label="Duration" value={`${service.duration_minutes} minutes`} />}
-                  {booking?.notes && <Row label="Notes" value={booking.notes} />}
+                  <Row
+                    label={t("invoice.service")}
+                    value={service ? pickLocale(locale, service.name, service.name_ar) : "—"}
+                  />
+                  {staff && <Row label={t("invoice.specialist")} value={staff.name} />}
+                  {service && (
+                    <Row
+                      label={t("invoice.duration")}
+                      value={`${service.duration_minutes} ${t("invoice.minutes")}`}
+                    />
+                  )}
+                  {booking?.notes && <Row label={t("invoice.notes")} value={booking.notes} />}
                 </dl>
               </section>
 
               {/* Customer */}
               {booking && (
                 <section>
-                  <SectionHeader>Billed to</SectionHeader>
+                  <SectionHeader>{t("invoice.billedTo")}</SectionHeader>
                   <dl className="divide-y divide-border/60">
-                    <Row label="Name" value={booking.customer_name} />
-                    {booking.customer_email && <Row label="Email" value={booking.customer_email} />}
-                    {booking.customer_phone && <Row label="Phone" value={booking.customer_phone} />}
+                    <Row label={t("invoice.name")} value={booking.customer_name} />
+                    {booking.customer_email && <Row label={t("invoice.email")} value={booking.customer_email} />}
+                    {booking.customer_phone && <Row label={t("invoice.phone")} value={booking.customer_phone} />}
                   </dl>
                 </section>
               )}
@@ -290,23 +300,23 @@ export default function Confirmation() {
               {/* Charges */}
               {amount != null && (
                 <section className="rounded-2xl border border-border/60 bg-card/50 p-5">
-                  <SectionHeader className="mb-3">Charges</SectionHeader>
+                  <SectionHeader className="mb-3">{t("invoice.charges")}</SectionHeader>
                   {(() => {
                     const charge = formatDisplay(amount!, currency);
                     return (
                       <>
                         <dl className="space-y-2 text-sm">
-                          <Line label="Subtotal" value={charge.display} />
-                          <Line label="Service charge" value={formatCurrency(0, charge.displayCurrency)} subtle />
-                          <Line label="Tax" value={formatCurrency(0, charge.displayCurrency)} subtle />
+                          <Line label={t("invoice.subtotal")} value={charge.display} />
+                          <Line label={t("invoice.serviceCharge")} value={formatCurrency(0, charge.displayCurrency)} subtle />
+                          <Line label={t("invoice.tax")} value={formatCurrency(0, charge.displayCurrency)} subtle />
                         </dl>
                         <div className="mt-3 flex items-start justify-between border-t border-border pt-3">
-                          <span className="text-sm font-medium">Total paid</span>
-                          <span className="text-right">
+                          <span className="text-sm font-medium">{t("invoice.totalPaid")}</span>
+                          <span className="text-end">
                             <span className="block text-xl font-semibold tracking-tight">{charge.display}</span>
                             {charge.converted && (
                               <span className="mt-0.5 block text-[11px] font-mono text-muted-foreground">
-                                Settled as {charge.native}
+                                {t("invoice.settledAs")} {charge.native}
                               </span>
                             )}
                           </span>
@@ -320,7 +330,7 @@ export default function Confirmation() {
               {/* Payment */}
               {method && (
                 <section>
-                  <SectionHeader>Payment</SectionHeader>
+                  <SectionHeader>{t("invoice.payment")}</SectionHeader>
                   <div className="mt-2 flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-card/50 p-4">
                     <div className="flex items-center gap-3">
                       <PaymentBrandMark method={method} />
@@ -328,15 +338,15 @@ export default function Confirmation() {
                         <div className="text-sm font-medium">
                           {PAYMENT_METHODS[method]?.shortLabel ?? method}
                           {booking?.payment_transaction_id && (
-                            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
+                            <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
                               <ShieldCheck className="h-3 w-3" />
-                              {paid ? "Paid" : "Pending"}
+                              {paid ? t("invoice.paid") : t("invoice.pending")}
                             </span>
                           )}
                         </div>
                         {booking?.payment_transaction_id && (
                           <div className="mt-0.5 font-mono text-xs text-muted-foreground">
-                            Txn {booking.payment_transaction_id}
+                            {t("invoice.txn")} {booking.payment_transaction_id}
                           </div>
                         )}
                       </div>
@@ -350,16 +360,16 @@ export default function Confirmation() {
                 <div className="flex items-start gap-3">
                   <Calendar className="mt-0.5 h-5 w-5 text-accent" />
                   <div className="text-sm">
-                    <div className="font-medium">Save the date</div>
+                    <div className="font-medium">{t("invoice.saveTheDate")}</div>
                     <div className="text-muted-foreground">
-                      Add this to your calendar so you don't miss it.
+                      {t("invoice.saveTheDateBody")}
                     </div>
                   </div>
                 </div>
                 {slotTimes && (
                   <Button variant="outline" size="sm" onClick={handleAddToCalendar} data-no-print>
                     <Calendar className="h-3.5 w-3.5" />
-                    Add to calendar
+                    {t("invoice.addToCalendar")}
                   </Button>
                 )}
               </div>
@@ -370,12 +380,10 @@ export default function Confirmation() {
                   <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
                   <div className="text-sm">
                     <div className="font-medium text-emerald-700 dark:text-emerald-200">
-                      Your payment is protected by escrow
+                      {t("invoice.escrowTitle")}
                     </div>
                     <div className="mt-0.5 text-xs text-emerald-700/70 dark:text-emerald-200/70">
-                      Funds are held with the platform until your service is delivered.
-                      If something goes wrong before then, the refund returns to you cleanly —
-                      we haven't released the money to {business.name} yet.
+                      {t("invoice.escrowBody").replace("{{business}}", business.name)}
                     </div>
                   </div>
                 </div>
@@ -385,7 +393,7 @@ export default function Confirmation() {
             <div className="flex flex-col gap-2 border-t border-border/60 bg-muted/30 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5" />
-                Powered by Bookit
+                {t("invoice.poweredBy")}
               </div>
               <div className="flex flex-wrap items-center gap-2" data-no-print>
                 {canCancel && (
@@ -400,7 +408,7 @@ export default function Confirmation() {
                   </Button>
                 )}
                 <Button variant="outline" size="sm" onClick={handlePrint}>
-                  <Printer className="h-3.5 w-3.5" /> Print invoice
+                  <Printer className="h-3.5 w-3.5" /> {t("invoice.print")}
                 </Button>
               </div>
             </div>
@@ -431,14 +439,14 @@ export default function Confirmation() {
         <div className="mt-8 flex flex-col items-stretch justify-center gap-2 sm:flex-row" data-no-print>
           <Button asChild>
             <Link to={`/business/${business.slug}`}>
-              Back to {business.name}
+              {t("invoice.backTo")} {business.name}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="outline" asChild>
             <Link to={`/business/${business.slug}/book`}>
               <Clock className="h-4 w-4" />
-              Book another
+              {t("invoice.bookAnother")}
             </Link>
           </Button>
         </div>
