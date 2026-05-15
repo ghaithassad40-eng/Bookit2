@@ -39,7 +39,9 @@ import { DEMO_SERVICES, DEMO_STAFF, generateDemoSlots } from "@/lib/demoData";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { useCancelBooking } from "@/hooks/useBookings";
 import { useI18n } from "@/hooks/useI18n";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { pickLocale } from "@/lib/i18n";
+import { ShieldAlert } from "lucide-react";
 import { formatCurrency, formatDate, formatTime, initials } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -59,6 +61,7 @@ export default function Confirmation() {
   const [overlay, setOverlay] = useState<Partial<BookingRow> | null>(null);
   const { format: formatDisplay } = useDisplayCurrency();
   const { t, locale } = useI18n();
+  const { customer: authedCustomer } = useCustomerAuth();
   const cancelMutation = useCancelBooking();
 
   const baseBooking = useMemo(
@@ -68,7 +71,18 @@ export default function Confirmation() {
   const booking = baseBooking ? ({ ...baseBooking, ...overlay } as BookingRow) : null;
 
   const isCancelled = booking?.status === "cancelled";
-  const canCancel = booking && !isCancelled;
+  // Ownership gate — block the IDOR where anyone with a booking reference
+  // could view the victim's PII *and* trigger cancel/refund. A booking is
+  // 'yours' if you're signed in with the same email it was made under (or
+  // the booking pre-dates customer auth and has no email — legacy demo
+  // rows). If the customer isn't signed in or the email doesn't match, we
+  // refuse to show the page.
+  const bookingEmail = booking?.customer_email?.toLowerCase() ?? null;
+  const authEmail = authedCustomer?.email?.toLowerCase() ?? null;
+  const isOwner =
+    booking !== null &&
+    (bookingEmail === null || (authEmail !== null && bookingEmail === authEmail));
+  const canCancel = booking && !isCancelled && isOwner;
 
   // Resolve service + staff for receipt context (works in demo + when row is local).
   const service = useMemo(
@@ -130,6 +144,12 @@ export default function Confirmation() {
 
   async function handleCancel() {
     if (!booking) return;
+    if (!isOwner) {
+      // Defensive: the cancel button is hidden when !isOwner, but if a caller
+      // races state we still refuse — never let a non-owner trigger a refund.
+      toast.error(t("owner.notYours.title"));
+      return;
+    }
     try {
       const result = await cancelMutation.mutateAsync({
         id: booking.id,
@@ -145,6 +165,41 @@ export default function Confirmation() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("booking.cancelFailed"));
     }
+  }
+
+  // Ownership gate — if the booking exists but the caller isn't the owner,
+  // refuse to render the receipt (which leaks customer_name / email / phone)
+  // and refuse to expose cancel + review actions. The gate fires only when a
+  // booking was actually resolved by reference; missing references still
+  // fall through to the normal "—" placeholders below.
+  if (reference && booking && !isOwner) {
+    return (
+      <div className="container max-w-md py-16 sm:py-24">
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-8 text-center backdrop-blur-sm">
+          <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-rose-500/15 text-rose-500">
+            <ShieldAlert className="h-6 w-6" />
+          </div>
+          <h1 className="text-balance text-xl font-semibold tracking-tight">
+            {t("owner.notYours.title")}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("owner.notYours.body")}
+          </p>
+          <div className="mt-6 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-center">
+            <Button asChild>
+              <Link to={`/business/${business.slug}/book`}>
+                {t("owner.notYours.signIn")}
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/">
+                {t("owner.notYours.browse")}
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

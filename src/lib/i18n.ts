@@ -551,6 +551,11 @@ const STRINGS_EN = {
   "approval.suspended.title": "Currently unavailable",
   "approval.suspended.body": "This business has been temporarily suspended. Try one of the other places on Bookit.",
   "approval.browseOthers": "Browse other places",
+  "owner.notYours.title": "This booking isn't yours",
+  "owner.notYours.body":
+    "Sign in with the account that made this booking to see its details. We don't show booking info to anyone else for privacy.",
+  "owner.notYours.signIn": "Sign in",
+  "owner.notYours.browse": "Browse places",
   "approval.vendorBanner.pending.title": "Awaiting platform approval",
   "approval.vendorBanner.pending.body":
     "Your business is being reviewed by the Bookit team. Customers can't see your page yet — you can keep editing your services, staff and copy in the meantime.",
@@ -1158,6 +1163,11 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "approval.suspended.title": "غير متاح حالياً",
   "approval.suspended.body": "هذا النشاط معلَّق مؤقّتاً. جرّب أحد الأماكن الأخرى على بكيت.",
   "approval.browseOthers": "تصفّح الأماكن الأخرى",
+  "owner.notYours.title": "هذا الحجز ليس لك",
+  "owner.notYours.body":
+    "سجّل دخولك بالحساب الذي أتمّ الحجز لرؤية تفاصيله. لا نعرض بيانات الحجز لأي شخص آخر حفاظاً على الخصوصيّة.",
+  "owner.notYours.signIn": "تسجيل الدخول",
+  "owner.notYours.browse": "تصفّح الأماكن",
   "approval.vendorBanner.pending.title": "بانتظار موافقة المنصّة",
   "approval.vendorBanner.pending.body":
     "نشاطك قيد المراجعة من فريق بكيت. صفحتك ليست ظاهرة للعملاء بعد — يمكنك متابعة تحرير الخدمات والفريق والنصوص في غضون ذلك.",
