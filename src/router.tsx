@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Home from "@/pages/Home";
+import Legal from "@/pages/Legal";
 import NotFound from "@/pages/NotFound";
 import { CustomerLayout } from "@/components/layout/CustomerLayout";
 import Landing from "@/pages/customer/Landing";
@@ -20,6 +21,8 @@ import Settings from "@/pages/admin/Settings";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Home /> },
+  { path: "/privacy", element: <Legal kind="privacy" /> },
+  { path: "/terms", element: <Legal kind="terms" /> },
   // MyFatoorah-style hosted page (only used when running without real
   // MyFatoorah credentials — see src/lib/myfatoorah.ts).
   { path: "/payment/myfatoorah-mock", element: <MyFatoorahMock /> },

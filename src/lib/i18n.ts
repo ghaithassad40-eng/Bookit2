@@ -93,6 +93,8 @@ const STRINGS_EN = {
   "home.listing.cta": "Get started",
   "home.footer.copyright": "Bookit",
   "home.footer.tagline": "Built for service businesses everywhere",
+  "home.footer.privacy": "Privacy",
+  "home.footer.terms": "Terms",
   // admin shell + page headers
   "admin.adminBadge": "Admin",
   "admin.signOut": "Sign out",
@@ -463,6 +465,8 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "home.listing.cta": "ابدأ الآن",
   "home.footer.copyright": "بكيت",
   "home.footer.tagline": "صُمِّم لأصحاب الأنشطة الخدميّة في كل مكان",
+  "home.footer.privacy": "الخصوصية",
+  "home.footer.terms": "الشروط",
   "admin.adminBadge": "لوحة التحكم",
   "admin.signOut": "تسجيل الخروج",
   "admin.demoMode": "وضع تجريبي",

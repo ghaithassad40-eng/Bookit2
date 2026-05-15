@@ -413,14 +413,18 @@ export default function Home() {
 
       {/* footer */}
       <footer className="relative z-10 border-t border-white/5">
-        <div className="container flex flex-col items-center justify-between gap-2 py-8 text-xs text-white/40 sm:flex-row">
+        <div className="container flex flex-col items-center justify-between gap-3 py-8 text-xs text-white/40 sm:flex-row">
           <div className="flex items-center gap-2">
             <div className="grid h-5 w-5 place-items-center rounded bg-gradient-to-br from-blue-500 to-emerald-400">
               <CalendarCheck className="h-3 w-3 text-white" />
             </div>
             <span>© {new Date().getFullYear()} {t("home.footer.copyright")}</span>
           </div>
-          <span>{t("home.footer.tagline")}</span>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="hover:text-white/70">{t("home.footer.privacy")}</Link>
+            <Link to="/terms" className="hover:text-white/70">{t("home.footer.terms")}</Link>
+            <span>{t("home.footer.tagline")}</span>
+          </div>
         </div>
       </footer>
     </div>
