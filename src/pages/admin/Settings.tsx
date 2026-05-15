@@ -6,6 +6,7 @@ import type { BusinessRow, BusinessConfigRow, CopyJson } from "@/lib/database.ty
 import { supabase } from "@/lib/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonConfigEditor } from "@/components/admin/JsonConfigEditor";
+import { LogoThemeGenerator } from "@/components/admin/LogoThemeGenerator";
 import { BrandGeneratorPanel } from "@/components/admin/BrandGeneratorPanel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input, Label, Textarea } from "@/components/ui/input";
@@ -268,7 +269,23 @@ export default function Settings() {
           <TabsTrigger value="layout">{t("admin.settings.tabs.layout")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="theme">
+        <TabsContent value="theme" className="space-y-4">
+          {/* AI-powered palette suggestion. Vendor uploads their logo, we
+              extract the dominant + accent colours locally and propose a
+              theme. Applying writes both the new theme_json AND the logo
+              URL onto the business row (the extractor produced a data
+              URL preview; in production this would upload to Supabase
+              Storage and store the public URL instead). */}
+          <LogoThemeGenerator
+            current={config.theme_json}
+            busy={saveJson.isPending || updateBusiness.isPending}
+            onApply={(nextTheme, logoDataUrl) => {
+              saveJson.mutate({ key: "theme_json", value: nextTheme });
+              if (logoDataUrl) {
+                setLogoUrl(logoDataUrl);
+              }
+            }}
+          />
           <JsonConfigEditor
             title="theme_json"
             description="Colors, font, mode, card style. Live-applied via CSS variables."

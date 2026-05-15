@@ -371,6 +371,29 @@ const STRINGS_EN = {
   "admin.settings.tabs.copy": "Copy",
   "admin.settings.tabs.rules": "Booking rules",
   "admin.settings.tabs.layout": "Layout",
+
+  // Logo → theme palette generator (LogoThemeGenerator component).
+  "admin.theme.generator.title": "Generate theme from your logo",
+  "admin.theme.generator.aiBadge": "AI",
+  "admin.theme.generator.subtitle":
+    "Upload your logo and we'll extract the dominant + accent colours and propose a matching theme. Nothing saves until you press Apply.",
+  "admin.theme.generator.dropTitle": "Upload your logo",
+  "admin.theme.generator.dropHint":
+    "Drop a PNG, JPG, or SVG here — or click to pick a file (max 8 MB).",
+  "admin.theme.generator.analysing": "Analysing your logo…",
+  "admin.theme.generator.analysingHint":
+    "Sampling the dominant colours and matching them to a theme.",
+  "admin.theme.generator.paletteFound": "Colours detected",
+  "admin.theme.generator.role.primary": "Primary",
+  "admin.theme.generator.role.accent": "Accent",
+  "admin.theme.generator.role.secondary": "Secondary",
+  "admin.theme.generator.role.mode": "Mode",
+  "admin.theme.generator.apply": "Apply to theme",
+  "admin.theme.generator.tryAnother": "Try another logo",
+  "admin.theme.toast.applied": "Theme + logo updated",
+  "admin.theme.toast.notImage": "That doesn't look like an image file.",
+  "admin.theme.toast.tooLarge": "Image is over 8 MB — try a smaller file.",
+  "admin.theme.toast.failed": "Couldn't analyse that image.",
   "admin.settings.copyCard.title": "Copy",
   "admin.settings.copyCard.desc":
     "Hero, CTAs, and confirmation messaging. Arabic translations are optional — the Arabic site falls back to the English value per field when a translation is missing.",
@@ -1081,6 +1104,29 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "admin.settings.tabs.theme": "المظهر",
   "admin.settings.tabs.copy": "النصوص",
   "admin.settings.tabs.rules": "قواعد الحجز",
+
+  // Logo → theme palette generator (AR).
+  "admin.theme.generator.title": "ولّد المظهر من شعارك",
+  "admin.theme.generator.aiBadge": "ذكاء اصطناعي",
+  "admin.theme.generator.subtitle":
+    "ارفع شعارك وسنستخرج الألوان الرئيسية والمميِّزة، ثم نقترح مظهراً مطابقاً. لا شيء يُحفظ حتى تضغط تطبيق.",
+  "admin.theme.generator.dropTitle": "ارفع شعارك",
+  "admin.theme.generator.dropHint":
+    "اسحب ملفاً بصيغة PNG أو JPG أو SVG هنا — أو اضغط لاختيار ملف (الحجم الأقصى ٨ ميغابايت).",
+  "admin.theme.generator.analysing": "نحلّل شعارك…",
+  "admin.theme.generator.analysingHint":
+    "نأخذ عيّنة من الألوان السائدة ونطابقها مع مظهر.",
+  "admin.theme.generator.paletteFound": "الألوان المكتشفة",
+  "admin.theme.generator.role.primary": "أساسي",
+  "admin.theme.generator.role.accent": "مميِّز",
+  "admin.theme.generator.role.secondary": "ثانوي",
+  "admin.theme.generator.role.mode": "النمط",
+  "admin.theme.generator.apply": "تطبيق على المظهر",
+  "admin.theme.generator.tryAnother": "جرّب شعاراً آخر",
+  "admin.theme.toast.applied": "تم تحديث المظهر والشعار",
+  "admin.theme.toast.notImage": "يبدو أنّ هذا ليس ملفّ صورة.",
+  "admin.theme.toast.tooLarge": "حجم الصورة يتجاوز ٨ ميغابايت — جرّب ملفاً أصغر.",
+  "admin.theme.toast.failed": "تعذّر تحليل هذه الصورة.",
   "admin.settings.tabs.layout": "التخطيط",
   "admin.settings.copyCard.title": "النصوص",
   "admin.settings.copyCard.desc":
