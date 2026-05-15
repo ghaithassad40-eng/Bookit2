@@ -135,6 +135,21 @@ const STRINGS_EN = {
   // language picker
   "lang.language": "Language",
   "lang.switchTo": "Switch to",
+
+  // welcome / region picker
+  "welcome.title": "Welcome to Bookit",
+  "welcome.subtitle": "Pick your country and language. We'll show you businesses near you and translate the site to match.",
+  "welcome.country": "Country",
+  "welcome.language": "Language",
+  "welcome.continue": "Continue",
+  "welcome.allCountries": "Show all countries",
+  "welcome.skip": "Skip",
+  "welcome.changeLater": "You can change this anytime from the header.",
+  "region.changeRegion": "Change region",
+  "region.in": "in",
+  "region.noBusinessesYet": "No businesses in this country yet",
+  "region.noBusinessesBody": "We're expanding fast. Pick another country or check back soon.",
+  "region.tryDifferentCountry": "Try another country",
 } as const;
 
 type Strings = typeof STRINGS_EN;
@@ -236,6 +251,20 @@ const STRINGS_AR: Record<TranslationKey, string> = {
 
   "lang.language": "اللغة",
   "lang.switchTo": "التبديل إلى",
+
+  "welcome.title": "أهلاً بك في بكيت",
+  "welcome.subtitle": "اختر بلدك ولغتك، وسنعرض لك الأماكن القريبة منك ونترجم الموقع بما يناسبك.",
+  "welcome.country": "البلد",
+  "welcome.language": "اللغة",
+  "welcome.continue": "متابعة",
+  "welcome.allCountries": "عرض كل البلدان",
+  "welcome.skip": "تخطّي",
+  "welcome.changeLater": "يمكنك تغيير الاختيار في أي وقت من رأس الصفحة.",
+  "region.changeRegion": "تغيير المنطقة",
+  "region.in": "في",
+  "region.noBusinessesYet": "لا توجد أنشطة في هذا البلد بعد",
+  "region.noBusinessesBody": "نحن نتوسّع بسرعة. جرّب بلداً آخر أو عُد قريباً.",
+  "region.tryDifferentCountry": "جرّب بلداً آخر",
 };
 
 const STRINGS: Record<Locale, Strings> = {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -21,6 +21,8 @@ import {
 import { useConciergeContext } from "@/hooks/useConciergeContext";
 import { localConciergeReply, type ConciergeMatch } from "@/lib/concierge";
 import { formatCurrency } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
+import { useRegion } from "@/hooks/useRegion";
 
 const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   gym: Dumbbell,
@@ -34,12 +36,40 @@ const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   cricket: Trophy,
 };
 
-const STARTERS = [
-  "5v5 football tonight",
-  "Padel court Saturday",
-  "Basketball court for an hour",
-  "I need a haircut",
-];
+const STARTERS_BY_LOCALE: Record<"en" | "ar", string[]> = {
+  en: [
+    "5v5 football tonight",
+    "Padel court Saturday",
+    "Basketball court for an hour",
+    "I need a haircut",
+  ],
+  ar: [
+    "ملعب خماسي الليلة",
+    "ملعب بادل السبت",
+    "ملعب كرة سلة لساعة",
+    "أحتاج حلاقة شعر",
+  ],
+};
+
+const WELCOME_BY_LOCALE: Record<"en" | "ar", string> = {
+  en: "Hi! I'm your booking concierge. Tell me what you're looking for — a haircut, a workout, a yoga class — and I'll point you to a place.",
+  ar: "أهلاً! أنا مساعدك في الحجز. اكتب لي ما تبحث عنه — حلاقة، تمرين، حصة يوغا — وسأرشدك للمكان المناسب.",
+};
+
+const HEADER_LABELS_BY_LOCALE: Record<"en" | "ar", { title: string; subtitle: string; placeholder: string; online: string }> = {
+  en: {
+    title: "Booking concierge",
+    subtitle: "Tell me what you need — I'll find a place",
+    placeholder: "Ask about a service, place, or time",
+    online: "Online",
+  },
+  ar: {
+    title: "مساعد الحجز",
+    subtitle: "اكتب ما تحتاج — وسأجد لك المكان",
+    placeholder: "اسأل عن خدمة أو مكان أو وقت",
+    online: "متاح",
+  },
+};
 
 interface Message {
   id: string;
@@ -48,19 +78,37 @@ interface Message {
   matches?: ConciergeMatch[];
 }
 
-const initialMessage: Message = {
-  id: "welcome",
-  role: "assistant",
-  text:
-    "Hi! I'm your booking concierge. Tell me what you're looking for — a haircut, a workout, a yoga class — and I'll point you to a place.",
-};
-
 export function AIConcierge() {
   const { data: ctx, isLoading } = useConciergeContext();
+  const { locale } = useI18n();
+  const { country } = useRegion();
+  const lang: "en" | "ar" = locale === "ar" ? "ar" : "en";
+  const labels = HEADER_LABELS_BY_LOCALE[lang];
+  const starters = STARTERS_BY_LOCALE[lang];
+
+  const initialMessage: Message = useMemo(
+    () => ({ id: "welcome", role: "assistant", text: WELCOME_BY_LOCALE[lang] }),
+    [lang],
+  );
+
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Reset the conversation when the user switches language, so the welcome
+  // message renders in the new locale rather than mixed.
+  useEffect(() => {
+    setMessages([initialMessage]);
+  }, [initialMessage]);
+
+  // Apply country filter to the catalog the concierge searches against.
+  const filteredCtx = useMemo(() => {
+    if (!ctx) return ctx;
+    if (!country || country === "ALL") return ctx;
+    const businesses = ctx.businesses.filter((b) => b.country === country);
+    return { ...ctx, businesses };
+  }, [ctx, country]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -82,7 +130,7 @@ export function AIConcierge() {
     // Always have a valid context. If the catalog hasn't loaded, fall through
     // with empty arrays — the concierge will respond with a friendly empty
     // state rather than hanging silently.
-    const safeCtx = ctx ?? { businesses: [], servicesByBusiness: {} };
+    const safeCtx = filteredCtx ?? { businesses: [], servicesByBusiness: {} };
 
     // simulate a brief "thinking" delay so it feels considered
     const delay = 380 + Math.random() * 280;
@@ -90,12 +138,13 @@ export function AIConcierge() {
       let reply;
       if (safeCtx.businesses.length === 0) {
         reply = {
-          message:
-            "We're still onboarding our first wave of places — no live bookings yet. Check back soon, or reach out if there's a specific business you'd like to see here.",
+          message: lang === "ar"
+            ? "لا توجد أنشطة في هذا البلد بعد. جرّب اختيار بلد آخر من رأس الصفحة، أو عُد قريباً."
+            : "No businesses in your selected country yet. Try a different country from the header, or check back soon.",
           matches: [],
         };
       } else {
-        reply = localConciergeReply(trimmed, safeCtx);
+        reply = localConciergeReply(trimmed, safeCtx, lang);
       }
       const assistantMsg: Message = {
         id: `a-${Date.now()}`,
@@ -117,13 +166,13 @@ export function AIConcierge() {
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <div>
-            <div className="text-sm font-semibold leading-tight">Booking concierge</div>
-            <div className="text-[11px] text-white/50">Tell me what you need — I'll find a place</div>
+            <div className="text-sm font-semibold leading-tight">{labels.title}</div>
+            <div className="text-[11px] text-white/50">{labels.subtitle}</div>
           </div>
         </div>
         <div className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/60 sm:flex">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-          Online
+          {labels.online}
         </div>
       </div>
 
@@ -173,7 +222,7 @@ export function AIConcierge() {
       {/* starters */}
       {messages.length <= 1 && !thinking && (
         <div className="flex flex-wrap gap-2 border-t border-white/10 px-4 py-3 sm:px-6">
-          {STARTERS.map((s) => (
+          {starters.map((s) => (
             <button
               key={s}
               onClick={() => ask(s)}
@@ -196,7 +245,7 @@ export function AIConcierge() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about a service, place, or time"
+          placeholder={labels.placeholder}
           className="flex-1 rounded-xl border border-transparent bg-white/[0.04] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-white/20 focus:bg-white/[0.06] disabled:opacity-50"
         />
         <button

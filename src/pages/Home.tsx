@@ -20,11 +20,16 @@ import {
   Smartphone,
 } from "lucide-react";
 import { AIConcierge } from "@/components/customer/AIConcierge";
+import { WelcomePicker } from "@/components/customer/WelcomePicker";
+import { RegionPill } from "@/components/customer/RegionPill";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BusinessRow } from "@/lib/database.types";
 import { DEMO_BUSINESSES } from "@/lib/demoData";
+import { useRegion } from "@/hooks/useRegion";
+import { useI18n } from "@/hooks/useI18n";
+import { countryMeta } from "@/lib/region";
 
 const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   gym: Dumbbell,
@@ -39,11 +44,14 @@ const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>
 };
 
 export default function Home() {
-  const [businesses, setBusinesses] = useState<BusinessRow[] | null>(null);
+  const [allBusinesses, setAllBusinesses] = useState<BusinessRow[] | null>(null);
+  const { country, setCountry } = useRegion();
+  const { locale, t } = useI18n();
+  const regionMeta = country ? countryMeta(country) : null;
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
-      setBusinesses(DEMO_BUSINESSES);
+      setAllBusinesses(DEMO_BUSINESSES);
       return;
     }
     supabase
@@ -51,15 +59,25 @@ export default function Home() {
       .select("*")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
-      .limit(8)
+      .limit(40)
       .then(({ data }) => {
         const live = (data as BusinessRow[]) ?? [];
-        setBusinesses(live.length > 0 ? live : DEMO_BUSINESSES);
+        setAllBusinesses(live.length > 0 ? live : DEMO_BUSINESSES);
       });
   }, []);
 
+  // Apply country filter. "ALL" or null shows everything.
+  const businesses = (() => {
+    if (allBusinesses === null) return null;
+    if (!country || country === "ALL") return allBusinesses;
+    return allBusinesses.filter((b) => b.country === country);
+  })();
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0a0a0f] text-white">
+      {/* First-visit country + language prompt */}
+      <WelcomePicker />
+
       {/* ambient background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 left-1/2 h-[640px] w-[1100px] -translate-x-1/2 rounded-full bg-blue-500/15 blur-[120px]" />
@@ -91,10 +109,11 @@ export default function Home() {
           </nav>
           {/* No sign-in here — customers don't sign in to book.
               Business owners reach the admin via the "List your business" CTA. */}
-          <div className="hidden md:block">
+          <div className="flex items-center gap-2">
+            <RegionPill className="border-white/10 bg-white/[0.04] text-white/85 hover:bg-white/[0.08]" />
             <Link
               to="/admin/login"
-              className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur transition-colors hover:bg-white/[0.06] hover:text-white"
+              className="hidden rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur transition-colors hover:bg-white/[0.06] hover:text-white md:inline-block"
             >
               List your business
             </Link>
@@ -190,8 +209,14 @@ export default function Home() {
         <div className="container py-20">
           <div className="mb-10 flex items-end justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
-                Browse places
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                <span>Browse places</span>
+                {regionMeta && regionMeta.code !== "ALL" && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 normal-case tracking-normal text-white/70">
+                    <span aria-hidden>{regionMeta.flag}</span>
+                    {locale === "ar" ? regionMeta.nameAr : regionMeta.name}
+                  </span>
+                )}
               </div>
               <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">
                 Pick a place, book in seconds.
@@ -206,7 +231,30 @@ export default function Home() {
               ))}
             </div>
           ) : businesses.length === 0 ? (
-            <DemoEmptyState configured={isSupabaseConfigured} />
+            // Empty: distinguish between "no businesses at all" and "no
+            // businesses in the selected country yet".
+            country && country !== "ALL" && (allBusinesses?.length ?? 0) > 0 ? (
+              <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-10 text-center backdrop-blur">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white/[0.06] text-2xl">
+                  {regionMeta?.flag}
+                </div>
+                <h3 className="mt-4 text-lg font-semibold">{t("region.noBusinessesYet")}</h3>
+                <p className="mx-auto mt-1 max-w-sm text-sm text-white/60">
+                  {t("region.noBusinessesBody")}
+                </p>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    className="border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
+                    onClick={() => setCountry("ALL")}
+                  >
+                    🌍 {t("welcome.allCountries")}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <DemoEmptyState configured={isSupabaseConfigured} />
+            )
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {businesses.map((b, i) => {

@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { router } from "@/router";
 import { useAutoReleaseScheduler } from "@/hooks/usePayouts";
 import { I18nProvider } from "@/hooks/useI18n";
+import { RegionProvider } from "@/hooks/useRegion";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,15 +23,17 @@ function AutoReleaseBackground() {
 export default function App() {
   return (
     <I18nProvider>
-      <QueryClientProvider client={queryClient}>
-        <AutoReleaseBackground />
-        <RouterProvider router={router} />
-        <Toaster
-          position="top-right"
-          richColors
-          toastOptions={{ style: { fontFamily: "var(--font-sans)" } }}
-        />
-      </QueryClientProvider>
+      <RegionProvider>
+        <QueryClientProvider client={queryClient}>
+          <AutoReleaseBackground />
+          <RouterProvider router={router} />
+          <Toaster
+            position="top-right"
+            richColors
+            toastOptions={{ style: { fontFamily: "var(--font-sans)" } }}
+          />
+        </QueryClientProvider>
+      </RegionProvider>
     </I18nProvider>
   );
 }
