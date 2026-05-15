@@ -113,6 +113,10 @@ const STRINGS_EN = {
   "step.review": "Review",
   "step.payment": "Pay",
 
+  "slot.left": "left",
+  "slot.empty.title": "No upcoming slots",
+  "slot.empty.body": "Try a different service or staff member.",
+
   "book.chooseService": "Choose a service",
   "book.chooseStaff": "Choose your specialist",
   "book.noPreference": "No preference",
@@ -389,6 +393,10 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "step.details": "بياناتك",
   "step.review": "المراجعة",
   "step.payment": "الدفع",
+
+  "slot.left": "متاح",
+  "slot.empty.title": "لا توجد مواعيد متاحة",
+  "slot.empty.body": "جرّب خدمة أخرى أو مختصاً آخر.",
 
   "book.chooseService": "اختر الخدمة",
   "book.chooseStaff": "اختر المختصّ",
