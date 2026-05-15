@@ -53,15 +53,62 @@ const INTENT_KEYWORDS: Record<string, string[]> = {
   // Sports
   football: [
     "football", "soccer", "5v5", "7v7", "5aside", "7aside", "pitch", "turf", "futsal", "match", "kickabout", "goalkeeper", "striker",
-    "كرة", "قدم", "ملعب", "خماسي", "سباعي", "مباراة",
+    "قدم", "خماسي", "سباعي", "مباراة",
   ],
   basketball: [
-    "basketball", "basket", "hoops", "fullcourt", "halfcourt", "court", "shoot", "dunk", "dribble",
-    "سلة", "كرة السلة",
+    "basketball", "basket", "hoops", "fullcourt", "halfcourt", "shoot", "dunk", "dribble",
+    "سلة",
   ],
-  padel: ["padel", "paddle", "racquet", "racket", "بادل", "تنس", "مضرب"],
+  padel: ["padel", "paddle", "racquet", "racket", "بادل", "مضرب"],
   cricket: ["cricket", "nets", "batting", "bowling", "wicket", "bowler", "batsman", "كريكت"],
 };
+
+// Generic "court/field/stadium" words in Arabic and English. They don't
+// disambiguate a sport on their own — «ملعب» can mean a padel court, a
+// basketball court, a football pitch or a cricket field. They are kept out of
+// the per-intent keyword lists above and used only as a SPORT TRIGGER by the
+// phrase scanner: when a generic word appears alongside a real sport keyword,
+// we score that sport higher; when it appears alone, we surface every sport
+// venue available in the region. Removing «ملعب» from the football-only list
+// fixes the Arabic QA tour bug where every «ملعب …» query routed to football.
+const GENERIC_SPORT_WORDS = new Set([
+  "court", "field", "stadium", "pitch", "venue",
+  "ملعب", "ملاعب", "ستاد",
+]);
+
+// Map of "sport tokens" to their intents — used by the phrase scanner so we
+// can rank a specific sport above football when the user types things like
+// «ملعب بادل» (padel court) or «basketball court».
+const SPORT_PHRASE_TOKENS: Record<string, string> = {
+  padel: "padel", بادل: "padel", paddle: "padel",
+  basketball: "basketball", basket: "basketball", hoops: "basketball", سلة: "basketball",
+  football: "football", soccer: "football", قدم: "football", خماسي: "football", سباعي: "football",
+  cricket: "cricket", كريكت: "cricket",
+};
+
+// Localized human-readable label per intent. Used in the response message so
+// 'Found one place for "football"' becomes 'Found one place for "كرة قدم"' in
+// Arabic instead of leaking the raw English intent name.
+export const INDUSTRY_LABELS: Record<string, { en: string; ar: string }> = {
+  gym: { en: "gym", ar: "نادي رياضي" },
+  salon: { en: "salon", ar: "صالون" },
+  clinic: { en: "clinic", ar: "عيادة" },
+  yoga: { en: "yoga", ar: "يوغا" },
+  spa: { en: "spa", ar: "سبا" },
+  barber: { en: "barber", ar: "حلاق" },
+  tutor: { en: "tutor", ar: "مدرّس" },
+  coworking: { en: "coworking", ar: "مساحة عمل مشتركة" },
+  car: { en: "car service", ar: "خدمة سيارة" },
+  photo: { en: "photo studio", ar: "استوديو تصوير" },
+  football: { en: "football", ar: "كرة قدم" },
+  basketball: { en: "basketball", ar: "كرة سلة" },
+  padel: { en: "padel", ar: "بادل" },
+  cricket: { en: "cricket", ar: "كريكت" },
+};
+
+function industryLabel(intent: string, locale: Locale): string {
+  return INDUSTRY_LABELS[intent]?.[locale] ?? intent;
+}
 
 const STOPWORDS = new Set([
   // English
@@ -83,17 +130,35 @@ function tokenize(text: string): string[] {
     .filter((t) => t.length > 1 && !STOPWORDS.has(t));
 }
 
-function detectIntents(tokens: string[]): string[] {
+function detectIntents(tokens: string[]): { intents: string[]; sportSpecific: string | null } {
   const hits = new Set<string>();
+  // Phrase pass: did the user name a specific sport? («ملعب بادل»/"basketball court")
+  let sportSpecific: string | null = null;
+  for (const tok of tokens) {
+    const sport = SPORT_PHRASE_TOKENS[tok];
+    if (sport) {
+      sportSpecific = sport;
+      hits.add(sport);
+      break;
+    }
+  }
+  // Token pass against per-intent keyword lists. Skip the generic court/field
+  // words — those should not by themselves attach to a specific sport intent.
   for (const [intent, words] of Object.entries(INTENT_KEYWORDS)) {
     for (const w of words) {
-      if (tokens.some((t) => t === w || w.includes(t) || t.includes(w))) {
+      if (
+        tokens.some(
+          (t) =>
+            !GENERIC_SPORT_WORDS.has(t) &&
+            (t === w || w.includes(t) || t.includes(w)),
+        )
+      ) {
         hits.add(intent);
         break;
       }
     }
   }
-  return [...hits];
+  return { intents: [...hits], sportSpecific };
 }
 
 function scoreBusiness(
@@ -200,12 +265,19 @@ export function localConciergeReply(
   }
 
   const tokens = tokenize(trimmed);
-  const intents = detectIntents(tokens);
+  const { intents, sportSpecific } = detectIntents(tokens);
 
   const ranked: ConciergeMatch[] = ctx.businesses
     .map((b) => {
       const services = ctx.servicesByBusiness[b.id] ?? [];
-      const { score, matchedServices } = scoreBusiness(b, services, tokens, intents);
+      let { score, matchedServices } = scoreBusiness(b, services, tokens, intents);
+      // If the user named a specific sport, boost businesses whose industry
+      // matches that sport so they outrank a generic-keyword match. Without
+      // this boost, «ملعب بادل» (padel court) still ranks football pitches
+      // high because they match the generic "ملعب" token.
+      if (sportSpecific && b.industry?.toLowerCase() === sportSpecific) {
+        score += 10;
+      }
       return { business: b, matchedServices, score };
     })
     .filter((m) => m.score > 0)
@@ -222,10 +294,11 @@ export function localConciergeReply(
   }
 
   const top = ranked[0];
-  // Use the top business's actual industry — it's the most accurate label even
-  // when the query happened to match a generic keyword like "ملعب"/"court" from
-  // a different intent's keyword list.
-  const intentLabel = top.business.industry || intents[0] || "place";
+  // Use the top business's actual industry, localized — so the message reads
+  // 'Found one place for "padel"' in English and 'وجدت مكاناً واحداً لـ«بادل»'
+  // in Arabic, instead of leaking the raw English intent name into Arabic.
+  const rawIntent = top.business.industry || intents[0] || "place";
+  const intentLabel = industryLabel(rawIntent, locale);
   const message =
     ranked.length === 1
       ? REPLIES.oneMatch(intentLabel)[locale]
