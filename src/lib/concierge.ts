@@ -1,5 +1,6 @@
-import type { BusinessRow, ServiceRow } from "./database.types";
+import type { BusinessRow, EquipmentRow, ServiceRow } from "./database.types";
 import type { Locale } from "./i18n";
+import { searchEquipmentLocally } from "./equipmentSearch";
 
 // ---------------------------------------------------------------------------
 // Local concierge — keyword/intent matcher with conversational replies.
@@ -10,11 +11,19 @@ import type { Locale } from "./i18n";
 export interface ConciergeContext {
   businesses: BusinessRow[];
   servicesByBusiness: Record<string, ServiceRow[]>;
+  /** Flat catalog of every active equipment row across approved businesses.
+   *  Used as a fall-through matcher when no service intent fires — so
+   *  customers can ask "Samsung Monitor 27" curve" in the chat and still get
+   *  matched to Meridian (instead of the random-browse fallback). */
+  equipment: EquipmentRow[];
 }
 
 export interface ConciergeMatch {
   business: BusinessRow;
   matchedServices: ServiceRow[];
+  /** Equipment items the user's query matched (populated only when the
+   *  reply came from the equipment fall-through). */
+  matchedEquipment?: EquipmentRow[];
   score: number;
 }
 
@@ -22,6 +31,9 @@ export interface ConciergeReply {
   message: string;
   matches: ConciergeMatch[];
   followUp?: string;
+  /** Tag describing where the matches came from so the UI / telemetry can
+   *  distinguish a service match from an equipment match. */
+  source?: "service" | "equipment" | "browse";
 }
 
 // Map common customer intents → industry/service keywords.
@@ -233,6 +245,19 @@ const REPLIES = {
     en: 'I didn\'t quite catch that, but here are a few places you can browse. Try something like "haircut", "personal training", or "yoga class".',
     ar: "لم أفهم الطلب تماماً، لكن إليك بعض الأماكن للتصفّح. جرّب «حلاقة» أو «تدريب شخصي» أو «حصة يوغا».",
   },
+  // Used when the query didn't match a service but did match equipment add-ons
+  // — e.g. "Samsung Monitor 27" curve" or "4K camera for Zoom". We surface the
+  // vendor that offers that gear instead of falling back to random browse.
+  equipmentMatch: (count: number) => ({
+    en:
+      count === 1
+        ? "Looks like you're after equipment. One place offers that — tap to start booking:"
+        : `Looks like you're after equipment. ${count} places offer that — top pick first:`,
+    ar:
+      count === 1
+        ? "يبدو أنّك تبحث عن تجهيزات. مكان واحد يوفّرها — اضغط لبدء الحجز:"
+        : `يبدو أنّك تبحث عن تجهيزات. ${count} أماكن توفّرها — الأنسب أولاً:`,
+  }),
   oneMatch: (intent: string) => ({
     en: `Found one match for "${intent}". Tap to start booking.`,
     ar: `وجدت مكاناً واحداً لـ«${intent}». اضغط لبدء الحجز.`,
@@ -285,12 +310,34 @@ export function localConciergeReply(
     .slice(0, 4);
 
   if (ranked.length === 0) {
+    // Service matcher missed — try the equipment matcher before falling
+    // back to random browse. Customers asking "Samsung Monitor 27\" curve"
+    // or "I need a whiteboard" should land on the vendor that offers it.
+    const equipmentMatches = (ctx.equipment ?? []).length > 0
+      ? searchEquipmentLocally(trimmed, ctx.equipment, ctx.businesses).slice(0, 4)
+      : [];
+
+    if (equipmentMatches.length > 0) {
+      const matches: ConciergeMatch[] = equipmentMatches.map((m) => ({
+        business: m.business,
+        matchedServices: [],
+        matchedEquipment: m.matchedEquipment.slice(0, 4).map((e) => e.equipment),
+        score: m.score,
+      }));
+      return {
+        message: REPLIES.equipmentMatch(matches.length)[locale],
+        matches,
+        source: "equipment",
+      };
+    }
+
+    // Truly nothing matched — show the polite fallback with browse list.
     const list = ctx.businesses.slice(0, 4).map((b) => ({
       business: b,
       matchedServices: (ctx.servicesByBusiness[b.id] ?? []).slice(0, 2),
       score: 0,
     }));
-    return { message: REPLIES.noMatch[locale], matches: list };
+    return { message: REPLIES.noMatch[locale], matches: list, source: "browse" };
   }
 
   const top = ranked[0];
@@ -309,5 +356,5 @@ export function localConciergeReply(
       ? REPLIES.followUp(top.matchedServices[0].name, top.business.name)[locale]
       : undefined;
 
-  return { message, matches: ranked, followUp };
+  return { message, matches: ranked, followUp, source: "service" };
 }

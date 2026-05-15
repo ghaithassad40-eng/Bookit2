@@ -131,7 +131,7 @@ export function AIConcierge() {
     // Always have a valid context. If the catalog hasn't loaded, fall through
     // with empty arrays — the concierge will respond with a friendly empty
     // state rather than hanging silently.
-    const safeCtx = filteredCtx ?? { businesses: [], servicesByBusiness: {} };
+    const safeCtx = filteredCtx ?? { businesses: [], servicesByBusiness: {}, equipment: [] };
 
     // simulate a brief "thinking" delay so it feels considered
     const delay = 380 + Math.random() * 280;
@@ -291,7 +291,7 @@ function Bubble({ message }: { message: Message }) {
 }
 
 function SuggestionCard({ match }: { match: ConciergeMatch }) {
-  const { business, matchedServices } = match;
+  const { business, matchedServices, matchedEquipment } = match;
   const industryKey = business.industry?.toLowerCase() ?? "";
   const Icon = INDUSTRY_ICONS[industryKey] ?? Sparkles;
   const showService = matchedServices[0];
@@ -305,6 +305,10 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
   const serviceName = showService
     ? pickLocale(locale, showService.name, showService.name_ar)
     : null;
+  // When the match came from the equipment fall-through, we surface the
+  // first two equipment items as chips instead of the service chip — that
+  // tells the user exactly *why* this vendor showed up.
+  const equipmentChips = matchedEquipment?.slice(0, 2) ?? [];
 
   return (
     <Link
@@ -323,7 +327,28 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
           <div className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-white/40">
             {industryLabel}
           </div>
-          {showService && price && serviceName && (
+          {equipmentChips.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {equipmentChips.map((eq) => (
+                <span
+                  key={eq.id}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] text-emerald-200 ring-1 ring-emerald-400/20"
+                >
+                  {pickLocale(locale, eq.name, eq.name_ar)}
+                  {eq.price != null && (
+                    <span className="text-emerald-200/60">
+                      +{format(eq.price, eq.currency).display}
+                    </span>
+                  )}
+                </span>
+              ))}
+              {matchedEquipment && matchedEquipment.length > 2 && (
+                <span className="text-[10px] text-white/40">
+                  +{matchedEquipment.length - 2}
+                </span>
+              )}
+            </div>
+          ) : showService && price && serviceName ? (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2 py-0.5 text-[11px] text-white/70">
               {serviceName}
               <span className="text-white/40">·</span>
@@ -331,7 +356,7 @@ function SuggestionCard({ match }: { match: ConciergeMatch }) {
                 {price.converted ? `≈ ${price.display}` : price.display}
               </span>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </Link>
