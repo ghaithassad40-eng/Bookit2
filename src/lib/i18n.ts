@@ -198,6 +198,8 @@ const STRINGS_EN = {
   "fail.helpHint": "Need help? Reach out with your reference and we'll get the booking sorted manually.",
   "fail.bookingUnconfirmed": "Booking unconfirmed",
   "fail.attemptReference": "Attempt reference",
+  "fail.genericReason": "The payment did not complete.",
+  "fail.codeLabel": "Code",
 
   // invoice
   "invoice.bookingConfirmed": "Booking confirmed",
@@ -470,6 +472,8 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "fail.helpHint": "تحتاج مساعدة؟ تواصل معنا بالرقم المرجعي وسنُكمل الحجز يدوياً.",
   "fail.bookingUnconfirmed": "حجز غير مؤكّد",
   "fail.attemptReference": "الرقم المرجعي للمحاولة",
+  "fail.genericReason": "لم تكتمل عملية الدفع.",
+  "fail.codeLabel": "الرمز",
 
   "invoice.bookingConfirmed": "تم تأكيد الحجز",
   "invoice.invoice": "فاتورة",

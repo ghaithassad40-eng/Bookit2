@@ -88,10 +88,10 @@ export default function PaymentFailed() {
               <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
               <div className="space-y-1">
                 <div className="font-medium text-foreground">
-                  {reason || "The payment did not complete."}
+                  {reason || t("fail.genericReason")}
                 </div>
                 {code && (
-                  <div className="font-mono text-[11px] text-muted-foreground">Code: {code}</div>
+                  <div className="font-mono text-[11px] text-muted-foreground">{t("fail.codeLabel")}: {code}</div>
                 )}
               </div>
             </div>
