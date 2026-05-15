@@ -321,3 +321,63 @@ export function enabledPaymentMethods(rules: { paymentMethods?: PaymentMethodId[
   }
   return ["visa", "apple_pay", "google_pay", "samsung_pay", "paypal", "knet"];
 }
+
+/**
+ * Per-country payment-method preferences in the GCC. Mirrors the data used by
+ * the PaymentRegionInfo info panel — kept here so the resolver below can
+ * inject the customer's local network into a business's method list. Without
+ * this, a Kuwait customer paying a Saudi business never sees KNET, even
+ * though KNET would tokenize their card just fine.
+ */
+const COUNTRY_PREFERRED_METHODS: Record<string, PaymentMethodId[]> = {
+  KW: ["knet", "apple_pay", "google_pay", "visa", "samsung_pay"],
+  SA: ["mada", "stcpay", "apple_pay", "google_pay", "visa", "amex"],
+  AE: ["uaecc", "visa", "apple_pay", "google_pay", "amex"],
+  BH: ["visa", "apple_pay", "google_pay"],
+  QA: ["visa", "apple_pay", "google_pay"],
+  OM: ["visa", "apple_pay", "google_pay"],
+};
+
+/**
+ * Resolves the final ordered list of payment methods to show a customer on
+ * the payment step.
+ *
+ * The customer's region matters as much as the business's: a Kuwait customer
+ * paying a Saudi business should still see KNET because KNET is the
+ * tokenisation network on their card. Without this union, the QA tour found
+ * Kuwait customers on padel/yoga/etc. businesses outside KW were stranded
+ * on Mada/STC Pay buttons they couldn't actually use.
+ *
+ * Ordering: customer's local network(s) come first, then everything else
+ * the business explicitly enables. Dedup preserves first occurrence.
+ */
+export function resolvePaymentMethodsForCustomer(
+  businessRules: { paymentMethods?: PaymentMethodId[] } | null | undefined,
+  customerCountry: string | null | undefined,
+): PaymentMethodId[] {
+  const businessMethods = enabledPaymentMethods(businessRules);
+  const customerMethods =
+    customerCountry && customerCountry !== "ALL"
+      ? COUNTRY_PREFERRED_METHODS[customerCountry] ?? []
+      : [];
+
+  // Customer-local methods first, then business methods. Drop anything the
+  // business explicitly disabled — if the business has a non-default
+  // paymentMethods list, only methods present in that list survive. Default
+  // (no list) means everything passes.
+  const businessAllowAll =
+    !Array.isArray(businessRules?.paymentMethods) || businessRules.paymentMethods.length === 0;
+  const allowed = new Set(businessMethods);
+  const out: PaymentMethodId[] = [];
+  const seen = new Set<PaymentMethodId>();
+  function push(m: PaymentMethodId) {
+    if (seen.has(m)) return;
+    if (!businessAllowAll && !allowed.has(m)) return;
+    if (!(m in PAYMENT_METHODS)) return;
+    seen.add(m);
+    out.push(m);
+  }
+  for (const m of customerMethods) push(m);
+  for (const m of businessMethods) push(m);
+  return out;
+}

@@ -21,8 +21,9 @@ import { useSlots } from "@/hooks/useSlots";
 import { useBookingStore } from "@/store/bookingStore";
 import { useCreateBooking } from "@/hooks/useBookings";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
-import { charge, enabledPaymentMethods, type PaymentRequest, type PaymentResult } from "@/lib/payments";
+import { charge, resolvePaymentMethodsForCustomer, type PaymentRequest, type PaymentResult } from "@/lib/payments";
 import { useI18n } from "@/hooks/useI18n";
+import { useRegion } from "@/hooks/useRegion";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import {
   MYFATOORAH_ENABLED,
@@ -52,7 +53,8 @@ export default function Book() {
   } = useBookingStore();
   const [charging, setCharging] = useState(false);
   const requirePayment = rules.requirePayment !== false;
-  const enabled = enabledPaymentMethods(rules);
+  const { country: customerCountry } = useRegion();
+  const enabled = resolvePaymentMethodsForCustomer(rules, customerCountry);
   const reference = `BK-${slot?.id?.slice(-6).toUpperCase() ?? "PENDING"}`;
 
   const { data: services, isLoading: loadingSvc } = useServices(business.id);
