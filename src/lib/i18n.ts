@@ -105,6 +105,14 @@ const STRINGS_EN = {
   "industry.cricket": "Cricket",
 
   // booking flow
+  // booking stepper labels
+  "step.service": "Service",
+  "step.staff": "Staff",
+  "step.slot": "Slot",
+  "step.details": "Details",
+  "step.review": "Review",
+  "step.payment": "Pay",
+
   "book.chooseService": "Choose a service",
   "book.chooseStaff": "Choose your specialist",
   "book.noPreference": "No preference",
@@ -322,6 +330,13 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "industry.basketball": "كرة سلة",
   "industry.padel": "بادل",
   "industry.cricket": "كريكت",
+
+  "step.service": "الخدمة",
+  "step.staff": "المختصّ",
+  "step.slot": "الوقت",
+  "step.details": "بياناتك",
+  "step.review": "المراجعة",
+  "step.payment": "الدفع",
 
   "book.chooseService": "اختر الخدمة",
   "book.chooseStaff": "اختر المختصّ",
