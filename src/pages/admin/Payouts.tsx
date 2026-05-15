@@ -121,7 +121,7 @@ export default function Payouts() {
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs">
           <Percent className="h-3.5 w-3.5 text-accent" />
-          <span className="font-medium">Commission</span>
+          <span className="font-medium">{t("admin.payouts.commission")}</span>
           <span className="font-mono">{commissionPct}%</span>
         </div>
       </header>
@@ -129,33 +129,33 @@ export default function Payouts() {
       {/* KPI tiles */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Tile
-          label="Held in escrow"
+          label={t("admin.payouts.tile.held")}
           value={formatCurrency(summary.heldAmount, currency)}
-          sub={`${summary.heldCount} booking${summary.heldCount === 1 ? "" : "s"}`}
+          sub={t("admin.payouts.bookings").replace("{{count}}", String(summary.heldCount))}
           icon={Clock}
           accent="warning"
           loading={loading}
         />
         <Tile
-          label="Paid out to you"
+          label={t("admin.payouts.tile.paid")}
           value={formatCurrency(summary.merchantPayouts, currency)}
-          sub={`${summary.releasedCount} payout${summary.releasedCount === 1 ? "" : "s"}`}
+          sub={t("admin.payouts.payouts").replace("{{count}}", String(summary.releasedCount))}
           icon={Wallet}
           accent="success"
           loading={loading}
         />
         <Tile
-          label="Platform fees collected"
+          label={t("admin.payouts.tile.platform")}
           value={formatCurrency(summary.platformRevenue, currency)}
-          sub={`${commissionPct}% commission`}
+          sub={t("admin.payouts.commissionPct").replace("{{pct}}", commissionPct)}
           icon={Banknote}
           accent="default"
           loading={loading}
         />
         <Tile
-          label="Failed transfers"
+          label={t("admin.payouts.tile.failed")}
           value={summary.failed.toString()}
-          sub={summary.failed > 0 ? "Needs ops attention" : "Clean — all delivered"}
+          sub={summary.failed > 0 ? t("admin.payouts.failedHint") : t("admin.payouts.cleanHint")}
           icon={AlertTriangle}
           accent={summary.failed > 0 ? "destructive" : "default"}
           loading={loading}
@@ -168,20 +168,22 @@ export default function Payouts() {
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
           <div>
             <div className="font-medium text-emerald-700 dark:text-emerald-200">
-              Payouts {business.payouts_enabled ? "enabled" : "not enabled"} ·{" "}
-              {business.payout_provider}
+              {business.payouts_enabled
+                ? t("admin.payouts.banner.enabled")
+                : t("admin.payouts.banner.disabled")}{" "}
+              · {business.payout_provider}
             </div>
             <div className="mt-0.5 text-xs text-emerald-700/70 dark:text-emerald-200/70">
               {business.payouts_enabled
                 ? business.iban_last4
-                  ? `Settling to IBAN ending in ${business.iban_last4} the same day funds clear.`
-                  : "Connected — your share lands in your bank the same day funds clear."
-                : "Complete KYC in Settings to start receiving payouts."}
+                  ? t("admin.payouts.banner.settleIban").replace("{{last4}}", business.iban_last4)
+                  : t("admin.payouts.banner.connected")
+                : t("admin.payouts.banner.kyc")}
             </div>
           </div>
         </div>
-        <div className="text-[11px] text-muted-foreground sm:text-right">
-          Account ID
+        <div className="text-[11px] text-muted-foreground sm:text-end">
+          {t("admin.payouts.accountId")}
           <div className="mt-0.5 font-mono">
             {business.connected_account_id ?? "—"}
           </div>
@@ -192,13 +194,13 @@ export default function Payouts() {
       <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-card/40 p-1">
         {(
           [
-            ["all", "All"],
-            ["held", "Held in escrow"],
-            ["pending_transfer", "Releasing"],
-            ["transferred", "Paid out"],
-            ["transfer_failed", "Failed"],
+            ["all", "admin.payouts.filter.all"],
+            ["held", "admin.payouts.filter.held"],
+            ["pending_transfer", "admin.payouts.filter.releasing"],
+            ["transferred", "admin.payouts.filter.paid"],
+            ["transfer_failed", "admin.payouts.filter.failed"],
           ] as const
-        ).map(([k, label]) => (
+        ).map(([k, key]) => (
           <button
             key={k}
             onClick={() => setFilter(k)}
@@ -208,14 +210,16 @@ export default function Payouts() {
                 : "text-muted-foreground hover:bg-muted"
             }`}
           >
-            {label}
+            {t(key)}
           </button>
         ))}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{rows.length} record{rows.length === 1 ? "" : "s"}</CardTitle>
+          <CardTitle>
+            {t("admin.payouts.records").replace("{{count}}", String(rows.length))}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -226,8 +230,8 @@ export default function Payouts() {
             </div>
           ) : rows.length === 0 ? (
             <EmptyState
-              title="No payouts yet"
-              description="Once a customer pays an invoice, it'll land here as Held — then release automatically after the service window."
+              title={t("admin.payouts.empty")}
+              description={t("admin.payouts.emptyBody")}
               icon={<Receipt className="h-5 w-5" />}
             />
           ) : (
@@ -235,12 +239,12 @@ export default function Payouts() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3 text-left">Reference</th>
-                    <th className="px-4 py-3 text-left hidden sm:table-cell">When</th>
-                    <th className="px-4 py-3 text-right">Gross</th>
-                    <th className="px-4 py-3 text-right hidden sm:table-cell">Fee</th>
-                    <th className="px-4 py-3 text-right">Your share</th>
-                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-start">{t("admin.payouts.col.reference")}</th>
+                    <th className="px-4 py-3 text-start hidden sm:table-cell">{t("admin.payouts.col.when")}</th>
+                    <th className="px-4 py-3 text-end">{t("admin.payouts.col.gross")}</th>
+                    <th className="px-4 py-3 text-end hidden sm:table-cell">{t("admin.payouts.col.fee")}</th>
+                    <th className="px-4 py-3 text-end">{t("admin.payouts.col.yourShare")}</th>
+                    <th className="px-4 py-3 text-start">{t("admin.payouts.col.status")}</th>
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
@@ -253,6 +257,8 @@ export default function Payouts() {
                         commissionBps={business.commission_bps}
                         onRelease={() => releaseManually(row.booking)}
                         releasing={release.isPending}
+                        heldLabel={t("admin.payouts.heldBadge")}
+                        releaseNowLabel={t("admin.payouts.releaseNow")}
                       />
                     ) : (
                       <PayoutRowEl key={row.payout.id} payout={row.payout} />
@@ -273,11 +279,15 @@ function HeldRow({
   commissionBps,
   onRelease,
   releasing,
+  heldLabel,
+  releaseNowLabel,
 }: {
   booking: BookingRow;
   commissionBps: number;
   onRelease: () => void;
   releasing: boolean;
+  heldLabel: string;
+  releaseNowLabel: string;
 }) {
   const split = calculateSplit(
     booking.payment_amount ?? 0,
@@ -293,24 +303,24 @@ function HeldRow({
       <td className="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground">
         {formatDate(booking.created_at)} · {formatTime(booking.created_at)}
       </td>
-      <td className="px-4 py-3 text-right font-medium">
+      <td className="px-4 py-3 text-end font-medium">
         {formatCurrency(split.gross, split.currency)}
       </td>
-      <td className="hidden sm:table-cell px-4 py-3 text-right text-muted-foreground">
+      <td className="hidden sm:table-cell px-4 py-3 text-end text-muted-foreground">
         {formatCurrency(split.platformFee, split.currency)}
       </td>
-      <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-300">
+      <td className="px-4 py-3 text-end font-semibold text-emerald-600 dark:text-emerald-300">
         {formatCurrency(split.merchantAmount, split.currency)}
       </td>
       <td className="px-4 py-3">
         <Badge variant="warning" className="gap-1">
           <Clock className="h-3 w-3" />
-          Held
+          {heldLabel}
         </Badge>
       </td>
-      <td className="px-4 py-3 text-right">
+      <td className="px-4 py-3 text-end">
         <Button size="sm" variant="ghost" onClick={onRelease} disabled={releasing}>
-          {releasing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Release now"}
+          {releasing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : releaseNowLabel}
         </Button>
       </td>
     </tr>
@@ -329,13 +339,13 @@ function PayoutRowEl({ payout }: { payout: PayoutRow }) {
       <td className="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground">
         {formatDate(payout.created_at)} · {formatTime(payout.created_at)}
       </td>
-      <td className="px-4 py-3 text-right font-medium">
+      <td className="px-4 py-3 text-end font-medium">
         {formatCurrency(payout.gross_amount, payout.currency)}
       </td>
-      <td className="hidden sm:table-cell px-4 py-3 text-right text-muted-foreground">
+      <td className="hidden sm:table-cell px-4 py-3 text-end text-muted-foreground">
         {formatCurrency(payout.platform_fee, payout.currency)}
       </td>
-      <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-300">
+      <td className="px-4 py-3 text-end font-semibold text-emerald-600 dark:text-emerald-300">
         {formatCurrency(payout.merchant_amount, payout.currency)}
       </td>
       <td className="px-4 py-3">
@@ -350,7 +360,7 @@ function PayoutRowEl({ payout }: { payout: PayoutRow }) {
           {STATUS_LABEL[payout.status]}
         </Badge>
       </td>
-      <td className="px-4 py-3 text-right text-[11px] text-muted-foreground">
+      <td className="px-4 py-3 text-end text-[11px] text-muted-foreground">
         {payout.reason.replace(/_/g, " ")}
       </td>
     </tr>
