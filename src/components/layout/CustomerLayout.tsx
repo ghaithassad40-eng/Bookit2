@@ -6,12 +6,12 @@ import { MusicControls } from "@/components/customer/MusicControls";
 import { LanguagePicker } from "@/components/customer/LanguagePicker";
 import { initials } from "@/lib/utils";
 import { useI18n } from "@/hooks/useI18n";
-import { localizedCopy } from "@/lib/i18n";
+import { localizedCopy, pickLocale } from "@/lib/i18n";
 
 export function CustomerLayout() {
   const { slug } = useParams();
   const { data, isLoading, error } = useBusiness(slug);
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
 
   if (isLoading) {
     return (
@@ -39,6 +39,7 @@ export function CustomerLayout() {
     ...rawConfig,
     copy_json: localizedCopy(locale, rawConfig.copy_json, rawConfig.copy_json_ar),
   };
+  const businessName = pickLocale(locale, business.name, business.name_ar);
 
   return (
     <ThemeProvider theme={config.theme_json}>
@@ -47,13 +48,13 @@ export function CustomerLayout() {
           <div className="container flex h-14 items-center justify-between">
             <Link to={`/business/${business.slug}`} className="flex items-center gap-2">
               {business.logo_url ? (
-                <img src={business.logo_url} alt={business.name} className="h-8 w-8 rounded-lg object-cover" />
+                <img src={business.logo_url} alt={businessName} className="h-8 w-8 rounded-lg object-cover" />
               ) : (
                 <div className="grid h-8 w-8 place-items-center rounded-lg bg-accent/15 text-xs font-bold text-accent">
                   {initials(business.name)}
                 </div>
               )}
-              <span className="font-semibold tracking-tight">{business.name}</span>
+              <span className="font-semibold tracking-tight">{businessName}</span>
             </Link>
             <div className="flex items-center gap-2">
               <LanguagePicker />
@@ -71,8 +72,8 @@ export function CustomerLayout() {
         </main>
         <footer className="border-t border-border/60 mt-16">
           <div className="container flex flex-col items-center justify-between gap-2 py-6 text-xs text-muted-foreground sm:flex-row">
-            <span>© {new Date().getFullYear()} {business.name}</span>
-            <span>Powered by Bookit</span>
+            <span>© {new Date().getFullYear()} {businessName}</span>
+            <span>{t("invoice.poweredBy")}</span>
           </div>
         </footer>
         <MusicControls industry={business.industry} />

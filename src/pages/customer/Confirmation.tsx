@@ -383,7 +383,10 @@ export default function Confirmation() {
                       {t("invoice.escrowTitle")}
                     </div>
                     <div className="mt-0.5 text-xs text-emerald-700/70 dark:text-emerald-200/70">
-                      {t("invoice.escrowBody").replace("{{business}}", business.name)}
+                      {t("invoice.escrowBody").replace(
+                        "{{business}}",
+                        pickLocale(locale, business.name, business.name_ar),
+                      )}
                     </div>
                   </div>
                 </div>
@@ -439,7 +442,7 @@ export default function Confirmation() {
         <div className="mt-8 flex flex-col items-stretch justify-center gap-2 sm:flex-row" data-no-print>
           <Button asChild>
             <Link to={`/business/${business.slug}`}>
-              {t("invoice.backTo")} {business.name}
+              {t("invoice.backTo")} {pickLocale(locale, business.name, business.name_ar)}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>

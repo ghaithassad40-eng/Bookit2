@@ -30,6 +30,7 @@ import type { BusinessRow } from "@/lib/database.types";
 import { DEMO_BUSINESSES } from "@/lib/demoData";
 import { useRegion } from "@/hooks/useRegion";
 import { useI18n } from "@/hooks/useI18n";
+import { pickLocale } from "@/lib/i18n";
 import { countryMeta } from "@/lib/region";
 
 const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -293,7 +294,7 @@ export default function Home() {
                         {industryLabel}
                       </div>
                       <div className="mt-1.5 text-lg font-semibold leading-snug">
-                        {b.name}
+                        {pickLocale(locale, b.name, b.name_ar)}
                       </div>
                       <div className="mt-6 inline-flex items-center text-xs font-medium text-white/70 transition-colors group-hover:text-white">
                         {t("home.places.openBookingPage")}

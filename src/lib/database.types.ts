@@ -72,6 +72,8 @@ export interface LayoutJson {
 export interface BusinessRow {
   id: string;
   name: string;
+  /** Optional Arabic translation of name. Falls back to name when absent. */
+  name_ar?: string | null;
   slug: string;
   industry: string;
   logo_url: string | null;

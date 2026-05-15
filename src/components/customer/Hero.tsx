@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { BusinessRow, CopyJson } from "@/lib/database.types";
 import { useI18n } from "@/hooks/useI18n";
+import { pickLocale } from "@/lib/i18n";
 
 interface Props {
   business: BusinessRow;
@@ -11,7 +12,8 @@ interface Props {
 }
 
 export function Hero({ business, copy }: Props) {
-  const { dir } = useI18n();
+  const { dir, locale } = useI18n();
+  const businessName = pickLocale(locale, business.name, business.name_ar);
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -28,7 +30,7 @@ export function Hero({ business, copy }: Props) {
         >
           <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span>{business.name}</span>
+            <span>{businessName}</span>
           </div>
           <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
             {copy.heroTitle}

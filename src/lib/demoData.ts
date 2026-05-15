@@ -47,6 +47,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-pulse",
     name: "Pulse Athletic Club",
+    name_ar: "نادي بالس الرياضي",
     slug: "pulse-athletic",
     industry: "gym",
     logo_url: null,
@@ -67,6 +68,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-lumen",
     name: "Lumen Hair Studio",
+    name_ar: "لومن لتصفيف الشعر",
     slug: "lumen-hair",
     industry: "salon",
     logo_url: null,
@@ -86,6 +88,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-northgate",
     name: "Northgate Family Clinic",
+    name_ar: "عيادة نورثغيت العائلية",
     slug: "northgate-clinic",
     industry: "clinic",
     logo_url: null,
@@ -105,6 +108,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-stillpoint",
     name: "Stillpoint Yoga",
+    name_ar: "ستيلبوينت يوغا",
     slug: "stillpoint-yoga",
     industry: "yoga",
     logo_url: null,
@@ -125,6 +129,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-galaxy",
     name: "Galaxy Football Arena",
+    name_ar: "أرينا غالاكسي لكرة القدم",
     slug: "galaxy-football",
     industry: "football",
     logo_url: null,
@@ -145,6 +150,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-hoops",
     name: "Hoops Arena",
+    name_ar: "أرينا هوبس",
     slug: "hoops-arena",
     industry: "basketball",
     logo_url: null,
@@ -164,6 +170,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-padel",
     name: "Padel Point",
+    name_ar: "بادل بوينت",
     slug: "padel-point",
     industry: "padel",
     logo_url: null,
@@ -185,6 +192,7 @@ export const DEMO_BUSINESSES: BusinessRow[] = [
   row({
     id: "biz-boundary",
     name: "Boundary Cricket Hub",
+    name_ar: "مركز باوندري للكريكت",
     slug: "boundary-cricket",
     industry: "cricket",
     logo_url: null,
