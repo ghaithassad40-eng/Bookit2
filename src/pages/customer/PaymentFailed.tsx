@@ -148,7 +148,7 @@ export default function PaymentFailed() {
           </Link>
         </Button>
         <Button variant="ghost" asChild size="lg">
-          <a href={`mailto:support@${business.slug}.bookit.app`}>
+          <a href={`mailto:support@${business.slug}.bk-it.ai`}>
             <Mail className="h-4 w-4" />
             {t("common.contactSupport")}
           </a>

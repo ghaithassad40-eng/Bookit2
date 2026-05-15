@@ -154,5 +154,5 @@ At minimum:
 
 ## Reporting a vulnerability
 
-Please email security@bookit.app (or open a private GitHub security
+Please email security@bk-it.ai (or open a private GitHub security
 advisory) with reproduction steps. Do not file a public issue.

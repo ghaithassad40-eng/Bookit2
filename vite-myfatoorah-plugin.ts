@@ -223,7 +223,7 @@ export function myfatoorahDevProxy(opts: MyFatoorahDevOptions = {}): Plugin {
             DisplayCurrencyIso: (body as { displayCurrency?: string }).displayCurrency ?? body.currency,
             MobileCountryCode: "+965",
             CustomerMobile: (body.customer.phone ?? "").replace(/\D/g, "") || "00000000",
-            CustomerEmail: body.customer.email ?? "noreply@bookit.local",
+            CustomerEmail: body.customer.email ?? "noreply@bk-it.ai",
             InvoiceValue: body.amount,
             CallBackUrl: callbackUrl,
             ErrorUrl: errorUrl,

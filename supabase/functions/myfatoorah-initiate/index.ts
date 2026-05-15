@@ -15,7 +15,7 @@
 //   MYFATOORAH_API_KEY        — bearer token from MyFatoorah portal
 //   MYFATOORAH_BASE_URL       — https://apitest.myfatoorah.com  (staging)
 //                                or https://api.myfatoorah.com  (production KW)
-//   MYFATOORAH_RETURN_BASE    — public origin of your site (e.g. https://bookit.app)
+//   MYFATOORAH_RETURN_BASE    — public origin of your site (e.g. https://bk-it.ai)
 //                                Used to build CallBackUrl/ErrorUrl.
 //
 // Deploy:
@@ -268,7 +268,7 @@ serve(async (req) => {
       DisplayCurrencyIso: (payload as { displayCurrency?: string }).displayCurrency ?? payload.currency,
       MobileCountryCode: "+965",
       CustomerMobile: (payload.customer.phone ?? "").replace(/\D/g, "") || "00000000",
-      CustomerEmail: payload.customer.email ?? "noreply@bookit.local",
+      CustomerEmail: payload.customer.email ?? "noreply@bk-it.ai",
       InvoiceValue: payload.amount,
       CallBackUrl: callbackUrl,
       ErrorUrl: errorUrl,

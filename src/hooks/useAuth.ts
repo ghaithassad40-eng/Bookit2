@@ -142,7 +142,7 @@ export function useAuth(): AuthState {
     clearDemoUser();
   }
 
-  function enterDemoMode(email = "demo@bookit.app", role: UserRole = "vendor"): DemoUser {
+  function enterDemoMode(email = "demo@bk-it.ai", role: UserRole = "vendor"): DemoUser {
     return setDemoUser(email, role);
   }
 

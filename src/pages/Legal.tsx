@@ -93,7 +93,7 @@ const PRIVACY_SECTIONS_EN: Section[] = [
   },
   {
     heading: "Your rights",
-    body: "You can request access, export, or deletion of your data at any time by emailing privacy@bookit.example. We will respond within 30 days.",
+    body: "You can request access, export, or deletion of your data at any time by emailing privacy@bk-it.ai. We will respond within 30 days.",
   },
   {
     heading: "Cookies",
@@ -116,7 +116,7 @@ const PRIVACY_SECTIONS_AR: Section[] = [
   },
   {
     heading: "حقوقك",
-    body: "يمكنك طلب الاطّلاع على بياناتك أو تصديرها أو حذفها في أي وقت بمراسلة privacy@bookit.example. سنردّ خلال 30 يوماً.",
+    body: "يمكنك طلب الاطّلاع على بياناتك أو تصديرها أو حذفها في أي وقت بمراسلة privacy@bk-it.ai. سنردّ خلال 30 يوماً.",
   },
   {
     heading: "ملفّات تعريف الارتباط",

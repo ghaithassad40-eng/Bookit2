@@ -82,12 +82,12 @@ export default function Login() {
   }
 
   function startDemo() {
-    enterDemoMode(email.trim() || "demo@bookit.app");
+    enterDemoMode(email.trim() || "demo@bk-it.ai");
     toast.success(t("login.toastDemoStarted"));
   }
 
   function startPlatformDemo() {
-    enterDemoMode(email.trim() || "platform@bookit.app", "platform_admin");
+    enterDemoMode(email.trim() || "platform@bk-it.ai", "platform_admin");
     toast.success(t("login.toastDemoPlatform"));
     navigate("/admin/platform", { replace: true });
   }

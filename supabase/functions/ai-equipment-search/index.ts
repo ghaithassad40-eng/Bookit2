@@ -156,7 +156,7 @@ serve(async (req) => {
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://bookit.app",
+        "HTTP-Referer": "https://bk-it.ai",
         "X-Title": "Bookit Equipment Search",
       },
       body: JSON.stringify({

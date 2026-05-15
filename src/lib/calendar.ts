@@ -52,7 +52,7 @@ export function buildIcs({ booking, business, service, staff, start, end }: Buil
     .join(", ");
 
   const now = toIcsDateUtc(new Date().toISOString());
-  const uid = `${booking.id}@bookit.app`;
+  const uid = `${booking.id}@bk-it.ai`;
 
   const lines = [
     "BEGIN:VCALENDAR",
