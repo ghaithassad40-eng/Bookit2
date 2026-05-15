@@ -22,6 +22,7 @@ import {
 import { AIConcierge } from "@/components/customer/AIConcierge";
 import { WelcomePicker } from "@/components/customer/WelcomePicker";
 import { RegionPill } from "@/components/customer/RegionPill";
+import { SocialProof } from "@/components/customer/SocialProof";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -105,6 +106,8 @@ export default function Home() {
           <nav className="hidden items-center gap-7 text-sm text-white/60 md:flex">
             <a href="#features" className="hover:text-white">Features</a>
             <a href="#workspaces" className="hover:text-white">Live demos</a>
+            <a href="#reviews" className="hover:text-white">Reviews</a>
+            <a href="#community" className="hover:text-white">Community</a>
             <a href="#how" className="hover:text-white">How it works</a>
           </nav>
           {/* No sign-in here — customers don't sign in to book.
@@ -342,6 +345,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* social proof: reviews, community, owner story */}
+      <SocialProof />
 
       {/* how it works */}
       <section id="how" className="relative z-10 border-t border-white/5">
