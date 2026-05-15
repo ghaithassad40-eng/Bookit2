@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { DEMO_BUSINESSES } from "@/lib/demoData";
 import { useI18n } from "@/hooks/useI18n";
+import { getHostMode, goCrossHost } from "@/lib/host";
 
 export default function Login() {
   const { signIn, signUp, user, demoUser, enterDemoMode, requestPasswordReset } = useAuth();
@@ -41,24 +42,67 @@ export default function Login() {
     }
   }
 
-  // After auth, route to the right shell based on role.
+  // Cross-host demo handoff. When someone clicks "Try platform admin" on
+  // the main host (bk-it.ai), we redirect them here (admin.bk-it.ai) with
+  // ?_demo=platform&_email=... — the original host's localStorage doesn't
+  // reach this origin, so we recreate the demo session here on first
+  // render. The URL params are stripped after consumption so a refresh
+  // doesn't keep re-entering demo mode.
   useEffect(() => {
-    if (demoUser) {
-      if (demoUser.role === "platform_admin") {
+    if (demoUser || user) return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("_demo") === "platform") {
+        const handoffEmail = params.get("_email") || "platform@bk-it.ai";
+        enterDemoMode(handoffEmail, "platform_admin");
+        // Clean the URL so refresh / back-button don't replay this.
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    } catch {
+      /* malformed URL — ignore */
+    }
+  }, [demoUser, user, enterDemoMode]);
+
+  // After auth, route to the right shell based on role *and* host.
+  //   - platform_admin → /admin/platform (cross-host jump if needed)
+  //   - vendor         → /admin/:slug on the main host
+  // Login can land on either host; this resolver makes sure the user
+  // ends up on the host that actually serves their destination.
+  useEffect(() => {
+    const hostMode = getHostMode();
+
+    const goToPlatform = () => {
+      if (hostMode === "admin") {
         navigate("/admin/platform", { replace: true });
       } else {
-        navigate(`/admin/${DEMO_BUSINESSES[0].slug}`, { replace: true });
+        goCrossHost("admin", "/admin/platform");
+      }
+    };
+
+    const goToVendor = (slug: string) => {
+      if (hostMode === "main") {
+        navigate(`/admin/${slug}`, { replace: true });
+      } else {
+        goCrossHost("main", `/admin/${slug}`);
+      }
+    };
+
+    if (demoUser) {
+      if (demoUser.role === "platform_admin") {
+        goToPlatform();
+      } else {
+        goToVendor(DEMO_BUSINESSES[0].slug);
       }
       return;
     }
     if (user) {
       const role = user.app_metadata?.role as "platform_admin" | "vendor" | undefined;
       if (role === "platform_admin") {
-        navigate("/admin/platform", { replace: true });
+        goToPlatform();
         return;
       }
       if (businesses && businesses.length > 0) {
-        navigate(`/admin/${businesses[0].slug}`, { replace: true });
+        goToVendor(businesses[0].slug);
       }
     }
   }, [user, demoUser, businesses, navigate]);
@@ -87,9 +131,23 @@ export default function Login() {
   }
 
   function startPlatformDemo() {
-    enterDemoMode(email.trim() || "platform@bk-it.ai", "platform_admin");
-    toast.success(t("login.toastDemoPlatform"));
-    navigate("/admin/platform", { replace: true });
+    const demoEmail = email.trim() || "platform@bk-it.ai";
+    // Important: localStorage is per-origin, so we cannot enter demo mode
+    // on the main host and then cross-host to the admin console — the
+    // admin host can't read the main host's localStorage. Instead, we
+    // hop to the admin host's /admin/login with a `_demo=platform` hint,
+    // and the admin host enters demo mode in its own localStorage on
+    // first render (see the effect below that watches the param).
+    if (getHostMode() === "admin") {
+      enterDemoMode(demoEmail, "platform_admin");
+      toast.success(t("login.toastDemoPlatform"));
+      navigate("/admin/platform", { replace: true });
+    } else {
+      goCrossHost(
+        "admin",
+        `/admin/login?_demo=platform&_email=${encodeURIComponent(demoEmail)}`,
+      );
+    }
   }
 
   // Arrow icons that point "forward" in the active reading direction.

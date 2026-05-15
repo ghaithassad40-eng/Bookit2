@@ -1,4 +1,8 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  type RouteObject,
+} from "react-router-dom";
 import Home from "@/pages/Home";
 import Legal from "@/pages/Legal";
 import NotFound from "@/pages/NotFound";
@@ -21,8 +25,28 @@ import Payouts from "@/pages/admin/Payouts";
 import Settings from "@/pages/admin/Settings";
 import { PlatformAdminLayout } from "@/components/layout/PlatformAdminLayout";
 import PlatformBusinesses from "@/pages/platform/PlatformBusinesses";
+import { ExternalRedirect, getHostMode } from "@/lib/host";
 
-export const router = createBrowserRouter([
+/**
+ * Two route trees, chosen by host (see src/lib/host.ts).
+ *
+ *   MAIN host (bk-it.ai / localhost:5173)
+ *     Customer site + vendor admin workspaces. Any hit on /admin/platform
+ *     is bounced cross-origin to the admin console.
+ *
+ *   ADMIN host (admin.bk-it.ai / localhost:5174)
+ *     Platform operations console only. Customer + vendor paths bounce
+ *     cross-origin back to the main host so the operator surface stays
+ *     tight and there's never any accidental drift between the two.
+ *
+ * Both trees keep /admin/login because login happens on whichever host
+ * the user reached first — the post-auth handler in Login.tsx decides
+ * which host owns the user's destination by role.
+ */
+
+// ─── Main host (customer + vendor) ──────────────────────────────────────────
+
+const mainRoutes: RouteObject[] = [
   { path: "/", element: <Home /> },
   { path: "/privacy", element: <Legal kind="privacy" /> },
   { path: "/terms", element: <Legal kind="terms" /> },
@@ -42,12 +66,12 @@ export const router = createBrowserRouter([
   },
   { path: "/admin", element: <Navigate to="/admin/login" replace /> },
   { path: "/admin/login", element: <Login /> },
+  // Platform console doesn't live on the main host — bounce to admin.
+  // Catches /admin/platform and any nested path (e.g. /admin/platform/audit
+  // once that ships) without enumerating each.
   {
-    path: "/admin/platform",
-    element: <PlatformAdminLayout />,
-    children: [
-      { index: true, element: <PlatformBusinesses /> },
-    ],
+    path: "/admin/platform/*",
+    element: <ExternalRedirect target="admin" to="/admin/platform" />,
   },
   {
     path: "/admin/:slug",
@@ -64,4 +88,36 @@ export const router = createBrowserRouter([
     ],
   },
   { path: "*", element: <NotFound /> },
-]);
+];
+
+// ─── Admin host (platform operations console) ───────────────────────────────
+
+const adminRoutes: RouteObject[] = [
+  // Root of admin.bk-it.ai goes straight to the console (or login if signed
+  // out — the PlatformAdminLayout guard handles the redirect).
+  { path: "/", element: <Navigate to="/admin/platform" replace /> },
+  { path: "/admin", element: <Navigate to="/admin/platform" replace /> },
+  { path: "/admin/login", element: <Login /> },
+  {
+    path: "/admin/platform",
+    element: <PlatformAdminLayout />,
+    children: [{ index: true, element: <PlatformBusinesses /> }],
+  },
+  // Anything customer- or vendor-shaped that wanders onto the admin host
+  // bounces back to the main site. We don't render those pages here at all.
+  {
+    path: "/business/*",
+    element: <ExternalRedirect target="main" to="/" />,
+  },
+  {
+    path: "/admin/:slug/*",
+    element: <ExternalRedirect target="main" to="/admin/login" />,
+  },
+  { path: "/privacy", element: <ExternalRedirect target="main" to="/privacy" /> },
+  { path: "/terms", element: <ExternalRedirect target="main" to="/terms" /> },
+  { path: "*", element: <NotFound /> },
+];
+
+export const router = createBrowserRouter(
+  getHostMode() === "admin" ? adminRoutes : mainRoutes,
+);

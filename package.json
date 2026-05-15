@@ -4,9 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173 --strictPort",
+    "dev:admin": "vite --port 5174 --strictPort",
+    "dev:both": "npm run dev & npm run dev:admin",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 5173",
+    "preview:admin": "vite preview --port 5174",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },

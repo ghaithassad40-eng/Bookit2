@@ -40,6 +40,23 @@ deps, browser-extension malware.
   localStorage in prod cannot grant themselves `platform_admin`. The
   platform-admin demo CTA is also hidden in prod (`src/pages/admin/Login.tsx`).
 
+### Host split
+- Bookit serves two surfaces from two different hosts:
+  - **`bk-it.ai`** — customer site + vendor admin workspaces
+  - **`admin.bk-it.ai`** — platform operations console (you, internally)
+- The same React bundle runs on both. `src/lib/host.ts` resolves which
+  host the current tab is on (via subdomain in prod, port in dev — 5173
+  / 5174), and `src/router.tsx` exposes a different route tree per host.
+  Vendor + customer routes 404 on the admin host; the platform console
+  route 404s on the main host. Cross-host hits bounce via full page
+  navigation (origin boundary respected).
+- This is **client-side routing isolation**, not a security boundary by
+  itself — but it sets up the production hardening:
+  - Per-host cookies (admin console cookies scoped to `admin.bk-it.ai`)
+  - Stricter CSP / CORS on the admin host
+  - Optional IP allow-list / VPN gate on `admin.bk-it.ai` (Cloudflare
+    Access or similar) before launch.
+
 ### Authorization
 - `PlatformAdminLayout` rejects everyone except `isPlatformAdmin`.
 - `AdminLayout` scopes each vendor to their `/admin/:slug` workspace.
