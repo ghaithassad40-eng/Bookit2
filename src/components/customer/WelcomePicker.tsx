@@ -27,6 +27,13 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
   const [pickedCountry, setPickedCountry] = useState<CountryCode>(initialCountry);
   const [pickedLocale, setPickedLocale] = useState<Locale>(locale);
   const [open, setOpen] = useState(false);
+  // Capture the portal target after mount — `document.body` is not safely
+  // accessible during initial render (SSR / early hydration / HMR can all
+  // hit a transient null and trip a render-time createPortal error).
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setPortalTarget(typeof document !== "undefined" ? document.body : null);
+  }, []);
 
   // Drive open state from either explicit override or first-visit signal.
   useEffect(() => {
@@ -66,7 +73,7 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
     onClose?.();
   }
 
-  if (typeof document === "undefined") return null;
+  if (!portalTarget) return null;
 
   return createPortal(
     <AnimatePresence>
@@ -222,6 +229,6 @@ export function WelcomePicker({ open: openOverride, onClose }: Props) {
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body,
+    portalTarget,
   );
 }
