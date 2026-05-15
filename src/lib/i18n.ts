@@ -122,6 +122,7 @@ const STRINGS_EN = {
   "admin.workspaceNotFoundBody": "No business with slug",
   "admin.nav.overview": "Overview",
   "admin.nav.bookings": "Bookings",
+  "admin.nav.calendar": "Calendar",
   "admin.nav.services": "Services",
   "admin.nav.equipment": "Equipment",
   "admin.nav.staff": "Staff",
@@ -244,6 +245,39 @@ const STRINGS_EN = {
   "admin.equipment.toastSaveFailed": "Save failed",
   "admin.equipment.toastDeleted": "Deleted",
   "admin.equipment.toastDeleteFailed": "Delete failed",
+
+  // Vendor calendar (mirror bookings to Google / Apple / Outlook).
+  "admin.calendar.title": "Calendar",
+  "admin.calendar.subtitle":
+    "Mirror your Bookit bookings into your own calendar — Google, Apple, Outlook. Updates every hour.",
+  "admin.calendar.sync.title": "Sync to your calendar",
+  "admin.calendar.sync.autoUpdate": "Auto-refresh",
+  "admin.calendar.sync.subtitle":
+    "Subscribe once and every new booking shows up in your calendar app alongside your existing events.",
+  "admin.calendar.sync.feedUrl": "Calendar feed URL",
+  "admin.calendar.sync.copy": "Copy",
+  "admin.calendar.sync.copied": "Copied",
+  "admin.calendar.sync.downloadTitle": "Download a snapshot",
+  "admin.calendar.sync.downloadHint":
+    "Get a one-time .ics file of every upcoming booking. Won't auto-update.",
+  "admin.calendar.sync.download": "Download .ics",
+  "admin.calendar.sync.demoNote":
+    "Demo note: the subscribe URL points at a serverless function that ships with production deploys. The download below works right now.",
+  "admin.calendar.toast.copied": "Feed URL copied",
+  "admin.calendar.toast.copyFailed": "Couldn't copy — try selecting the URL manually.",
+  "admin.calendar.toast.downloaded":
+    "Downloaded {{count}} upcoming bookings as .ics",
+  "admin.calendar.toast.empty": "No upcoming bookings to export yet.",
+  "admin.calendar.upcoming.title": "Upcoming bookings",
+  "admin.calendar.upcoming.emptyTitle": "Nothing on the schedule yet",
+  "admin.calendar.upcoming.emptyBody":
+    "Future bookings will appear here, grouped by day.",
+  "admin.calendar.upcoming.bookingSingular": "booking",
+  "admin.calendar.upcoming.bookingPlural": "bookings",
+  "admin.calendar.preview.title": "Feed preview",
+  "admin.calendar.preview.subtitle":
+    "First few VEVENTs as they'll appear in your calendar app. Useful for double-checking labels before you subscribe.",
+
   "admin.staff.title": "Staff",
   "admin.staff.subtitle": "Manage your team members and specialists.",
   "admin.staff.newBtn": "New staff",
@@ -856,6 +890,7 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "admin.workspaceNotFoundBody": "لا يوجد نشاط بالمعرّف",
   "admin.nav.overview": "نظرة عامّة",
   "admin.nav.bookings": "الحجوزات",
+  "admin.nav.calendar": "التقويم",
   "admin.nav.services": "الخدمات",
   "admin.nav.equipment": "التجهيزات",
   "admin.nav.staff": "الفريق",
@@ -977,6 +1012,38 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "admin.equipment.toastSaveFailed": "فشل الحفظ",
   "admin.equipment.toastDeleted": "تم الحذف",
   "admin.equipment.toastDeleteFailed": "فشل الحذف",
+
+  // Vendor calendar (AR).
+  "admin.calendar.title": "التقويم",
+  "admin.calendar.subtitle":
+    "زامِن حجوزات بكيت مع تقويمك — Google أو Apple أو Outlook. يحدِّث كل ساعة.",
+  "admin.calendar.sync.title": "زامن تقويمك",
+  "admin.calendar.sync.autoUpdate": "تحديث تلقائي",
+  "admin.calendar.sync.subtitle":
+    "اشترك مرّة واحدة وستظهر كل الحجوزات الجديدة في تقويمك إلى جانب مواعيدك الأخرى.",
+  "admin.calendar.sync.feedUrl": "رابط تغذية التقويم",
+  "admin.calendar.sync.copy": "نسخ",
+  "admin.calendar.sync.copied": "تم النسخ",
+  "admin.calendar.sync.downloadTitle": "حمّل نسخة كاملة",
+  "admin.calendar.sync.downloadHint":
+    "احصل على ملف .ics بكل الحجوزات القادمة مرّة واحدة. لن يتحدّث تلقائياً.",
+  "admin.calendar.sync.download": "تحميل .ics",
+  "admin.calendar.sync.demoNote":
+    "ملاحظة تجريبية: رابط الاشتراك يعمل عند نشر المنصّة على الإنتاج. أمّا التحميل بالأسفل فيعمل الآن.",
+  "admin.calendar.toast.copied": "تم نسخ رابط التغذية",
+  "admin.calendar.toast.copyFailed": "تعذّر النسخ — حدّد الرابط يدوياً.",
+  "admin.calendar.toast.downloaded":
+    "تم تحميل {{count}} حجزاً قادماً كملف .ics",
+  "admin.calendar.toast.empty": "لا توجد حجوزات قادمة بعد للتصدير.",
+  "admin.calendar.upcoming.title": "الحجوزات القادمة",
+  "admin.calendar.upcoming.emptyTitle": "لا حجوزات في الجدول بعد",
+  "admin.calendar.upcoming.emptyBody":
+    "ستظهر الحجوزات المستقبلية هنا، مجمَّعة حسب اليوم.",
+  "admin.calendar.upcoming.bookingSingular": "حجز",
+  "admin.calendar.upcoming.bookingPlural": "حجوزات",
+  "admin.calendar.preview.title": "معاينة التغذية",
+  "admin.calendar.preview.subtitle":
+    "أوّل عدد من VEVENTs كما ستظهر في تقويمك. مفيدة للتحقّق من الصياغة قبل الاشتراك.",
   "admin.staff.title": "الفريق",
   "admin.staff.subtitle": "أدِر أعضاء فريقك والمختصّين.",
   "admin.staff.newBtn": "عضو جديد",

@@ -17,6 +17,7 @@ import Login from "@/pages/admin/Login";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import Bookings from "@/pages/admin/Bookings";
+import CalendarPage from "@/pages/admin/Calendar";
 import Services from "@/pages/admin/Services";
 import Equipment from "@/pages/admin/Equipment";
 import Staff from "@/pages/admin/Staff";
@@ -79,6 +80,7 @@ const mainRoutes: RouteObject[] = [
     children: [
       { index: true, element: <Dashboard /> },
       { path: "bookings", element: <Bookings /> },
+      { path: "calendar", element: <CalendarPage /> },
       { path: "services", element: <Services /> },
       { path: "equipment", element: <Equipment /> },
       { path: "staff", element: <Staff /> },

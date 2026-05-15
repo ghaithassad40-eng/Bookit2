@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 import {
   Banknote,
+  CalendarDays,
   CalendarRange,
   LayoutDashboard,
   LogOut,
@@ -30,6 +31,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: "", icon: LayoutDashboard, labelKey: "admin.nav.overview" },
   { to: "bookings", icon: CalendarRange, labelKey: "admin.nav.bookings" },
+  { to: "calendar", icon: CalendarDays, labelKey: "admin.nav.calendar" },
   { to: "services", icon: Tags, labelKey: "admin.nav.services" },
   { to: "equipment", icon: Package, labelKey: "admin.nav.equipment" },
   { to: "staff", icon: Users, labelKey: "admin.nav.staff" },
