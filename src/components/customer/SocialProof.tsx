@@ -20,10 +20,13 @@ import { cn } from "@/lib/utils";
 
 interface Review {
   name: string;
+  nameAr: string;
   initials: string;
   city: string;
+  cityAr: string;
   country: FlagCode;
   industry: string;
+  industryAr: string;
   rating: 5;
   quote: string;
   quoteAr: string;
@@ -32,10 +35,13 @@ interface Review {
 const REVIEWS: Review[] = [
   {
     name: "Reem A.",
+    nameAr: "ريم ع.",
     initials: "RA",
     city: "Riyadh",
+    cityAr: "الرياض",
     country: "SA",
     industry: "Salon",
+    industryAr: "صالون",
     rating: 5,
     quote:
       "I booked my colour appointment in two taps. The WhatsApp reminder came the day before — felt like a five-star hotel.",
@@ -44,10 +50,13 @@ const REVIEWS: Review[] = [
   },
   {
     name: "Mohammed Q.",
+    nameAr: "محمد ق.",
     initials: "MQ",
     city: "Kuwait City",
+    cityAr: "مدينة الكويت",
     country: "KW",
     industry: "Padel",
+    industryAr: "بادل",
     rating: 5,
     quote:
       "Picking the slot instead of calling? Game changer. I can see who's booked which court at a glance.",
@@ -56,10 +65,13 @@ const REVIEWS: Review[] = [
   },
   {
     name: "Layla K.",
+    nameAr: "ليلى ك.",
     initials: "LK",
     city: "Dubai",
+    cityAr: "دبي",
     country: "AE",
     industry: "Yoga",
+    industryAr: "يوغا",
     rating: 5,
     quote:
       "I've tried five booking apps. This one just gets out of the way. I open, tap, and I'm done.",
@@ -68,10 +80,13 @@ const REVIEWS: Review[] = [
   },
   {
     name: "Khalid M.",
+    nameAr: "خالد م.",
     initials: "KM",
     city: "Doha",
+    cityAr: "الدوحة",
     country: "QA",
     industry: "Gym Owner",
+    industryAr: "صاحب نادي",
     rating: 5,
     quote:
       "We moved our 6-coach gym to Bookit. No-shows dropped from 18% to 6% in the first month.",
@@ -80,10 +95,13 @@ const REVIEWS: Review[] = [
   },
   {
     name: "Noura H.",
+    nameAr: "نورة ح.",
     initials: "NH",
     city: "Manama",
+    cityAr: "المنامة",
     country: "BH",
     industry: "Clinic",
+    industryAr: "عيادة",
     rating: 5,
     quote:
       "The Arabic feels native, not translated. My mother used it without asking me once for help.",
@@ -92,10 +110,13 @@ const REVIEWS: Review[] = [
   },
   {
     name: "Yousef S.",
+    nameAr: "يوسف س.",
     initials: "YS",
     city: "Muscat",
+    cityAr: "مسقط",
     country: "OM",
     industry: "Football",
+    industryAr: "كرة قدم",
     rating: 5,
     quote:
       "I run 12 pitches. The dashboard tells me what each one earned this week. That's all I need.",
@@ -296,12 +317,14 @@ export function SocialProof() {
                     {r.initials}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-white">{r.name}</div>
+                    <div className="truncate text-sm font-semibold text-white">
+                      {ar ? r.nameAr : r.name}
+                    </div>
                     <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/55">
                       <Flag code={r.country} className="h-3 w-4" />
-                      <span>{r.city}</span>
+                      <span>{ar ? r.cityAr : r.city}</span>
                       <span className="opacity-50">·</span>
-                      <span>{r.industry}</span>
+                      <span>{ar ? r.industryAr : r.industry}</span>
                     </div>
                   </div>
                 </div>
@@ -391,12 +414,17 @@ export function SocialProof() {
                 </div>
 
                 <ul className="relative mt-4 space-y-2">
+                  {/* The list key includes the locale so a language switch
+                      tears down the AnimatePresence children and rebuilds
+                      them — preventing the half-EN / half-AR ticker glitch
+                      where exit animations from the previous locale lingered
+                      in the DOM during a flip. */}
                   <AnimatePresence initial={false}>
                     {activity.slice(0, 7).map((item, idx) => {
                       const Icon = ACTIVITY_ICONS[item.kind];
                       return (
                         <motion.li
-                          key={item.id}
+                          key={`${locale}-${item.id}`}
                           layout
                           initial={{ opacity: 0, y: -8 }}
                           animate={{ opacity: 1 - idx * 0.06, y: 0 }}
