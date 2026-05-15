@@ -770,10 +770,10 @@ const stf = (extra: Partial<StaffRow>): StaffRow =>
   } as StaffRow);
 
 export const DEMO_STAFF: StaffRow[] = [
-  stf({ id: "stf-maya",   business_id: "biz-pulse",      name: "Maya Okafor",       role: "Head Coach",          specialty: "Strength & conditioning", rating: 4.95, bio: "8 years coaching, NSCA-CPT." }),
-  stf({ id: "stf-daniel", business_id: "biz-pulse",      name: "Daniel Reeves",     role: "Coach",               specialty: "Olympic lifting",         rating: 4.86, bio: "Former collegiate athlete." }),
-  stf({ id: "stf-riley",  business_id: "biz-lumen",      name: "Riley Chen",        role: "Master Stylist",      specialty: "Precision cuts & color",  rating: 4.92, bio: "A decade in editorial styling." }),
-  stf({ id: "stf-jordan", business_id: "biz-lumen",      name: "Jordan Hayes",      role: "Senior Stylist",      specialty: "Balayage",                rating: 4.78, bio: "Color specialist." }),
+  stf({ id: "stf-maya",   business_id: "biz-pulse",      name: "Maya Okafor",       name_ar: "مايا أوكافور",  role: "Head Coach",     role_ar: "المدرّبة الأولى",   specialty: "Strength & conditioning", specialty_ar: "قوّة ولياقة", rating: 4.95, bio: "8 years coaching, NSCA-CPT." }),
+  stf({ id: "stf-daniel", business_id: "biz-pulse",      name: "Daniel Reeves",     name_ar: "دانيال ريفز",   role: "Coach",          role_ar: "مدرّب",              specialty: "Olympic lifting",         specialty_ar: "رفع أولمبي",  rating: 4.86, bio: "Former collegiate athlete." }),
+  stf({ id: "stf-riley",  business_id: "biz-lumen",      name: "Riley Chen",        name_ar: "رايلي تشن",     role: "Master Stylist", role_ar: "كبيرة مصمّمي الشعر", specialty: "Precision cuts & color",  specialty_ar: "قصّ وصبغة دقيقة", rating: 4.92, bio: "A decade in editorial styling." }),
+  stf({ id: "stf-jordan", business_id: "biz-lumen",      name: "Jordan Hayes",      name_ar: "جوردان هايز",   role: "Senior Stylist", role_ar: "مصمّمة شعر أولى",   specialty: "Balayage",                specialty_ar: "بالياج",     rating: 4.78, bio: "Color specialist." }),
   stf({ id: "stf-aisha",  business_id: "biz-northgate",  name: "Dr. Aisha Rahman",  role: "Family Physician",    specialty: "Preventive care",         rating: 4.97, bio: "Board-certified, 12 years." }),
   stf({ id: "stf-marco",  business_id: "biz-northgate",  name: "Dr. Marco Vela",    role: "Internal Medicine",   specialty: "Cardio risk",             rating: 4.88, bio: "Specializes in long-term care." }),
   stf({ id: "stf-sana",   business_id: "biz-stillpoint", name: "Sana Patel",        role: "Lead Teacher",        specialty: "Vinyasa & breathwork",    rating: 4.99, bio: "E-RYT 500, 10+ years teaching." }),
@@ -788,8 +788,8 @@ export const DEMO_STAFF: StaffRow[] = [
   stf({ id: "stf-laila",  business_id: "biz-hoops",      name: "Laila Hashem",           role: "Strength Coach",  specialty: "On-court conditioning",   rating: 4.83, bio: "CSCS, builds engines that finish games." }),
 
   // ─── Padel Point ──────────────────────────────────────────────────────
-  stf({ id: "stf-rafa",   business_id: "biz-padel",      name: "Rafael Moreno",          role: "Head Pro",        specialty: "Bandeja, vibora, defence", rating: 4.94, bio: "PPA-certified, 12 years pro padel." }),
-  stf({ id: "stf-mona",   business_id: "biz-padel",      name: "Mona Al-Sabah",          role: "Coach",           specialty: "Beginner foundations",     rating: 4.79, bio: "Builds students from racquet-up." }),
+  stf({ id: "stf-rafa",   business_id: "biz-padel",      name: "Rafael Moreno",          name_ar: "رافائيل مورينو",      role: "Head Pro",        role_ar: "المحترف الأوّل", specialty: "Bandeja, vibora, defence", specialty_ar: "بانديخا وفيبورا ودفاع", rating: 4.94, bio: "PPA-certified, 12 years pro padel." }),
+  stf({ id: "stf-mona",   business_id: "biz-padel",      name: "Mona Al-Sabah",          name_ar: "منى الصباح",          role: "Coach",           role_ar: "مدرّبة",         specialty: "Beginner foundations",     specialty_ar: "أساسيات للمبتدئين",     rating: 4.79, bio: "Builds students from racquet-up." }),
 
   // ─── Boundary Cricket Hub ─────────────────────────────────────────────
   stf({ id: "stf-vikram", business_id: "biz-boundary",   name: "Coach Vikram Iyer",      role: "Batting Coach",   specialty: "Top-order technique",      rating: 4.95, bio: "ECB Level 3. Mentored 3 first-class debutants." }),

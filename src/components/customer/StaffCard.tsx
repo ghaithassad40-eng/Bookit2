@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn, initials } from "@/lib/utils";
+import { useI18n } from "@/hooks/useI18n";
+import { pickLocale } from "@/lib/i18n";
 import type { StaffRow } from "@/lib/database.types";
 
 interface Props {
@@ -11,6 +13,10 @@ interface Props {
 }
 
 export function StaffCard({ staff, selected, onSelect }: Props) {
+  const { locale } = useI18n();
+  const name = pickLocale(locale, staff.name, staff.name_ar);
+  const role = pickLocale(locale, staff.role, staff.role_ar);
+  const specialty = pickLocale(locale, staff.specialty, staff.specialty_ar);
   return (
     <motion.button
       type="button"
@@ -29,17 +35,17 @@ export function StaffCard({ staff, selected, onSelect }: Props) {
           {staff.profile_photo_url ? (
             <img
               src={staff.profile_photo_url}
-              alt={staff.name}
+              alt={name}
               className="h-14 w-14 rounded-full object-cover"
             />
           ) : (
             <div className="grid h-14 w-14 place-items-center rounded-full bg-accent/15 text-base font-semibold text-accent">
-              {initials(staff.name)}
+              {initials(name)}
             </div>
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <h4 className="truncate text-base font-semibold">{staff.name}</h4>
+              <h4 className="truncate text-base font-semibold">{name}</h4>
               {staff.rating !== null && (
                 <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
                   <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -47,10 +53,10 @@ export function StaffCard({ staff, selected, onSelect }: Props) {
                 </span>
               )}
             </div>
-            {staff.role && <div className="text-sm text-muted-foreground">{staff.role}</div>}
-            {staff.specialty && (
+            {role && <div className="text-sm text-muted-foreground">{role}</div>}
+            {specialty && (
               <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-                {staff.specialty}
+                {specialty}
               </div>
             )}
           </div>

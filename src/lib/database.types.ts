@@ -135,9 +135,17 @@ export interface StaffRow {
   id: string;
   business_id: string;
   name: string;
+  /** Optional Arabic translation of name. Falls back to name when absent. */
+  name_ar?: string | null;
   role: string | null;
+  /** Optional Arabic translation of role. Falls back to role. */
+  role_ar?: string | null;
   specialty: string | null;
+  /** Optional Arabic translation of specialty. Falls back to specialty. */
+  specialty_ar?: string | null;
   bio: string | null;
+  /** Optional Arabic translation of bio. Falls back to bio. */
+  bio_ar?: string | null;
   profile_photo_url: string | null;
   rating: number | null;
   is_active: boolean;
