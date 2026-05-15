@@ -90,7 +90,11 @@ const STRINGS_EN = {
   "home.listing.eyebrow": "For business owners",
   "home.listing.title": "List your business",
   "home.listing.body": "Set up your own booking page in minutes.",
-  "home.listing.cta": "Get started",
+  // The CTA label deliberately echoes the heading so the button is
+  // self-explanatory when read out of context (customers were clicking
+  // the previous generic 'Get started' expecting a customer flow and
+  // landing on the admin login).
+  "home.listing.cta": "List your business",
   "home.footer.copyright": "Bookit",
   "home.footer.tagline": "Built for service businesses everywhere",
   "home.footer.privacy": "Privacy",
@@ -640,7 +644,7 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "home.listing.eyebrow": "لأصحاب الأنشطة",
   "home.listing.title": "أضِف نشاطك",
   "home.listing.body": "أنشئ صفحة الحجز الخاصّة بك خلال دقائق.",
-  "home.listing.cta": "ابدأ الآن",
+  "home.listing.cta": "أضِف نشاطك",
   "home.footer.copyright": "بكيت",
   "home.footer.tagline": "صُمِّم لأصحاب الأنشطة الخدميّة في كل مكان",
   "home.footer.privacy": "الخصوصية",
