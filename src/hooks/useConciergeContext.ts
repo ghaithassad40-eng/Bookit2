@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { BusinessRow, ServiceRow } from "@/lib/database.types";
 import type { ConciergeContext } from "@/lib/concierge";
 import { DEMO_BUSINESSES, DEMO_SERVICES } from "@/lib/demoData";
+import { applyBusinessOverrides } from "@/hooks/usePlatformBusinesses";
 
 /** Approval gate — never surface unapproved businesses in the concierge.
  *  Rows without `status` (legacy prod data) are treated as approved. */
@@ -21,10 +22,12 @@ function buildIndex(businesses: BusinessRow[], services: ServiceRow[]): Concierg
   return { businesses: approved, servicesByBusiness };
 }
 
-const DEMO_CONTEXT: ConciergeContext = buildIndex(
-  DEMO_BUSINESSES,
-  DEMO_SERVICES.filter((s) => s.is_active),
-);
+function buildDemoContext(): ConciergeContext {
+  return buildIndex(
+    applyBusinessOverrides(DEMO_BUSINESSES),
+    DEMO_SERVICES.filter((s) => s.is_active),
+  );
+}
 
 /**
  * Loads every active business + its services in one shot so the concierge can
@@ -36,7 +39,7 @@ export function useConciergeContext() {
     queryKey: ["concierge-context"],
     staleTime: 60_000,
     queryFn: async () => {
-      if (!isSupabaseConfigured) return DEMO_CONTEXT;
+      if (!isSupabaseConfigured) return buildDemoContext();
 
       const [{ data: businesses, error: bErr }, { data: services, error: sErr }] = await Promise.all([
         supabase
@@ -56,7 +59,7 @@ export function useConciergeContext() {
       if (sErr) throw sErr;
 
       const list = (businesses ?? []) as BusinessRow[];
-      if (list.length === 0) return DEMO_CONTEXT;
+      if (list.length === 0) return buildDemoContext();
 
       const svcRows = (services ?? []) as ServiceRow[];
       return buildIndex(list, svcRows);

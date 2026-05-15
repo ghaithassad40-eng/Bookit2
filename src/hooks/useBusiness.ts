@@ -12,6 +12,7 @@ import {
   withDefaults,
 } from "@/lib/defaults";
 import { findDemoBusinessBySlug } from "@/lib/demoData";
+import { applyBusinessOverrides } from "@/hooks/usePlatformBusinesses";
 
 export interface BusinessBundle {
   business: BusinessRow;
@@ -50,7 +51,10 @@ async function fetchBusinessBySlug(slug: string): Promise<BusinessBundle | null>
   if (!isSupabaseConfigured) {
     const demo = findDemoBusinessBySlug(slug);
     if (!demo) return null;
-    return { business: demo.business, config: buildSafeConfig(demo.config, demo.business.id) };
+    // Apply platform-admin overrides so /admin/platform status changes are
+    // immediately reflected on the customer landing + vendor banner.
+    const [withOverrides] = applyBusinessOverrides([demo.business]);
+    return { business: withOverrides, config: buildSafeConfig(demo.config, demo.business.id) };
   }
 
   const { data: business, error } = await supabase
@@ -65,7 +69,8 @@ async function fetchBusinessBySlug(slug: string): Promise<BusinessBundle | null>
     // hard-coded demo slugs always render.
     const demo = findDemoBusinessBySlug(slug);
     if (demo) {
-      return { business: demo.business, config: buildSafeConfig(demo.config, demo.business.id) };
+      const [withOverrides] = applyBusinessOverrides([demo.business]);
+      return { business: withOverrides, config: buildSafeConfig(demo.config, demo.business.id) };
     }
     return null;
   }

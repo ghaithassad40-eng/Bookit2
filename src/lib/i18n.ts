@@ -362,6 +362,8 @@ const STRINGS_EN = {
   "login.toastAccountCreated": "Account created",
   "login.toastAuthFailed": "Authentication failed",
   "login.toastDemoStarted": "Welcome — exploring the admin in demo mode",
+  "login.demoPlatformBtn": "Try as platform admin",
+  "login.toastDemoPlatform": "Welcome — exploring the platform admin console",
 
   // industry chip labels
   "industry.gym": "Gym",
@@ -565,6 +567,27 @@ const STRINGS_EN = {
   "approval.statusBadge.rejected": "Rejected",
   "admin.settings.payouts.commissionLocked":
     "Set by the platform — contact support to change.",
+
+  // Platform admin (website operator) console.
+  "platform.shellBadge": "Platform",
+  "platform.roleBadge": "Platform admin",
+  "platform.nav.businesses": "Businesses",
+  "platform.businesses.title": "Businesses",
+  "platform.businesses.subtitle":
+    "Review new vendor signups and manage the live marketplace.",
+  "platform.businesses.search": "Search by name, slug, country or industry",
+  "platform.businesses.results": "{{count}} results",
+  "platform.businesses.empty": "Nothing matches that filter.",
+  "platform.action.approve": "Approve",
+  "platform.action.suspend": "Suspend",
+  "platform.action.reject": "Reject",
+  "platform.reject.title": "Reject this business?",
+  "platform.reject.body":
+    "{{name}} will be hidden from customers. The vendor will see the rejection reason on their admin dashboard.",
+  "platform.reject.reasonPlaceholder": "Optional note shown to the vendor",
+  "platform.reject.confirm": "Reject business",
+  "platform.toast.statusUpdated": "{{name}} → {{status}}",
+  "platform.toast.failed": "Update failed",
 
   // booking cancel + refund
   "booking.cancel": "Cancel booking",
@@ -957,6 +980,8 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "login.toastAccountCreated": "تم إنشاء الحساب",
   "login.toastAuthFailed": "فشل التحقّق من البيانات",
   "login.toastDemoStarted": "أهلاً بك — تصفّح لوحة التحكم في الوضع التجريبي",
+  "login.demoPlatformBtn": "جرّب كمسؤول منصّة",
+  "login.toastDemoPlatform": "أهلاً بك — تصفّح وحدة تحكّم مسؤول المنصّة",
 
   "industry.gym": "نادي رياضي",
   "industry.salon": "صالون",
@@ -1149,6 +1174,26 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "approval.statusBadge.rejected": "مرفوض",
   "admin.settings.payouts.commissionLocked":
     "تحدّدها المنصّة — تواصل مع الدعم لتغييرها.",
+
+  "platform.shellBadge": "المنصّة",
+  "platform.roleBadge": "مسؤول المنصّة",
+  "platform.nav.businesses": "الأنشطة",
+  "platform.businesses.title": "الأنشطة",
+  "platform.businesses.subtitle":
+    "راجع طلبات التسجيل الجديدة وأدِر سوق المنصّة.",
+  "platform.businesses.search": "ابحث بالاسم أو المعرّف أو البلد أو القطاع",
+  "platform.businesses.results": "{{count}} نتيجة",
+  "platform.businesses.empty": "لا توجد نتائج لهذا الفلتر.",
+  "platform.action.approve": "اعتماد",
+  "platform.action.suspend": "تعليق",
+  "platform.action.reject": "رفض",
+  "platform.reject.title": "رفض هذا النشاط؟",
+  "platform.reject.body":
+    "سيُخفى {{name}} عن العملاء. يرى صاحب النشاط سبب الرفض في لوحة تحكّمه.",
+  "platform.reject.reasonPlaceholder": "ملاحظة اختيارية تُعرض لصاحب النشاط",
+  "platform.reject.confirm": "رفض النشاط",
+  "platform.toast.statusUpdated": "{{name}} → {{status}}",
+  "platform.toast.failed": "فشل التحديث",
 
   "booking.cancel": "إلغاء الحجز",
   "booking.cancelConfirmTitle": "هل تريد إلغاء هذا الحجز؟",

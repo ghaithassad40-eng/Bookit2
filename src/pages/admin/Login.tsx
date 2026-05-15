@@ -41,14 +41,25 @@ export default function Login() {
     }
   }
 
-  // After auth, route to a workspace.
+  // After auth, route to the right shell based on role.
   useEffect(() => {
     if (demoUser) {
-      navigate(`/admin/${DEMO_BUSINESSES[0].slug}`, { replace: true });
+      if (demoUser.role === "platform_admin") {
+        navigate("/admin/platform", { replace: true });
+      } else {
+        navigate(`/admin/${DEMO_BUSINESSES[0].slug}`, { replace: true });
+      }
       return;
     }
-    if (user && businesses && businesses.length > 0) {
-      navigate(`/admin/${businesses[0].slug}`, { replace: true });
+    if (user) {
+      const role = user.app_metadata?.role as "platform_admin" | "vendor" | undefined;
+      if (role === "platform_admin") {
+        navigate("/admin/platform", { replace: true });
+        return;
+      }
+      if (businesses && businesses.length > 0) {
+        navigate(`/admin/${businesses[0].slug}`, { replace: true });
+      }
     }
   }, [user, demoUser, businesses, navigate]);
 
@@ -73,6 +84,12 @@ export default function Login() {
   function startDemo() {
     enterDemoMode(email.trim() || "demo@bookit.app");
     toast.success(t("login.toastDemoStarted"));
+  }
+
+  function startPlatformDemo() {
+    enterDemoMode(email.trim() || "platform@bookit.app", "platform_admin");
+    toast.success(t("login.toastDemoPlatform"));
+    navigate("/admin/platform", { replace: true });
   }
 
   // Arrow icons that point "forward" in the active reading direction.
@@ -189,6 +206,14 @@ export default function Login() {
               <Sparkles className="h-4 w-4" />
               {t("login.demoBtn")}
               <ForwardArrow className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              className="mt-2 w-full text-xs text-muted-foreground"
+              onClick={startPlatformDemo}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              {t("login.demoPlatformBtn")}
             </Button>
             <p className="mt-2 text-center text-[11px] text-muted-foreground">
               {t("login.demoNote")}

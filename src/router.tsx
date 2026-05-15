@@ -18,6 +18,8 @@ import Staff from "@/pages/admin/Staff";
 import Slots from "@/pages/admin/Slots";
 import Payouts from "@/pages/admin/Payouts";
 import Settings from "@/pages/admin/Settings";
+import { PlatformAdminLayout } from "@/components/layout/PlatformAdminLayout";
+import PlatformBusinesses from "@/pages/platform/PlatformBusinesses";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -39,6 +41,13 @@ export const router = createBrowserRouter([
   },
   { path: "/admin", element: <Navigate to="/admin/login" replace /> },
   { path: "/admin/login", element: <Login /> },
+  {
+    path: "/admin/platform",
+    element: <PlatformAdminLayout />,
+    children: [
+      { index: true, element: <PlatformBusinesses /> },
+    ],
+  },
   {
     path: "/admin/:slug",
     element: <AdminLayout />,

@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BusinessRow } from "@/lib/database.types";
 import { DEMO_BUSINESSES } from "@/lib/demoData";
+import { applyBusinessOverrides } from "@/hooks/usePlatformBusinesses";
 import { useRegion } from "@/hooks/useRegion";
 import { useI18n } from "@/hooks/useI18n";
 import { pickLocale } from "@/lib/i18n";
@@ -53,7 +54,10 @@ export default function Home() {
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
-      setAllBusinesses(DEMO_BUSINESSES);
+      // Demo mode: apply platform-admin overrides on top of the seeded list
+      // so status changes from /admin/platform show up here without a
+      // round-trip.
+      setAllBusinesses(applyBusinessOverrides(DEMO_BUSINESSES));
       return;
     }
     supabase
@@ -64,7 +68,9 @@ export default function Home() {
       .limit(40)
       .then(({ data }) => {
         const live = (data as BusinessRow[]) ?? [];
-        setAllBusinesses(live.length > 0 ? live : DEMO_BUSINESSES);
+        setAllBusinesses(
+          live.length > 0 ? live : applyBusinessOverrides(DEMO_BUSINESSES),
+        );
       });
   }, []);
 
