@@ -14,6 +14,7 @@ import {
 } from "@/lib/payments";
 import { formatCurrency } from "@/lib/utils";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
+import { useI18n } from "@/hooks/useI18n";
 
 interface Props {
   method: PaymentMethodId;
@@ -64,6 +65,7 @@ function CardForm({
   onSubmit,
 }: Omit<Props, "method">) {
   const { format } = useDisplayCurrency();
+  const { t } = useI18n();
   const price = format(amount, currency);
   const [number, setNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -74,10 +76,10 @@ function CardForm({
 
   function validate() {
     const e: Record<string, string> = {};
-    if (number.replace(/\D/g, "").length < 12) e.number = "Enter a valid card number";
-    if (!/^\d{2}\/\d{2}$/.test(expiry)) e.expiry = "Format MM/YY";
-    if (!/^\d{3,4}$/.test(cvc)) e.cvc = "3 or 4 digits";
-    if (holder.trim().length < 2) e.holder = "Cardholder name required";
+    if (number.replace(/\D/g, "").length < 12) e.number = t("payment.cardNumberError");
+    if (!/^\d{2}\/\d{2}$/.test(expiry)) e.expiry = t("payment.expiryError");
+    if (!/^\d{3,4}$/.test(cvc)) e.cvc = t("payment.cvcError");
+    if (holder.trim().length < 2) e.holder = t("payment.cardholderError");
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -101,18 +103,18 @@ function CardForm({
         <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5" />
-            Secure payment
+            {t("payment.securePayment")}
           </span>
           <span className="font-mono text-[10px]">{reference}</span>
         </div>
 
         <div className="space-y-3">
-          <Field label="Card number" error={errors.number}>
+          <Field label={t("payment.cardNumber")} error={errors.number}>
             <div className="relative">
               <Input
                 inputMode="numeric"
                 autoComplete="cc-number"
-                placeholder="1234 5678 9012 3456"
+                placeholder={t("payment.cardNumberPlaceholder")}
                 value={number}
                 onChange={(e) => setNumber(formatCardNumber(e.target.value))}
                 className="pr-16 font-mono tracking-wide"
@@ -126,21 +128,21 @@ function CardForm({
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Expiry" error={errors.expiry}>
+            <Field label={t("payment.expiry")} error={errors.expiry}>
               <Input
                 inputMode="numeric"
                 autoComplete="cc-exp"
-                placeholder="MM/YY"
+                placeholder={t("payment.expiryPlaceholder")}
                 value={expiry}
                 onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                 className="font-mono"
               />
             </Field>
-            <Field label="CVC" error={errors.cvc}>
+            <Field label={t("payment.cvc")} error={errors.cvc}>
               <Input
                 inputMode="numeric"
                 autoComplete="cc-csc"
-                placeholder="123"
+                placeholder={t("payment.cvcPlaceholder")}
                 value={cvc}
                 onChange={(e) => setCvc(e.target.value.replace(/\D/g, "").slice(0, 4))}
                 className="font-mono"
@@ -148,10 +150,10 @@ function CardForm({
             </Field>
           </div>
 
-          <Field label="Cardholder name" error={errors.holder}>
+          <Field label={t("payment.cardholderName")} error={errors.holder}>
             <Input
               autoComplete="cc-name"
-              placeholder="Name as printed on card"
+              placeholder={t("payment.cardholderPlaceholder")}
               value={holder}
               onChange={(e) => setHolder(e.target.value)}
             />
@@ -162,11 +164,11 @@ function CardForm({
       <div>
         <SubmitButton submitting={submitting}>
           <CreditCard className="h-4 w-4" />
-          Pay {price.display}
+          {t("payment.payAmount")} {price.display}
         </SubmitButton>
         {price.converted && (
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            You'll be charged <span className="font-mono">{price.native}</span> in the merchant's currency.
+            {t("payment.youllBeCharged")} <span className="font-mono">{price.native}</span> {t("payment.inMerchantCurrency")}
           </p>
         )}
       </div>
@@ -188,6 +190,7 @@ function WalletMethod({
 }: Props) {
   const m = PAYMENT_METHODS[method];
   const { format } = useDisplayCurrency();
+  const { t } = useI18n();
   const price = format(amount, currency);
   return (
     <div className="space-y-4">
@@ -197,10 +200,10 @@ function WalletMethod({
         <p className="mt-1 text-sm text-muted-foreground">{m.description}</p>
         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs">
           <Fingerprint className="h-3.5 w-3.5" />
-          Confirm with biometrics on device
+          {t("payment.confirmBiometrics")}
         </div>
         <div className="mt-4 text-xs text-muted-foreground">
-          Reference <span className="font-mono">{reference}</span>
+          {t("payment.reference")} <span className="font-mono">{reference}</span>
         </div>
       </div>
       <div>
@@ -208,12 +211,14 @@ function WalletMethod({
           submitting={submitting}
           onClick={() => onSubmit({ method, amount, currency, reference })}
         >
-          <PaymentBrandMark method={method} className="h-7 w-12" />
-          Pay {price.display}
+          <span aria-hidden>
+            <PaymentBrandMark method={method} className="h-7 w-12" />
+          </span>
+          {t("payment.payAmount")} {price.display}
         </SubmitButton>
         {price.converted && (
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            You'll be charged <span className="font-mono">{price.native}</span>.
+            {t("payment.youllBeCharged")} <span className="font-mono">{price.native}</span>.
           </p>
         )}
       </div>
@@ -235,6 +240,7 @@ function RedirectMethod({
 }: Props) {
   const m = PAYMENT_METHODS[method];
   const { format } = useDisplayCurrency();
+  const { t } = useI18n();
   const price = format(amount, currency);
   return (
     <div className="space-y-4">
@@ -246,21 +252,19 @@ function RedirectMethod({
         <div className="flex items-center justify-between">
           <PaymentBrandMark method={method} className="h-10 w-16" />
           <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            Redirect
+            {t("payment.redirect")}
           </span>
         </div>
         <h3 className="mt-4 text-base font-semibold">{m.label}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          {method === "paypal"
-            ? "You'll be taken to PayPal to log in and confirm the payment, then returned here."
-            : "You'll be taken to your Knet bank portal to authorise the payment, then returned here."}
+          {method === "paypal" ? t("payment.paypalBody") : t("payment.knetBody")}
         </p>
         <div className="mt-4 grid gap-2 text-xs">
-          <Row k="Amount" v={price.display} />
+          <Row k={t("payment.rowAmount")} v={price.display} />
           {price.converted && (
-            <Row k="Charged in merchant currency" v={price.native} mono />
+            <Row k={t("payment.rowChargedMerchantCurrency")} v={price.native} mono />
           )}
-          <Row k="Merchant reference" v={reference} mono />
+          <Row k={t("payment.rowMerchantReference")} v={reference} mono />
         </div>
       </motion.div>
       <SubmitButton
@@ -268,7 +272,7 @@ function RedirectMethod({
         onClick={() => onSubmit({ method, amount, currency, reference })}
       >
         <ExternalLink className="h-4 w-4" />
-        Continue to {m.shortLabel}
+        {t("payment.continueTo")} {m.shortLabel}
       </SubmitButton>
     </div>
   );
