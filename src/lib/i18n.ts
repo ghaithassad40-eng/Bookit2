@@ -136,6 +136,21 @@ const STRINGS_EN = {
   "lang.language": "Language",
   "lang.switchTo": "Switch to",
 
+  // landing page sections
+  "landing.services": "Services",
+  "landing.servicesSubtitle": "Pick one and book in under a minute.",
+  "landing.seeAll": "See all",
+  "landing.meetTheTeam": "Meet the team",
+  "landing.meetTheTeamSubtitle": "Trusted experts ready to help.",
+  "landing.whatGuestsSay": "What guests say",
+  "landing.readyToBook": "Ready to book?",
+  "landing.readyToBookSubtitle": "Pick a time that works for you.",
+  "landing.exploreServices": "Explore services",
+
+  // service card chips
+  "service.minutes": "min",
+  "service.upTo": "up to",
+
   // welcome / region picker
   "welcome.title": "Welcome to Bookit",
   "welcome.subtitle": "Pick your country and language. We'll show you businesses near you and translate the site to match.",
@@ -252,6 +267,19 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "lang.language": "اللغة",
   "lang.switchTo": "التبديل إلى",
 
+  "landing.services": "الخدمات",
+  "landing.servicesSubtitle": "اختر واحدة واحجز خلال أقل من دقيقة.",
+  "landing.seeAll": "عرض الكل",
+  "landing.meetTheTeam": "تعرّف على الفريق",
+  "landing.meetTheTeamSubtitle": "خبراء جاهزون لمساعدتك.",
+  "landing.whatGuestsSay": "ماذا يقول الضيوف",
+  "landing.readyToBook": "جاهز للحجز؟",
+  "landing.readyToBookSubtitle": "اختر الوقت الذي يناسبك.",
+  "landing.exploreServices": "تصفّح الخدمات",
+
+  "service.minutes": "دقيقة",
+  "service.upTo": "حتى",
+
   "welcome.title": "أهلاً بك في بكيت",
   "welcome.subtitle": "اختر بلدك ولغتك، وسنعرض لك الأماكن القريبة منك ونترجم الموقع بما يناسبك.",
   "welcome.country": "البلد",
@@ -319,4 +347,15 @@ export function localizedCopy<T extends Record<string, unknown>>(
     return { ...base, ...ar } as T;
   }
   return base;
+}
+
+/**
+ * Pick the locale-appropriate value for a translatable field. Returns the
+ * Arabic value when locale is "ar" AND the Arabic value is non-empty;
+ * otherwise the English value. Use for free-form per-row content like
+ * service name + description, staff role, etc.
+ */
+export function pickLocale<T>(locale: Locale, en: T, ar: T | null | undefined): T {
+  if (locale === "ar" && ar !== null && ar !== undefined && ar !== "") return ar;
+  return en;
 }

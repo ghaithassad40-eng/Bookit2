@@ -114,7 +114,11 @@ export interface ServiceRow {
   id: string;
   business_id: string;
   name: string;
+  /** Optional Arabic translation of name. Falls back to name when absent. */
+  name_ar?: string | null;
   description: string | null;
+  /** Optional Arabic translation of description. Falls back to description. */
+  description_ar?: string | null;
   duration_minutes: number;
   price: number;
   currency: string;

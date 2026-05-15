@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { ServiceRow } from "@/lib/database.types";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
+import { useI18n } from "@/hooks/useI18n";
+import { pickLocale } from "@/lib/i18n";
 
 interface Props {
   service: ServiceRow;
@@ -14,14 +16,17 @@ interface Props {
 
 export function ServiceCard({ service, selected, onSelect }: Props) {
   const { format } = useDisplayCurrency();
+  const { locale, t } = useI18n();
   const price = format(service.price, service.currency);
+  const name = pickLocale(locale, service.name, service.name_ar);
+  const description = pickLocale(locale, service.description, service.description_ar);
   return (
     <motion.button
       type="button"
       onClick={() => onSelect?.(service)}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.99 }}
-      className="text-left focus:outline-none"
+      className="text-start focus:outline-none"
     >
       <Card
         className={cn(
@@ -36,10 +41,10 @@ export function ServiceCard({ service, selected, onSelect }: Props) {
         <CardContent className="space-y-3 pt-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h4 className="text-base font-semibold">{service.name}</h4>
-              {service.description && (
+              <h4 className="text-base font-semibold">{name}</h4>
+              {description && (
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                  {service.description}
+                  {description}
                 </p>
               )}
             </div>
@@ -55,12 +60,12 @@ export function ServiceCard({ service, selected, onSelect }: Props) {
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Badge variant="outline" className="gap-1">
               <Clock className="h-3 w-3" />
-              {service.duration_minutes} min
+              {service.duration_minutes} {t("service.minutes")}
             </Badge>
             {service.capacity > 1 && (
               <Badge variant="outline" className="gap-1">
                 <Users className="h-3 w-3" />
-                up to {service.capacity}
+                {t("service.upTo")} {service.capacity}
               </Badge>
             )}
           </div>

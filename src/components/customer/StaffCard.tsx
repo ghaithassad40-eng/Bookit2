@@ -17,7 +17,7 @@ export function StaffCard({ staff, selected, onSelect }: Props) {
       onClick={() => onSelect?.(staff)}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.99 }}
-      className="text-left focus:outline-none"
+      className="text-start focus:outline-none"
     >
       <Card
         className={cn(

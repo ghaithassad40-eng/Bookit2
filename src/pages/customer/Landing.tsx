@@ -19,10 +19,23 @@ interface Ctx {
 
 export default function Landing() {
   const { business, config } = useOutletContext<Ctx>();
-  const { t } = useI18n();
+  const { t, dir, locale } = useI18n();
   const { data: services, isLoading: servicesLoading } = useServices(business.id);
   const { data: staff, isLoading: staffLoading } = useStaff(business.id);
   const layout = config.layout_json;
+
+  const testimonials =
+    locale === "ar"
+      ? [
+          { name: "علي و.", quote: "استغرق الحجز عشر ثوانٍ، والتذكيرات رائعة." },
+          { name: "بريا ر.", quote: "أسلس تجربة مررت بها مع نشاط محلّي." },
+          { name: "سامي ت.", quote: "أحببت إمكانية اختيار المختصّ المفضّل لديّ." },
+        ]
+      : [
+          { name: "Alex W.", quote: "Booking took ten seconds. The reminders are great too." },
+          { name: "Priya R.", quote: "Smoothest experience I've had with any local business." },
+          { name: "Sam T.", quote: "I love that I can pick my favorite specialist." },
+        ];
 
   return (
     <div>
@@ -32,14 +45,14 @@ export default function Landing() {
         <section id="services" className="container py-12 sm:py-20">
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-semibold sm:text-3xl">Services</h2>
+              <h2 className="text-2xl font-semibold sm:text-3xl">{t("landing.services")}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Pick one and book in under a minute.
+                {t("landing.servicesSubtitle")}
               </p>
             </div>
             <Button variant="outline" asChild>
               <Link to={`/business/${business.slug}/book`}>
-                See all <ArrowRight className="h-4 w-4" />
+                {t("landing.seeAll")} <ArrowRight className={dir === "rtl" ? "h-4 w-4 rotate-180" : "h-4 w-4"} />
               </Link>
             </Button>
           </div>
@@ -60,9 +73,9 @@ export default function Landing() {
       {layout.showStaff !== false && (
         <section className="container py-12 sm:py-20">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold sm:text-3xl">Meet the team</h2>
+            <h2 className="text-2xl font-semibold sm:text-3xl">{t("landing.meetTheTeam")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Trusted experts ready to help.
+              {t("landing.meetTheTeamSubtitle")}
             </p>
           </div>
           {staffLoading ? (
@@ -81,24 +94,20 @@ export default function Landing() {
 
       {layout.showTestimonials && (
         <section className="container py-12 sm:py-20">
-          <h2 className="mb-8 text-2xl font-semibold sm:text-3xl">What guests say</h2>
+          <h2 className="mb-8 text-2xl font-semibold sm:text-3xl">{t("landing.whatGuestsSay")}</h2>
           <div className="grid gap-4 md:grid-cols-3">
-            {[
-              { name: "Alex W.", quote: "Booking took ten seconds. The reminders are great too." },
-              { name: "Priya R.", quote: "Smoothest experience I've had with any local business." },
-              { name: "Sam T.", quote: "I love that I can pick my favorite specialist." },
-            ].map((t) => (
+            {testimonials.map((review) => (
               <motion.div
-                key={t.name}
+                key={review.name}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 className="rounded-2xl border border-border bg-card/60 p-6 shadow-sm"
               >
                 <Quote className="h-5 w-5 text-accent" />
-                <p className="mt-3 text-sm text-foreground/90">"{t.quote}"</p>
+                <p className="mt-3 text-sm text-foreground/90">"{review.quote}"</p>
                 <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">{t.name}</span>
+                  <span className="text-xs font-medium text-muted-foreground">{review.name}</span>
                   <div className="flex gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -122,15 +131,15 @@ export default function Landing() {
       </section>
 
       <section className="container pb-20">
-        <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-card/60 p-8 text-center sm:flex-row sm:text-left">
+        <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-border bg-card/60 p-8 text-center sm:flex-row sm:text-start">
           <div>
-            <h3 className="text-xl font-semibold">Ready to book?</h3>
-            <p className="text-sm text-muted-foreground">Pick a time that works for you.</p>
+            <h3 className="text-xl font-semibold">{t("landing.readyToBook")}</h3>
+            <p className="text-sm text-muted-foreground">{t("landing.readyToBookSubtitle")}</p>
           </div>
           <Button size="lg" asChild>
             <Link to={`/business/${business.slug}/book`}>
               {config.copy_json.ctaText}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className={dir === "rtl" ? "h-4 w-4 rotate-180" : "h-4 w-4"} />
             </Link>
           </Button>
         </div>
