@@ -58,7 +58,9 @@ You are the on-call engineer for Bookit. Two QA tours (one English, one Arabic /
 - *What:* For each of the 8 businesses, confirm `country` matches the address, lat/lng, phone country code, and that all `services[].currency` matches the business country's default. Fix any drift.
 - *Acceptance:* Click each business while country=KW, then SA, then AE — only co-country businesses appear, and prices never need a conversion blurb for same-country pairs.
 
-### 🟠 P1 — Major flow / i18n gaps
+### 🟠 P1 — Localization / Language
+
+Everything in this group is about making the Arabic experience reach parity with English. The pattern is "find the hardcoded literal → wrap in `t()` → add EN+AR keys to `src/lib/i18n.ts`". Where Arabic-specific logic is required (number formatting, intent matching, RTL flips, `_ar` data fields), call it out in the commit body.
 
 **P1-1. Translate the Home page end to end**
 - *Where:* `src/pages/Home.tsx`, `src/components/customer/SocialProof.tsx`.
@@ -70,9 +72,9 @@ You are the on-call engineer for Bookit. Two QA tours (one English, one Arabic /
 - *What:* Replace with `t("step.service")`, etc. Add keys in EN+AR (`الخدمة`, `الوقت`, `بياناتك`, `المراجعة`, `الدفع`).
 - *Acceptance:* Switching to Arabic shows Arabic step labels.
 
-**P1-3. Translate the Wallet payment subcomponent**
-- *Where:* `src/components/customer/PaymentForm.tsx` — the `WalletMethod` component is fully English.
-- *What:* Wrap "One tap with Touch ID or Face ID.", "Confirm with biometrics on device", "Reference {ref}", "Pay {amount}", "You'll be charged {amount}." with `t()`. Same treatment for `CardForm`, `RedirectMethod`, and the page-level "Pending selection" / "Selected" badges.
+**P1-3. Translate the Wallet / Card / Redirect payment subcomponents**
+- *Where:* `src/components/customer/PaymentForm.tsx` — the `WalletMethod`, `CardForm`, and `RedirectMethod` subcomponents are fully English.
+- *What:* Wrap "One tap with Touch ID or Face ID.", "Confirm with biometrics on device", "Reference {ref}", "Pay {amount}", "You'll be charged {amount}.", "Pending selection", "Selected" with `t()`. Same for card-entry labels ("Card number", "Expiry", "CVC", "Cardholder name", validation errors).
 - *Acceptance:* Arabic payment page is fully Arabic.
 
 **P1-4. Translate the Confirmation / Invoice page**
@@ -80,7 +82,11 @@ You are the on-call engineer for Bookit. Two QA tours (one English, one Arabic /
 - *What:* All labels — "Booking confirmed" badge, "We've emailed a copy of this invoice to you.", "INVOICE", "Issued {date}", "Booking reference", "BOOKING DETAILS", "Service", "Save the date", "Add this to your calendar so you don't miss it.", "Print invoice", "Get directions", "Back to {business}", "Book another". Plus the `ShieldCheck` escrow banner.
 - *Acceptance:* Arabic confirmation page is fully Arabic; service name uses `pickLocale(locale, service.name, service.name_ar)` instead of `service.name`.
 
-**P1-5. Fix concierge intent matching for sports**
+**P1-5. Translate the Failure page**
+- *Where:* `src/pages/customer/PaymentFailed.tsx` (and equivalents in the failure flow).
+- *What:* The "Common causes" section, card-declined / auth-failed / connection-lost bodies, the "Need help?" hint, "Attempt reference" — most have keys in `i18n.ts` already (`fail.*`). Audit and wire any remaining hardcoded strings.
+
+**P1-6. Fix concierge intent matching for Arabic sports**
 - *Where:* `src/lib/concierge.ts`.
 - *What:*
   - Remove the bare Arabic word `"ملعب"` from the `football` keyword list — it's a generic word for "court/field" and currently misroutes every Arabic sport query to football.
@@ -88,75 +94,83 @@ You are the on-call engineer for Bookit. Two QA tours (one English, one Arabic /
   - Localize the response message — `REPLIES.oneMatch` currently embeds the intent string ("football", "padel") directly into the Arabic sentence. Replace with the localized industry label from a new `INDUSTRY_LABELS: Record<string, { en: string; ar: string }>` map.
 - *Acceptance:* `أريد ملعب بادل الليلة` returns Padel Point (after P0-4 fixes its country). `كرة سلة` returns Hoops Arena.
 
-**P1-6. Fix payment-method selection to follow customer region, not business country**
+**P1-7. Localize day-of-week + time formatting in the slot picker**
+- *Where:* `src/components/customer/SlotPicker.tsx` (or wherever `FRI 15` chips are generated).
+- *What:* Use `new Intl.DateTimeFormat(intl(country), { weekday: "short" })` via the `useI18n().intl()` helper. Same for the day-section heading "Fri 15 May" and the 24h vs 12h time formatting.
+- *Acceptance:* Arabic users see `الجمعة ١٥`, `السبت ١٦`.
+
+**P1-8. Localize slot count labels**
+- *Where:* same component as P1-7.
+- *What:* "1 left" → `t("slot.left", { count })`. Plural-aware. Add EN + AR keys.
+
+**P1-9. Localize ServiceCard chip numbers (mixed digits)**
+- *Where:* `src/components/customer/ServiceCard.tsx`.
+- *What:* The duration chip renders `{service.duration_minutes} {t("service.minutes")}` — the number stays Western. Pass through `new Intl.NumberFormat(intl(country))` for Arabic.
+- *Acceptance:* `٦٠ دقيقة` and `حتى ٤`.
+
+**P1-10. Add `_ar` translations to staff data**
+- *Where:* `src/lib/database.types.ts` — extend `StaffRow` with `name_ar`, `role_ar`, `specialty_ar`, `bio_ar`. Update `src/lib/demoData.ts` accordingly. Update `src/components/customer/StaffCard.tsx` to use `pickLocale()`.
+- *Acceptance:* Arabic users see Arabic staff names / roles.
+
+**P1-11. Add `name_ar` to business data**
+- *Where:* `BusinessRow` → add `name_ar`. Wire `pickLocale` through `Hero.tsx`, the header in `CustomerLayout`, the `RegionPill` business reference, etc.
+- *Acceptance:* Arabic users see Arabic business names where translations exist.
+
+**P1-12. Fix activity ticker locale rotation in SocialProof**
+- *Where:* `src/components/customer/SocialProof.tsx` — the ticker rotates items every 4s but some entries still render in English mid-rotation. The `ar = locale === "ar"` flag is captured at the right level, so the issue is likely in `AnimatePresence` keying — investigate and fix.
+- *Acceptance:* All rotating items render in the active locale at all times.
+
+**P1-13. Translate testimonial reviewer metadata**
+- *Where:* `src/components/customer/SocialProof.tsx` — the `REVIEWS` array has `name`, `city`, `industry` as plain strings. Add `nameAr`, `cityAr`, `industryAr` per reviewer, switch via locale.
+
+**P1-14. Translate header chrome that survived P1-1**
+- *Where:* `src/components/layout/CustomerLayout.tsx` and any header strings that show up on every customer page ("List your business", "Powered by Bookit" footer, the music control's "Vibe music" tooltip if kept).
+- *Acceptance:* No untranslated string on the global header/footer.
+
+### 🟡 P2 — Payment / data correctness (not language)
+
+**P2-1. Fix payment-method selection to follow customer region, not business country**
 - *Where:* `src/lib/payments.ts` — `availableMethodsForBusiness()` or wherever the method list is built (search for `paymentMethods` filtering).
 - *What:* The selector should union `business_country_methods` and `customer_country_methods` and prioritize the customer's local network at the top. For a Kuwait customer on a Saudi business, the list should still show KNET (because KNET will tokenize the customer's card) — even if the business settles in SAR.
 - *Acceptance:* As a Kuwait customer on any business, KNET appears as a payment option.
 
-**P1-7. Fix invoice missing service name + total**
+**P2-2. Fix invoice missing service name + total**
 - *Where:* `src/pages/customer/Confirmation.tsx`.
 - *What:* The "Service" row renders as `—` because the page reads from `booking.service_id` but doesn't join the service. Look up the service via `useService(booking.service_id)` (or `useServices(business.id)` and find by id) and render the name. Render `payment_amount` + `payment_currency` in the charges block.
 - *Acceptance:* Invoice shows e.g. `Court Booking — KWD 13.10`.
 
-### 🟡 P2 — Polish (visible but not blocking)
+**P2-3. Hide duplicate slot times**
+- *Where:* `src/components/customer/SlotPicker.tsx` (or the data layer in `useSlots`).
+- *What:* When two slots have the same start time and one is fully booked (`booked_count >= capacity`), hide the fully-booked one in favor of the open one. If both are open, keep both (they're separate inventory).
+- *Acceptance:* The slot picker never shows `15:00 (1 left)` immediately followed by `15:00 (0 left)`.
 
-**P2-1. Fix Padel Point hero title contrast**
+### 🟢 P3 — Polish (visible but not blocking)
+
+**P3-1. Fix Padel Point hero title contrast**
 - *Where:* `src/components/customer/Hero.tsx` — `bg-gradient-to-b from-foreground/95 to-foreground/50 bg-clip-text text-transparent` renders nearly invisible against light-theme card bg.
 - *What:* Either drop the gradient on light mode (`dark:bg-gradient-to-b ... light:text-foreground`) or set a darker minimum stop (`from-foreground to-foreground/80`).
 - *Acceptance:* "Padel, on demand." / "بادل، عند الطلب." is readable on both themes.
 
-**P2-2. Localize day-of-week + time formatting in the slot picker**
-- *Where:* `src/components/customer/SlotPicker.tsx` (or wherever `FRI 15` chips are generated).
-- *What:* Use `new Intl.DateTimeFormat(intl(country), { weekday: "short" })` from the `useI18n().intl()` helper. Same for the day-section heading "Fri 15 May".
-- *Acceptance:* Arabic users see `الجمعة ١٥`, `السبت ١٦`.
+**P3-2. Fix pay-button accessibility (icon read as text)**
+- *Where:* `src/components/customer/PaymentForm.tsx` `SubmitButton` / `WalletMethod`.
+- *What:* The `<PaymentBrandMark>` SVG renders text content that reads as "Pay" in the accessibility tree, making the button announce "Pay Pay KWD 13.10". Add `aria-hidden="true"` to the brand-mark wrapper.
 
-**P2-3. Localize slot count labels**
-- *Where:* same component.
-- *What:* "1 left" → `t("slot.left", { count })`. Plural-aware. Add EN + AR keys.
-
-**P2-4. Localize ServiceCard chip numbers (mixed digits issue)**
-- *Where:* `src/components/customer/ServiceCard.tsx`.
-- *What:* The duration chip renders `{service.duration_minutes} {t("service.minutes")}` — the number stays Western. Pass through `intl()`'s number formatter for Arabic.
-- *Acceptance:* `٦٠ دقيقة` and `حتى ٤`.
-
-**P2-5. Hide duplicate slot times**
-- *Where:* `src/components/customer/SlotPicker.tsx` (or the data layer in `useSlots`).
-- *What:* When two slots have the same start time and one is fully booked (`booked_count >= capacity`), hide the fully-booked one in favor of the open one. If both are open, keep both (they're separate inventory).
-
-**P2-6. Add `_ar` translations to staff data**
-- *Where:* `src/lib/database.types.ts` — extend `StaffRow` with `name_ar`, `role_ar`, `specialty_ar`, `bio_ar`. Update `src/lib/demoData.ts` accordingly. Update `src/components/customer/StaffCard.tsx` to use `pickLocale()`.
-- *Acceptance:* Arabic users see Arabic staff names / roles.
-
-**P2-7. Add `name_ar` to business data**
-- *Where:* `BusinessRow` → add `name_ar`. Wire `pickLocale` through `Hero.tsx`, the header in `CustomerLayout`, the `RegionPill` business reference, etc.
-
-**P2-8. Fix activity ticker locale rotation in SocialProof**
-- *Where:* `src/components/customer/SocialProof.tsx` — the ticker captures `ar = locale === "ar"` at component-render time but the rotation setInterval doesn't re-pick the locale. The fix is just to read `locale` inside the render of each ticker item (which it does) but ensure the rotation effect triggers a re-render — it already does via `setActivity`. Investigate why English items still appear and fix.
-- *Acceptance:* All rotating items render in the active locale at all times.
-
-**P2-9. Translate testimonial reviewer metadata**
-- *Where:* `src/components/customer/SocialProof.tsx` — `REVIEWS` array has `name`, `city`, `industry` as plain strings. Add `nameAr`, `cityAr`, `industryAr` per reviewer, switch via locale.
-
-**P2-10. Fix pay-button accessibility (icon read as text)**
-- *Where:* `src/components/customer/PaymentForm.tsx` `SubmitButton`/`WalletMethod` — the `<PaymentBrandMark>` SVG renders text content that reads as "Pay" in the accessibility tree, making the button "Pay Pay KWD 13.10".
-- *What:* Add `aria-hidden="true"` to the brand mark wrapper.
-
-**P2-11. Welcome modal dismiss → don't auto-set country to "ALL"**
+**P3-3. Welcome modal dismiss → don't auto-set country to "ALL"**
 - *Where:* `src/components/customer/WelcomePicker.tsx` `dismiss()`.
-- *What:* Accidentally clicking the backdrop today stores `country = "ALL"`, trapping the user out of regional filtering. Suggest: on dismiss, pre-fill from `detectCountry()` instead of `ALL`, and don't persist so the next visit prompts again.
+- *What:* Accidentally clicking the backdrop today stores `country = "ALL"`, trapping the user out of regional filtering. On dismiss, pre-fill from `detectCountry()` instead of `ALL`, and don't persist so the next visit prompts again.
 
-### 🔵 P3 — Cleanup / dev infra
+### 🔵 P4 — Cleanup / dev infra
 
-**P3-1. MyFatoorah mock ↔ verifier alignment**
+**P4-1. MyFatoorah mock ↔ verifier alignment**
 - *Where:* `src/lib/myfatoorah.ts`, `src/pages/customer/MyFatoorahMock.tsx`, `src/pages/customer/PaymentCallback.tsx`.
 - *What:* In dev with `VITE_MYFATOORAH_ENABLED=true`, the mock page completes a payment and writes a localStorage flag, but the callback verifier hits the real staging API which doesn't know about the mock invoice. Short-circuit `verifyMyFatoorahCallback` when the `paymentId` starts with `MFTEST-` to the localStorage path instead of the live API.
 - *Acceptance:* A complete mock-payment flow ends on the confirmation page, never the failed page.
 
-**P3-2. MyFatoorah mock respects the selected payment method**
+**P4-2. MyFatoorah mock respects the selected payment method**
 - *Where:* `src/pages/customer/MyFatoorahMock.tsx`.
 - *What:* If `method=apple_pay`, show the wallet biometric prompt instead of the card form. Same for `knet`, `mada`, `stcpay`, `google_pay`.
 
-**P3-3. Add a /privacy and /terms link in footer** (good-to-have, not blocker).
+**P4-3. Add `/privacy` and `/terms` routes + footer links** (good-to-have, not blocker).
 
 ---
 
