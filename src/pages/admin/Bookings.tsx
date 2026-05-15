@@ -1,15 +1,23 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Download, Search } from "lucide-react";
+import { Download, Loader2, Search, XCircle } from "lucide-react";
 import type { BookingRow, BusinessRow, BusinessConfigRow } from "@/lib/database.types";
-import { useBookings, useUpdateBookingStatus } from "@/hooks/useBookings";
+import { useBookings, useCancelBooking, useUpdateBookingStatus } from "@/hooks/useBookings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { formatDate, formatTime } from "@/lib/utils";
 import { toast } from "sonner";
 import { downloadCsv, toCsv } from "@/lib/csv";
@@ -40,7 +48,9 @@ export default function Bookings() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<BookingRow["status"] | "all">("all");
   const [selected, setSelected] = useState<BookingRow | null>(null);
+  const [cancelConfirm, setCancelConfirm] = useState<BookingRow | null>(null);
   const updateStatus = useUpdateBookingStatus();
+  const cancelMutation = useCancelBooking();
 
   const { data, isLoading } = useBookings({
     businessId: business.id,
@@ -173,6 +183,67 @@ export default function Bookings() {
         </CardContent>
       </Card>
 
+      <Dialog
+        open={!!cancelConfirm}
+        onOpenChange={(open) => !open && !cancelMutation.isPending && setCancelConfirm(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-rose-500/15 text-rose-500">
+              <XCircle className="h-5 w-5" />
+            </div>
+            <DialogTitle>Cancel this booking and refund the customer?</DialogTitle>
+            <DialogDescription>
+              {cancelConfirm?.payment_status === "paid"
+                ? `${cancelConfirm.customer_name}'s slot will be released and the full payment will be refunded to their original payment method. This cannot be undone from the admin UI.`
+                : `${cancelConfirm?.customer_name ?? "Customer"}'s slot will be released. There is no captured payment to refund.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={cancelMutation.isPending}>
+                Keep booking
+              </Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              disabled={cancelMutation.isPending}
+              onClick={async () => {
+                if (!cancelConfirm) return;
+                try {
+                  const result = await cancelMutation.mutateAsync({
+                    id: cancelConfirm.id,
+                    business_id: cancelConfirm.business_id,
+                  });
+                  toast.success(
+                    result.refunded
+                      ? `Cancelled and refunded ${cancelConfirm.customer_name}`
+                      : `Cancelled ${cancelConfirm.customer_name}`,
+                  );
+                  // Keep the detail dialog open and reflect the new status.
+                  if (selected?.id === cancelConfirm.id) {
+                    setSelected({ ...selected, ...result.booking });
+                  }
+                  setCancelConfirm(null);
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Cancel failed");
+                }
+              }}
+            >
+              {cancelMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Cancelling…
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4" /> Yes, cancel & refund
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent>
           <DialogHeader>
@@ -187,29 +258,47 @@ export default function Bookings() {
               {selected.notes && <Row label="Notes" value={selected.notes} />}
               <Row label="Created" value={`${formatDate(selected.created_at)} · ${formatTime(selected.created_at)}`} />
               <div className="flex flex-wrap gap-2 pt-3">
-                {STATUSES.filter((s) => s !== selected.status).map((s) => (
-                  <Button
-                    key={s}
-                    size="sm"
-                    variant="outline"
-                    disabled={updateStatus.isPending}
-                    onClick={async () => {
-                      try {
-                        await updateStatus.mutateAsync({
-                          id: selected.id,
-                          status: s,
-                          businessId: selected.business_id,
-                        });
-                        toast.success(`Marked ${s.replace("_", " ")}`);
-                        setSelected({ ...selected, status: s });
-                      } catch (e) {
-                        toast.error(e instanceof Error ? e.message : "Update failed");
-                      }
-                    }}
-                  >
-                    Mark {s.replace("_", " ")}
-                  </Button>
-                ))}
+                {STATUSES.filter((s) => s !== selected.status).map((s) => {
+                  // "Cancelled" is special — it triggers the refund flow via a
+                  // confirmation dialog. The other statuses are plain updates.
+                  if (s === "cancelled") {
+                    return (
+                      <Button
+                        key={s}
+                        size="sm"
+                        variant="outline"
+                        className="border-rose-500/30 text-rose-600 hover:bg-rose-500/5 dark:text-rose-300"
+                        onClick={() => setCancelConfirm(selected)}
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        Cancel & refund
+                      </Button>
+                    );
+                  }
+                  return (
+                    <Button
+                      key={s}
+                      size="sm"
+                      variant="outline"
+                      disabled={updateStatus.isPending}
+                      onClick={async () => {
+                        try {
+                          await updateStatus.mutateAsync({
+                            id: selected.id,
+                            status: s,
+                            businessId: selected.business_id,
+                          });
+                          toast.success(`Marked ${s.replace("_", " ")}`);
+                          setSelected({ ...selected, status: s });
+                        } catch (e) {
+                          toast.error(e instanceof Error ? e.message : "Update failed");
+                        }
+                      }}
+                    >
+                      Mark {s.replace("_", " ")}
+                    </Button>
+                  );
+                })}
               </div>
             </div>
           )}

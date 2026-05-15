@@ -253,6 +253,11 @@ export function useUpdateBookingStatus() {
       status: BookingRow["status"];
       businessId: string;
     }) => {
+      if (!isSupabaseConfigured || businessId.startsWith("biz-")) {
+        const updated = updateLocalBooking(id, { status });
+        if (!updated) throw new Error("Booking not found");
+        return { id, status, businessId };
+      }
       const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
       if (error) throw error;
       return { id, status, businessId };
