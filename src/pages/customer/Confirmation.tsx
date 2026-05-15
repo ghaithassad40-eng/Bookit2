@@ -47,6 +47,7 @@ import { useCancelBooking } from "@/hooks/useBookings";
 import { useI18n } from "@/hooks/useI18n";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { pickLocale } from "@/lib/i18n";
+import { resolveTaxForBusiness, splitTaxInclusive, formatTaxLabel } from "@/lib/tax";
 import { ShieldAlert } from "lucide-react";
 import { formatCurrency, formatDate, formatTime, initials } from "@/lib/utils";
 import { toast } from "sonner";
@@ -414,10 +415,24 @@ export default function Confirmation() {
                 <section className="rounded-2xl border border-border/60 bg-card/50 p-5">
                   <SectionHeader className="mb-3">{t("invoice.charges")}</SectionHeader>
                   {(() => {
-                    const serviceAmount = amount! - equipmentSubtotal;
+                    // The price shown to the customer is tax-INCLUSIVE
+                    // (GCC consumer norm). Split it back so the receipt
+                    // shows what the merchant earns vs what went to VAT.
+                    const tax = resolveTaxForBusiness(business);
+                    const grossSplit = splitTaxInclusive(amount!, tax.rate);
+
+                    // Equipment + service subtotals also need to read as
+                    // *net* (pre-VAT) so they reconcile with the VAT
+                    // and total lines. Equipment's slice of VAT scales
+                    // by its share of the gross.
+                    const equipmentShare = amount! === 0 ? 0 : equipmentSubtotal / amount!;
+                    const equipmentNet = grossSplit.subtotal * equipmentShare;
+                    const serviceNet = grossSplit.subtotal - equipmentNet;
+
                     const charge = formatDisplay(amount!, currency);
-                    const serviceLine = formatDisplay(serviceAmount, currency);
-                    const equipmentLine = formatDisplay(equipmentSubtotal, currency);
+                    const serviceLine = formatDisplay(serviceNet, currency);
+                    const equipmentLine = formatDisplay(equipmentNet, currency);
+                    const taxLine = formatDisplay(grossSplit.tax, currency);
                     return (
                       <>
                         <dl className="space-y-2 text-sm">
@@ -429,12 +444,28 @@ export default function Confirmation() {
                             />
                           )}
                           <Line label={t("invoice.serviceCharge")} value={formatCurrency(0, charge.displayCurrency)} subtle />
-                          <Line label={t("invoice.tax")} value={formatCurrency(0, charge.displayCurrency)} subtle />
+                          {tax.rate > 0 ? (
+                            <Line
+                              label={formatTaxLabel(tax, locale === "ar" ? "ar" : "en")}
+                              value={taxLine.display}
+                            />
+                          ) : (
+                            <Line
+                              label={t("invoice.taxNotApplicable")}
+                              value="—"
+                              subtle
+                            />
+                          )}
                         </dl>
                         <div className="mt-3 flex items-start justify-between border-t border-border pt-3">
                           <span className="text-sm font-medium">{t("invoice.totalPaid")}</span>
                           <span className="text-end">
                             <span className="block text-xl font-semibold tracking-tight">{charge.display}</span>
+                            {tax.rate > 0 && (
+                              <span className="mt-0.5 block text-[10px] uppercase tracking-wider text-muted-foreground">
+                                {t("invoice.taxInclusive")}
+                              </span>
+                            )}
                             {charge.converted && (
                               <span className="mt-0.5 block text-[11px] font-mono text-muted-foreground">
                                 {t("invoice.settledAs")} {charge.native}

@@ -111,6 +111,15 @@ export interface BusinessRow {
   payouts_enabled: boolean;
   iban_last4: string | null;
   payout_provider: string;       // 'myfatoorah', 'stripe', etc.
+  /**
+   * Whether the vendor is VAT-registered with their local tax authority.
+   * Drives whether invoices show the VAT line. Optional for back-compat —
+   * `undefined` means "use country default" (countries with statutory VAT
+   * default to true; KW / QA default to false). Vendors under threshold
+   * or in exempt categories should set this to false explicitly.
+   * See src/lib/tax.ts for the country registry + resolution rules.
+   */
+  vat_registered?: boolean | null;
   created_at: string;
   updated_at: string;
 }

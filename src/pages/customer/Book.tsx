@@ -21,6 +21,7 @@ import { useStaff } from "@/hooks/useStaff";
 import { useSlots } from "@/hooks/useSlots";
 import { useEquipment } from "@/hooks/useEquipment";
 import { useBookingStore, type EquipmentCart } from "@/store/bookingStore";
+import { resolveTaxForBusiness, splitTaxInclusive, formatTaxLabel } from "@/lib/tax";
 import { useCreateBooking } from "@/hooks/useBookings";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 import { charge, resolvePaymentMethodsForCustomer, type PaymentRequest, type PaymentResult } from "@/lib/payments";
@@ -420,6 +421,7 @@ export default function Book() {
                 </div>
               </div>
               <BookingSummary
+                business={business}
                 service={service}
                 staff={staff}
                 slot={slot}
@@ -443,6 +445,7 @@ export default function Book() {
                 />
               </div>
               <BookingSummary
+                business={business}
                 service={service}
                 staff={staff}
                 slot={slot}
@@ -492,6 +495,7 @@ export default function Book() {
                 </CardContent>
               </Card>
               <BookingSummary
+                business={business}
                 service={service}
                 staff={staff}
                 slot={slot}
@@ -543,6 +547,7 @@ export default function Book() {
                 )}
               </div>
               <BookingSummary
+                business={business}
                 service={service}
                 staff={staff}
                 slot={slot}
@@ -585,6 +590,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function BookingSummary({
+  business,
   service,
   staff,
   slot,
@@ -592,6 +598,7 @@ function BookingSummary({
   equipmentSubtotal = 0,
   paymentLabel,
 }: {
+  business: BusinessRow;
   service: ReturnType<typeof useBookingStore.getState>["service"];
   staff: ReturnType<typeof useBookingStore.getState>["staff"];
   slot: ReturnType<typeof useBookingStore.getState>["slot"];
@@ -606,6 +613,12 @@ function BookingSummary({
   const total = service.price + equipmentSubtotal;
   const totalFmt = format(total, service.currency);
   const servicePriceFmt = format(service.price, service.currency);
+  // Customer-visible price is tax-inclusive; surface the embedded VAT
+  // here so the customer sees the breakdown before they pay rather
+  // than only on the receipt afterwards.
+  const tax = resolveTaxForBusiness(business);
+  const grossSplit = splitTaxInclusive(total, tax.rate);
+  const taxFmt = format(grossSplit.tax, service.currency);
   return (
     <Card className="h-fit">
       <CardHeader>
@@ -647,10 +660,22 @@ function BookingSummary({
           </div>
         )}
 
+        {tax.rate > 0 && (
+          <Row
+            label={formatTaxLabel(tax, locale === "ar" ? "ar" : "en")}
+            value={t("book.taxIncluded").replace("{{amount}}", taxFmt.display)}
+          />
+        )}
+
         <div className="flex items-start justify-between pt-3 text-base">
           <span className="text-muted-foreground">{t("book.total")}</span>
           <span className="text-right">
             <span className="block font-semibold">{totalFmt.display}</span>
+            {tax.rate > 0 && (
+              <span className="mt-0.5 block text-[10px] uppercase tracking-wider text-muted-foreground">
+                {t("invoice.taxInclusive")}
+              </span>
+            )}
             {totalFmt.converted && (
               <span className="mt-0.5 block text-[10px] font-mono text-muted-foreground">
                 ≈ {totalFmt.native}

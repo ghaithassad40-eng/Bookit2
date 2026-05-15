@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useAuth } from "@/hooks/useAuth";
 import { validateSlug } from "@/lib/slug";
+import { countryHasVat, resolveTaxForBusiness } from "@/lib/tax";
 
 interface Ctx {
   business: BusinessRow;
@@ -46,6 +47,12 @@ export default function Settings() {
   const [iban, setIban] = useState(business.iban_last4 ?? "");
   const [connectedId, setConnectedId] = useState(business.connected_account_id ?? "");
   const [payoutsEnabled, setPayoutsEnabled] = useState(business.payouts_enabled);
+  // VAT registration. `null/undefined` from the row means "use country
+  // default" — store an explicit boolean in local state so the toggle is
+  // always controlled. We default to "yes" when the country has VAT.
+  const [vatRegistered, setVatRegistered] = useState<boolean>(
+    business.vat_registered ?? countryHasVat(business.country),
+  );
 
   const saveEscrow = useMutation({
     mutationFn: async () => {
@@ -60,6 +67,7 @@ export default function Settings() {
           iban_last4: iban || null,
           connected_account_id: connectedId || null,
           payouts_enabled: payoutsEnabled,
+          vat_registered: vatRegistered,
         })
         .eq("id", business.id);
       if (error) throw error;
@@ -251,6 +259,55 @@ export default function Settings() {
               </span>
             </div>
           </Field>
+
+          {/* VAT registration. The statutory rate comes from the country
+              (see src/lib/tax.ts); this toggle decides whether the rate
+              actually applies to *this* business. Vendors under threshold
+              (e.g. SAR 375,000 in KSA) or in exempt categories should set
+              this to off so invoices stay tax-free. */}
+          <Field label={t("admin.settings.payouts.vatTitle")}>
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-card/50 px-3 py-2.5">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={vatRegistered}
+                onClick={() => setVatRegistered((v) => !v)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                  vatRegistered ? "bg-emerald-500" : "bg-muted"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${
+                    vatRegistered ? "left-[18px]" : "left-0.5"
+                  }`}
+                />
+              </button>
+              <span className="text-sm">
+                {vatRegistered
+                  ? t("admin.settings.payouts.vatOn")
+                  : t("admin.settings.payouts.vatOff")}
+              </span>
+              {business.country && (
+                <span className="ms-auto rounded-md bg-muted px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {business.country} ·{" "}
+                  {countryHasVat(business.country)
+                    ? `${Math.round(
+                        resolveTaxForBusiness({
+                          country: business.country,
+                          vat_registered: true,
+                        }).rate * 100,
+                      )}%`
+                    : t("admin.settings.payouts.vatNoneInCountry")}
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {countryHasVat(business.country)
+                ? t("admin.settings.payouts.vatHint")
+                : t("admin.settings.payouts.vatHintNoCountryVat")}
+            </p>
+          </Field>
+
           <div className="sm:col-span-2">
             <Button disabled={saveEscrow.isPending} onClick={() => saveEscrow.mutate()}>
               {saveEscrow.isPending
