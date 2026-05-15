@@ -70,12 +70,14 @@ export function useAuth(): AuthState {
     return onDemoAuthChange(() => setDemoUserState(getDemoUser()));
   }, []);
 
-  // Helpers that gracefully handle "Supabase not configured" / fetch failures.
+  // Helpers that gracefully handle the demo-mode (no backend connected) and
+  // fetch-failure paths. The messages here surface as toast errors to the
+  // vendor — keep them vendor-friendly (don't name infrastructure / SDKs).
   async function signIn(email: string, password: string) {
     if (!isSupabaseConfigured) {
       return {
         error: new Error(
-          "Supabase isn't connected. Use \"Try the demo admin\" below to explore without a backend.",
+          "Real sign-in is being set up. Use \"Try the demo admin\" below to preview the workspace.",
         ),
       };
     }
@@ -91,7 +93,7 @@ export function useAuth(): AuthState {
     if (!isSupabaseConfigured) {
       return {
         error: new Error(
-          "Supabase isn't connected. Use \"Try the demo admin\" below to explore without a backend.",
+          "Real sign-up is being set up. Use \"Try the demo admin\" below to preview the workspace.",
         ),
       };
     }
@@ -114,7 +116,7 @@ export function useAuth(): AuthState {
     if (!isSupabaseConfigured) {
       return {
         error: new Error(
-          "Supabase isn't connected. Password reset isn't available in demo mode.",
+          "Password reset isn't available in demo mode.",
         ),
       };
     }
@@ -182,7 +184,7 @@ function normalizeError(err: unknown): Error {
     // or TypeError. Translate so the UI can react properly.
     if (/failed to fetch|networkerror|load failed/i.test(err.message)) {
       return new Error(
-        "Couldn't reach the auth service. Check your Supabase URL/anon key, or use the demo admin below.",
+        "Couldn't reach the sign-in service. Check your connection, or try the demo admin below.",
       );
     }
     return err;

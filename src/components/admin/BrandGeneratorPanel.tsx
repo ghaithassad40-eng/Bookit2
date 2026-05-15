@@ -91,7 +91,7 @@ export function BrandGeneratorPanel({ business, config, onApplied }: Props) {
     try {
       if (!isSupabaseConfigured) {
         // Demo mode — just notify; persistence to demo data not wired.
-        toast.success("Applied (demo mode — connect Supabase to persist)");
+        toast.success("Applied — saved to this browser only (demo mode)");
         onApplied?.();
         return;
       }

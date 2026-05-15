@@ -117,7 +117,7 @@ const STRINGS_EN = {
   "admin.signOut": "Sign out",
   "admin.demoMode": "Demo mode",
   "admin.demoBanner":
-    "You're exploring in demo mode — changes are saved to this browser only. Connect Supabase to publish them.",
+    "You're exploring in demo mode — every change is saved to this browser only.",
   "admin.workspaceNotFound": "Workspace not found",
   "admin.workspaceNotFoundBody": "No business with slug",
   "admin.nav.overview": "Overview",
@@ -387,9 +387,9 @@ const STRINGS_EN = {
   // admin login
   "login.title": "Bookit Admin",
   "login.subtitle": "Manage every booking, service, and team member.",
-  "login.noSupabaseTitle": "Real sign-up requires a connected Supabase project.",
+  "login.noSupabaseTitle": "You're previewing the admin in demo mode.",
   "login.noSupabaseBody":
-    "You can still try the admin in demo mode below — every page works with the demo businesses and your changes save to this browser.",
+    "Real sign-up is being set up. In the meantime, explore the admin against live demo businesses — every page works and your changes save to this browser.",
   "login.welcome": "Welcome",
   "login.welcomeBody": "Sign in or create your workspace.",
   "login.tabSignIn": "Sign in",
@@ -402,7 +402,7 @@ const STRINGS_EN = {
   "login.createBtn": "Create account",
   "login.forgot": "Forgot password?",
   "login.sendingReset": "Sending reset link…",
-  "login.disabledNote": "Sign-in is disabled without Supabase. Use the demo below.",
+  "login.disabledNote": "Real sign-in is being set up. Use the demo below to preview the admin.",
   "login.or": "or",
   "login.demoBtn": "Try the demo admin",
   "login.demoNote":
@@ -815,7 +815,7 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "admin.signOut": "تسجيل الخروج",
   "admin.demoMode": "وضع تجريبي",
   "admin.demoBanner":
-    "أنت تتصفّح الوضع التجريبي — التغييرات تُحفظ في هذا المتصفح فقط. اربط Supabase لنشرها.",
+    "أنت تتصفّح الوضع التجريبي — جميع التغييرات تُحفظ في هذا المتصفح فقط.",
   "admin.workspaceNotFound": "مساحة العمل غير موجودة",
   "admin.workspaceNotFoundBody": "لا يوجد نشاط بالمعرّف",
   "admin.nav.overview": "نظرة عامّة",
@@ -1084,9 +1084,9 @@ const STRINGS_AR: Record<TranslationKey, string> = {
 
   "login.title": "بكيت — لوحة التحكم",
   "login.subtitle": "أدِر كل حجز وخدمة وعضو في الفريق.",
-  "login.noSupabaseTitle": "إنشاء حساب فعلي يتطلّب مشروع Supabase موصول.",
+  "login.noSupabaseTitle": "أنت تستعرض لوحة الإدارة في الوضع التجريبي.",
   "login.noSupabaseBody":
-    "يمكنك تجربة لوحة التحكم في الوضع التجريبي بالأسفل — كل صفحة تعمل مع أنشطة العرض، والتغييرات تُحفظ في هذا المتصفح.",
+    "إنشاء الحساب الفعلي قيد الإعداد. في غضون ذلك، استعرض لوحة التحكم مع أنشطة العرض الحيّة — كل صفحة تعمل والتغييرات تُحفظ في هذا المتصفح.",
   "login.welcome": "أهلاً",
   "login.welcomeBody": "سجّل دخولك أو أنشئ مساحة عملك.",
   "login.tabSignIn": "تسجيل الدخول",
@@ -1099,7 +1099,7 @@ const STRINGS_AR: Record<TranslationKey, string> = {
   "login.createBtn": "إنشاء حساب",
   "login.forgot": "نسيت كلمة المرور؟",
   "login.sendingReset": "جارٍ إرسال رابط الاستعادة…",
-  "login.disabledNote": "تسجيل الدخول معطّل بدون Supabase. استخدم الوضع التجريبي بالأسفل.",
+  "login.disabledNote": "تسجيل الدخول الفعلي قيد الإعداد. استخدم الوضع التجريبي بالأسفل لاستعراض لوحة التحكم.",
   "login.or": "أو",
   "login.demoBtn": "جرّب لوحة التحكم التجريبية",
   "login.demoNote":
