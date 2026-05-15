@@ -207,14 +207,20 @@ export default function Login() {
               {t("login.demoBtn")}
               <ForwardArrow className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              className="mt-2 w-full text-xs text-muted-foreground"
-              onClick={startPlatformDemo}
-            >
-              <ShieldCheck className="h-3.5 w-3.5" />
-              {t("login.demoPlatformBtn")}
-            </Button>
+            {/* Platform-admin demo is dev-only — in production, role resolution
+                ignores the localStorage DemoUser.role anyway (see useAuth.ts),
+                but we also hide the CTA so prod users can't even attempt to
+                self-elevate. Real platform admins sign in via Supabase. */}
+            {import.meta.env.DEV && (
+              <Button
+                variant="ghost"
+                className="mt-2 w-full text-xs text-muted-foreground"
+                onClick={startPlatformDemo}
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                {t("login.demoPlatformBtn")}
+              </Button>
+            )}
             <p className="mt-2 text-center text-[11px] text-muted-foreground">
               {t("login.demoNote")}
             </p>

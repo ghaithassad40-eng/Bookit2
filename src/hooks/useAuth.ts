@@ -147,9 +147,18 @@ export function useAuth(): AuthState {
   // Resolve role across both auth modes. Real Supabase puts role on
   // app_metadata (server-controlled, can't be tampered with client-side);
   // demo mode keeps it on the DemoUser record.
+  //
+  // SECURITY: the demoUser record lives in localStorage and is fully
+  // attacker-controlled. We therefore *only* trust demoUser.role in
+  // development builds. In production, role resolution comes exclusively
+  // from Supabase app_metadata so a malicious user can't grant themselves
+  // `platform_admin` by editing localStorage. (Demo mode is still allowed in
+  // prod for vendor-side previews, but role-gated routes — i.e. the
+  // platform admin console — will see role === null and reject.)
   const supabaseRole =
     (session?.user?.app_metadata?.role as UserRole | undefined) ?? null;
-  const role: ResolvedRole = demoUser?.role ?? supabaseRole;
+  const demoRole = import.meta.env.DEV ? demoUser?.role ?? null : null;
+  const role: ResolvedRole = demoRole ?? supabaseRole;
 
   return {
     session,
