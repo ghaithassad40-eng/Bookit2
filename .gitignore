@@ -19,3 +19,4 @@ vite.config.js
 vite.config.d.ts
 vite-myfatoorah-plugin.js
 vite-myfatoorah-plugin.d.ts
+supabase/.temp/
